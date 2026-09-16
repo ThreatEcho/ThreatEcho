@@ -59,7 +59,7 @@ jobs:
         run: go test -race -count=1 -coverprofile=coverage.out ./...
 
       - name: Upload coverage artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: coverage
           path: coverage.out
@@ -154,7 +154,7 @@ jobs:
           fail-on-error: 'false'
 
       - name: Upload SARIF artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: gap-analysis-sarif
           path: results.sarif
@@ -213,7 +213,7 @@ jobs:
           fail-on-error: 'false'
 
       - name: Upload SARIF artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: policy-eval-sarif
           path: policy.sarif
@@ -257,7 +257,7 @@ jobs:
             -o bin/threatecho-agent-${GOOS}-${GOARCH}${ext} ./cmd/threatecho-agent/
 
       - name: Upload binary
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: threatecho-${{ matrix.goos }}-${{ matrix.goarch }}
           path: bin/threatecho-*

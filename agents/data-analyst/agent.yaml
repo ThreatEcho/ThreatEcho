@@ -1,0 +1,57 @@
+api_version: v1
+kind: Agent
+
+meta:
+  name: data-analyst
+  type: tool-calling
+  description: "Data analysis agent with read-only access to databases, CSV/Excel export capabilities, visualization generation, and report creation. Handles ad-hoc queries, dashboards, and scheduled reporting."
+  model: gpt-4
+  version: "1.6.0"
+  owner: analytics-team
+  tags: [internal, tier-2, production, data-scope]
+
+capabilities:
+  tool_calling: true
+  rag: false
+  code_execution: false
+  web_access: false
+  file_access: true
+  message_passing: true
+  memory: false
+  autonomous: false
+
+tools:
+  - name: database_query
+    actions: [query, read, list_tables, describe]
+    targets: ["https://analytics-db.internal/*", "https://warehouse.internal/*"]
+    rate_limit: 100
+  - name: csv_export
+    actions: [export, format]
+    targets: ["*/exports/*"]
+    rate_limit: 10
+  - name: visualization_create
+    actions: [create, update, render]
+    targets: ["*/dashboards/*"]
+    rate_limit: 20
+  - name: report_generate
+    actions: [create, schedule, send]
+    targets: ["*/reports/*"]
+    rate_limit: 5
+
+trust:
+  level: standard
+  trusts_from: [orchestrator]
+  trusted_by: []
+  boundaries: [analytics]
+  can_escalate: false
+
+guardrails:
+  - name: pii-filter
+    type: output
+    enforced: true
+  - name: query-size-limit
+    type: tool-call
+    enforced: true
+  - name: data-classification-check
+    type: tool-call
+    enforced: true

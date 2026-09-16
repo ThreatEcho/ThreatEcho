@@ -1,0 +1,1892 @@
+{
+  "root": {
+    "id": "ROOT",
+    "title": "Compromise Agent Deployment",
+    "type": "OR",
+    "probability": 0.9999999999935013,
+    "impact": 10,
+    "risk_score": 9.999999999935014,
+    "mitigated": false,
+    "children": [
+      {
+        "id": "AGENT-BILLING-AGENT",
+        "title": "Compromise billing-agent",
+        "type": "OR",
+        "probability": 0.9136884736,
+        "impact": 10,
+        "risk_score": 9.136884736,
+        "mitigated": false,
+        "agent": "billing-agent",
+        "children": [
+          {
+            "id": "TOOLS-BILLING-AGENT",
+            "title": "Exploit billing-agent Tools",
+            "type": "OR",
+            "probability": 0.8704000000000001,
+            "impact": 8,
+            "risk_score": 6.9632000000000005,
+            "mitigated": false,
+            "agent": "billing-agent",
+            "children": [
+              {
+                "id": "TOOL-BILLING-AGENT-PAYMENT-GATEWAY",
+                "title": "Exploit tool: payment_gateway",
+                "type": "LEAF",
+                "probability": 0.4,
+                "impact": 8,
+                "risk_score": 3.2,
+                "mitigated": false,
+                "agent": "billing-agent",
+                "tool": "payment_gateway",
+                "category": "elevation_of_privilege"
+              },
+              {
+                "id": "TOOL-BILLING-AGENT-INVOICE-SYSTEM",
+                "title": "Exploit tool: invoice_system",
+                "type": "LEAF",
+                "probability": 0.4,
+                "impact": 8,
+                "risk_score": 3.2,
+                "mitigated": false,
+                "agent": "billing-agent",
+                "tool": "invoice_system",
+                "category": "elevation_of_privilege"
+              },
+              {
+                "id": "TOOL-BILLING-AGENT-REPORTING-DB",
+                "title": "Exploit tool: reporting_db",
+                "type": "LEAF",
+                "probability": 0.4,
+                "impact": 8,
+                "risk_score": 3.2,
+                "mitigated": false,
+                "agent": "billing-agent",
+                "tool": "reporting_db",
+                "category": "elevation_of_privilege"
+              },
+              {
+                "id": "TOOL-BILLING-AGENT-SEND-EMAIL",
+                "title": "Exploit tool: send_email",
+                "type": "LEAF",
+                "probability": 0.4,
+                "impact": 8,
+                "risk_score": 3.2,
+                "mitigated": false,
+                "agent": "billing-agent",
+                "tool": "send_email",
+                "category": "elevation_of_privilege"
+              }
+            ]
+          },
+          {
+            "id": "TRUST-BILLING-AGENT",
+            "title": "Exploit Trust of billing-agent",
+            "type": "AND",
+            "probability": 0.12,
+            "impact": 10,
+            "risk_score": 1.2,
+            "mitigated": false,
+            "agent": "billing-agent",
+            "category": "elevation_of_privilege",
+            "children": [
+              {
+                "id": "TRUST-BILLING-AGENT-IMPERSONATE",
+                "title": "Impersonate trusted delegator",
+                "type": "LEAF",
+                "probability": 0.3,
+                "impact": 8,
+                "risk_score": 2.4,
+                "mitigated": false,
+                "agent": "billing-agent",
+                "category": "spoofing"
+              },
+              {
+                "id": "TRUST-BILLING-AGENT-ABUSE",
+                "title": "Abuse delegation chain",
+                "type": "LEAF",
+                "probability": 0.4,
+                "impact": 8,
+                "risk_score": 3.2,
+                "mitigated": false,
+                "agent": "billing-agent",
+                "category": "elevation_of_privilege"
+              }
+            ]
+          },
+          {
+            "id": "INJ-BILLING-AGENT",
+            "title": "Prompt Injection on billing-agent",
+            "description": "Inject malicious instructions via crafted input to hijack agent behavior",
+            "type": "AND",
+            "probability": 0.13999999999999999,
+            "impact": 10,
+            "risk_score": 1.4,
+            "mitigated": true,
+            "agent": "billing-agent",
+            "category": "spoofing",
+            "children": [
+              {
+                "id": "INJ-BILLING-AGENT-CRAFT",
+                "title": "Craft adversarial input",
+                "type": "LEAF",
+                "probability": 0.7,
+                "impact": 8,
+                "risk_score": 5.6,
+                "mitigated": false,
+                "agent": "billing-agent",
+                "category": "spoofing"
+              },
+              {
+                "id": "INJ-BILLING-AGENT-BYPASS",
+                "title": "Bypass input guardrails",
+                "type": "LEAF",
+                "probability": 0.2,
+                "impact": 8,
+                "risk_score": 1.6,
+                "mitigated": true,
+                "mitigation": "guardrails: tool-call, tool-call, output",
+                "agent": "billing-agent",
+                "category": "spoofing"
+              }
+            ]
+          },
+          {
+            "id": "EVASION-BILLING-AGENT",
+            "title": "Evade Guardrails on billing-agent",
+            "description": "Circumvent declared guardrails to perform unauthorized actions",
+            "type": "AND",
+            "probability": 0.12,
+            "impact": 10,
+            "risk_score": 1.2,
+            "mitigated": false,
+            "agent": "billing-agent",
+            "category": "tampering",
+            "children": [
+              {
+                "id": "EVASION-BILLING-AGENT-RECON",
+                "title": "Enumerate guardrail boundaries",
+                "type": "LEAF",
+                "probability": 0.6,
+                "impact": 3,
+                "risk_score": 1.7999999999999998,
+                "mitigated": false,
+                "agent": "billing-agent",
+                "category": "tampering"
+              },
+              {
+                "id": "EVASION-BILLING-AGENT-BYPASS",
+                "title": "Craft guardrail bypass",
+                "type": "LEAF",
+                "probability": 0.2,
+                "impact": 8,
+                "risk_score": 1.6,
+                "mitigated": false,
+                "agent": "billing-agent",
+                "category": "tampering"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "AGENT-CODE-ASSISTANT",
+        "title": "Compromise code-assistant",
+        "type": "OR",
+        "probability": 0.88806806912,
+        "impact": 10,
+        "risk_score": 8.8806806912,
+        "mitigated": false,
+        "agent": "code-assistant",
+        "children": [
+          {
+            "id": "TOOLS-CODE-ASSISTANT",
+            "title": "Exploit code-assistant Tools",
+            "type": "OR",
+            "probability": 0.8319300000000001,
+            "impact": 6,
+            "risk_score": 4.991580000000001,
+            "mitigated": false,
+            "agent": "code-assistant",
+            "children": [
+              {
+                "id": "TOOL-CODE-ASSISTANT-CODE-EXECUTE",
+                "title": "Exploit tool: code_execute",
+                "type": "LEAF",
+                "probability": 0.3,
+                "impact": 6,
+                "risk_score": 1.7999999999999998,
+                "mitigated": false,
+                "agent": "code-assistant",
+                "tool": "code_execute",
+                "category": "elevation_of_privilege"
+              },
+              {
+                "id": "TOOL-CODE-ASSISTANT-FILE-READ",
+                "title": "Exploit tool: file_read",
+                "type": "LEAF",
+                "probability": 0.3,
+                "impact": 6,
+                "risk_score": 1.7999999999999998,
+                "mitigated": false,
+                "agent": "code-assistant",
+                "tool": "file_read",
+                "category": "elevation_of_privilege"
+              },
+              {
+                "id": "TOOL-CODE-ASSISTANT-FILE-WRITE",
+                "title": "Exploit tool: file_write",
+                "type": "LEAF",
+                "probability": 0.3,
+                "impact": 6,
+                "risk_score": 1.7999999999999998,
+                "mitigated": false,
+                "agent": "code-assistant",
+                "tool": "file_write",
+                "category": "elevation_of_privilege"
+              },
+              {
+                "id": "TOOL-CODE-ASSISTANT-GIT-COMMIT",
+                "title": "Exploit tool: git_commit",
+                "type": "LEAF",
+                "probability": 0.3,
+                "impact": 6,
+                "risk_score": 1.7999999999999998,
+                "mitigated": false,
+                "agent": "code-assistant",
+                "tool": "git_commit",
+                "category": "elevation_of_privilege"
+              },
+              {
+                "id": "TOOL-CODE-ASSISTANT-SEARCH-WEB",
+                "title": "Exploit tool: search_web",
+                "type": "LEAF",
+                "probability": 0.3,
+                "impact": 6,
+                "risk_score": 1.7999999999999998,
+                "mitigated": false,
+                "agent": "code-assistant",
+                "tool": "search_web",
+                "category": "elevation_of_privilege"
+              }
+            ]
+          },
+          {
+            "id": "TRUST-CODE-ASSISTANT",
+            "title": "Exploit Trust of code-assistant",
+            "type": "AND",
+            "probability": 0.12,
+            "impact": 10,
+            "risk_score": 1.2,
+            "mitigated": false,
+            "agent": "code-assistant",
+            "category": "elevation_of_privilege",
+            "children": [
+              {
+                "id": "TRUST-CODE-ASSISTANT-IMPERSONATE",
+                "title": "Impersonate trusted delegator",
+                "type": "LEAF",
+                "probability": 0.3,
+                "impact": 6,
+                "risk_score": 1.7999999999999998,
+                "mitigated": false,
+                "agent": "code-assistant",
+                "category": "spoofing"
+              },
+              {
+                "id": "TRUST-CODE-ASSISTANT-ABUSE",
+                "title": "Abuse delegation chain",
+                "type": "LEAF",
+                "probability": 0.4,
+                "impact": 6,
+                "risk_score": 2.4000000000000004,
+                "mitigated": false,
+                "agent": "code-assistant",
+                "category": "elevation_of_privilege"
+              }
+            ]
+          },
+          {
+            "id": "INJ-CODE-ASSISTANT",
+            "title": "Prompt Injection on code-assistant",
+            "description": "Inject malicious instructions via crafted input to hijack agent behavior",
+            "type": "AND",
+            "probability": 0.13999999999999999,
+            "impact": 10,
+            "risk_score": 1.4,
+            "mitigated": true,
+            "agent": "code-assistant",
+            "category": "spoofing",
+            "children": [
+              {
+                "id": "INJ-CODE-ASSISTANT-CRAFT",
+                "title": "Craft adversarial input",
+                "type": "LEAF",
+                "probability": 0.7,
+                "impact": 6,
+                "risk_score": 4.199999999999999,
+                "mitigated": false,
+                "agent": "code-assistant",
+                "category": "spoofing"
+              },
+              {
+                "id": "INJ-CODE-ASSISTANT-BYPASS",
+                "title": "Bypass input guardrails",
+                "type": "LEAF",
+                "probability": 0.2,
+                "impact": 6,
+                "risk_score": 1.2000000000000002,
+                "mitigated": true,
+                "mitigation": "guardrails: tool-call, output, tool-call",
+                "agent": "code-assistant",
+                "category": "spoofing"
+              }
+            ]
+          },
+          {
+            "id": "EVASION-CODE-ASSISTANT",
+            "title": "Evade Guardrails on code-assistant",
+            "description": "Circumvent declared guardrails to perform unauthorized actions",
+            "type": "AND",
+            "probability": 0.12,
+            "impact": 9,
+            "risk_score": 1.08,
+            "mitigated": false,
+            "agent": "code-assistant",
+            "category": "tampering",
+            "children": [
+              {
+                "id": "EVASION-CODE-ASSISTANT-RECON",
+                "title": "Enumerate guardrail boundaries",
+                "type": "LEAF",
+                "probability": 0.6,
+                "impact": 3,
+                "risk_score": 1.7999999999999998,
+                "mitigated": false,
+                "agent": "code-assistant",
+                "category": "tampering"
+              },
+              {
+                "id": "EVASION-CODE-ASSISTANT-BYPASS",
+                "title": "Craft guardrail bypass",
+                "type": "LEAF",
+                "probability": 0.2,
+                "impact": 6,
+                "risk_score": 1.2000000000000002,
+                "mitigated": false,
+                "agent": "code-assistant",
+                "category": "tampering"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "AGENT-CUSTOMER-SERVICE",
+        "title": "Compromise customer-service",
+        "type": "OR",
+        "probability": 0.90333151424,
+        "impact": 10,
+        "risk_score": 9.0333151424,
+        "mitigated": false,
+        "agent": "customer-service",
+        "children": [
+          {
+            "id": "TOOLS-CUSTOMER-SERVICE",
+            "title": "Exploit customer-service Tools",
+            "type": "OR",
+            "probability": 0.8319300000000001,
+            "impact": 6,
+            "risk_score": 4.991580000000001,
+            "mitigated": false,
+            "agent": "customer-service",
+            "children": [
+              {
+                "id": "TOOL-CUSTOMER-SERVICE-TICKET-READ",
+                "title": "Exploit tool: ticket_read",
+                "type": "LEAF",
+                "probability": 0.3,
+                "impact": 6,
+                "risk_score": 1.7999999999999998,
+                "mitigated": false,
+                "agent": "customer-service",
+                "tool": "ticket_read",
+                "category": "elevation_of_privilege"
+              },
+              {
+                "id": "TOOL-CUSTOMER-SERVICE-TICKET-UPDATE",
+                "title": "Exploit tool: ticket_update",
+                "type": "LEAF",
+                "probability": 0.3,
+                "impact": 6,
+                "risk_score": 1.7999999999999998,
+                "mitigated": false,
+                "agent": "customer-service",
+                "tool": "ticket_update",
+                "category": "elevation_of_privilege"
+              },
+              {
+                "id": "TOOL-CUSTOMER-SERVICE-KNOWLEDGE-SEARCH",
+                "title": "Exploit tool: knowledge_search",
+                "type": "LEAF",
+                "probability": 0.3,
+                "impact": 6,
+                "risk_score": 1.7999999999999998,
+                "mitigated": false,
+                "agent": "customer-service",
+                "tool": "knowledge_search",
+                "category": "elevation_of_privilege"
+              },
+              {
+                "id": "TOOL-CUSTOMER-SERVICE-EMAIL-SEND",
+                "title": "Exploit tool: email_send",
+                "type": "LEAF",
+                "probability": 0.3,
+                "impact": 6,
+                "risk_score": 1.7999999999999998,
+                "mitigated": false,
+                "agent": "customer-service",
+                "tool": "email_send",
+                "category": "elevation_of_privilege"
+              },
+              {
+                "id": "TOOL-CUSTOMER-SERVICE-REFUND-PROCESS",
+                "title": "Exploit tool: refund_process",
+                "type": "LEAF",
+                "probability": 0.3,
+                "impact": 6,
+                "risk_score": 1.7999999999999998,
+                "mitigated": false,
+                "agent": "customer-service",
+                "tool": "refund_process",
+                "category": "elevation_of_privilege"
+              }
+            ]
+          },
+          {
+            "id": "TRUST-CUSTOMER-SERVICE",
+            "title": "Exploit Trust of customer-service",
+            "type": "AND",
+            "probability": 0.24,
+            "impact": 10,
+            "risk_score": 2.4,
+            "mitigated": false,
+            "agent": "customer-service",
+            "category": "elevation_of_privilege",
+            "children": [
+              {
+                "id": "TRUST-CUSTOMER-SERVICE-IMPERSONATE",
+                "title": "Impersonate trusted delegator",
+                "type": "LEAF",
+                "probability": 0.3,
+                "impact": 6,
+                "risk_score": 1.7999999999999998,
+                "mitigated": false,
+                "agent": "customer-service",
+                "category": "spoofing"
+              },
+              {
+                "id": "TRUST-CUSTOMER-SERVICE-ESCALATE",
+                "title": "Leverage escalation capability",
+                "type": "LEAF",
+                "probability": 0.8,
+                "impact": 10,
+                "risk_score": 8,
+                "mitigated": false,
+                "agent": "customer-service",
+                "category": "elevation_of_privilege"
+              }
+            ]
+          },
+          {
+            "id": "INJ-CUSTOMER-SERVICE",
+            "title": "Prompt Injection on customer-service",
+            "description": "Inject malicious instructions via crafted input to hijack agent behavior",
+            "type": "AND",
+            "probability": 0.13999999999999999,
+            "impact": 10,
+            "risk_score": 1.4,
+            "mitigated": true,
+            "agent": "customer-service",
+            "category": "spoofing",
+            "children": [
+              {
+                "id": "INJ-CUSTOMER-SERVICE-CRAFT",
+                "title": "Craft adversarial input",
+                "type": "LEAF",
+                "probability": 0.7,
+                "impact": 6,
+                "risk_score": 4.199999999999999,
+                "mitigated": false,
+                "agent": "customer-service",
+                "category": "spoofing"
+              },
+              {
+                "id": "INJ-CUSTOMER-SERVICE-BYPASS",
+                "title": "Bypass input guardrails",
+                "type": "LEAF",
+                "probability": 0.2,
+                "impact": 6,
+                "risk_score": 1.2000000000000002,
+                "mitigated": true,
+                "mitigation": "guardrails: output, tool-call, output, content-filter",
+                "agent": "customer-service",
+                "category": "spoofing"
+              }
+            ]
+          },
+          {
+            "id": "EVASION-CUSTOMER-SERVICE",
+            "title": "Evade Guardrails on customer-service",
+            "description": "Circumvent declared guardrails to perform unauthorized actions",
+            "type": "AND",
+            "probability": 0.12,
+            "impact": 9,
+            "risk_score": 1.08,
+            "mitigated": false,
+            "agent": "customer-service",
+            "category": "tampering",
+            "children": [
+              {
+                "id": "EVASION-CUSTOMER-SERVICE-RECON",
+                "title": "Enumerate guardrail boundaries",
+                "type": "LEAF",
+                "probability": 0.6,
+                "impact": 3,
+                "risk_score": 1.7999999999999998,
+                "mitigated": false,
+                "agent": "customer-service",
+                "category": "tampering"
+              },
+              {
+                "id": "EVASION-CUSTOMER-SERVICE-BYPASS",
+                "title": "Craft guardrail bypass",
+                "type": "LEAF",
+                "probability": 0.2,
+                "impact": 6,
+                "risk_score": 1.2000000000000002,
+                "mitigated": false,
+                "agent": "customer-service",
+                "category": "tampering"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "AGENT-DATA-ANALYST",
+        "title": "Compromise data-analyst",
+        "type": "OR",
+        "probability": 0.8400972416,
+        "impact": 10,
+        "risk_score": 8.400972416,
+        "mitigated": false,
+        "agent": "data-analyst",
+        "children": [
+          {
+            "id": "TOOLS-DATA-ANALYST",
+            "title": "Exploit data-analyst Tools",
+            "type": "OR",
+            "probability": 0.7599,
+            "impact": 6,
+            "risk_score": 4.5594,
+            "mitigated": false,
+            "agent": "data-analyst",
+            "children": [
+              {
+                "id": "TOOL-DATA-ANALYST-DATABASE-QUERY",
+                "title": "Exploit tool: database_query",
+                "type": "LEAF",
+                "probability": 0.3,
+                "impact": 6,
+                "risk_score": 1.7999999999999998,
+                "mitigated": false,
+                "agent": "data-analyst",
+                "tool": "database_query",
+                "category": "elevation_of_privilege"
+              },
+              {
+                "id": "TOOL-DATA-ANALYST-CSV-EXPORT",
+                "title": "Exploit tool: csv_export",
+                "type": "LEAF",
+                "probability": 0.3,
+                "impact": 6,
+                "risk_score": 1.7999999999999998,
+                "mitigated": false,
+                "agent": "data-analyst",
+                "tool": "csv_export",
+                "category": "elevation_of_privilege"
+              },
+              {
+                "id": "TOOL-DATA-ANALYST-VISUALIZATION-CREATE",
+                "title": "Exploit tool: visualization_create",
+                "type": "LEAF",
+                "probability": 0.3,
+                "impact": 6,
+                "risk_score": 1.7999999999999998,
+                "mitigated": false,
+                "agent": "data-analyst",
+                "tool": "visualization_create",
+                "category": "elevation_of_privilege"
+              },
+              {
+                "id": "TOOL-DATA-ANALYST-REPORT-GENERATE",
+                "title": "Exploit tool: report_generate",
+                "type": "LEAF",
+                "probability": 0.3,
+                "impact": 6,
+                "risk_score": 1.7999999999999998,
+                "mitigated": false,
+                "agent": "data-analyst",
+                "tool": "report_generate",
+                "category": "elevation_of_privilege"
+              }
+            ]
+          },
+          {
+            "id": "TRUST-DATA-ANALYST",
+            "title": "Exploit Trust of data-analyst",
+            "type": "AND",
+            "probability": 0.12,
+            "impact": 10,
+            "risk_score": 1.2,
+            "mitigated": false,
+            "agent": "data-analyst",
+            "category": "elevation_of_privilege",
+            "children": [
+              {
+                "id": "TRUST-DATA-ANALYST-IMPERSONATE",
+                "title": "Impersonate trusted delegator",
+                "type": "LEAF",
+                "probability": 0.3,
+                "impact": 6,
+                "risk_score": 1.7999999999999998,
+                "mitigated": false,
+                "agent": "data-analyst",
+                "category": "spoofing"
+              },
+              {
+                "id": "TRUST-DATA-ANALYST-ABUSE",
+                "title": "Abuse delegation chain",
+                "type": "LEAF",
+                "probability": 0.4,
+                "impact": 6,
+                "risk_score": 2.4000000000000004,
+                "mitigated": false,
+                "agent": "data-analyst",
+                "category": "elevation_of_privilege"
+              }
+            ]
+          },
+          {
+            "id": "INJ-DATA-ANALYST",
+            "title": "Prompt Injection on data-analyst",
+            "description": "Inject malicious instructions via crafted input to hijack agent behavior",
+            "type": "AND",
+            "probability": 0.13999999999999999,
+            "impact": 10,
+            "risk_score": 1.4,
+            "mitigated": true,
+            "agent": "data-analyst",
+            "category": "spoofing",
+            "children": [
+              {
+                "id": "INJ-DATA-ANALYST-CRAFT",
+                "title": "Craft adversarial input",
+                "type": "LEAF",
+                "probability": 0.7,
+                "impact": 6,
+                "risk_score": 4.199999999999999,
+                "mitigated": false,
+                "agent": "data-analyst",
+                "category": "spoofing"
+              },
+              {
+                "id": "INJ-DATA-ANALYST-BYPASS",
+                "title": "Bypass input guardrails",
+                "type": "LEAF",
+                "probability": 0.2,
+                "impact": 6,
+                "risk_score": 1.2000000000000002,
+                "mitigated": true,
+                "mitigation": "guardrails: output, tool-call, tool-call",
+                "agent": "data-analyst",
+                "category": "spoofing"
+              }
+            ]
+          },
+          {
+            "id": "EVASION-DATA-ANALYST",
+            "title": "Evade Guardrails on data-analyst",
+            "description": "Circumvent declared guardrails to perform unauthorized actions",
+            "type": "AND",
+            "probability": 0.12,
+            "impact": 9,
+            "risk_score": 1.08,
+            "mitigated": false,
+            "agent": "data-analyst",
+            "category": "tampering",
+            "children": [
+              {
+                "id": "EVASION-DATA-ANALYST-RECON",
+                "title": "Enumerate guardrail boundaries",
+                "type": "LEAF",
+                "probability": 0.6,
+                "impact": 3,
+                "risk_score": 1.7999999999999998,
+                "mitigated": false,
+                "agent": "data-analyst",
+                "category": "tampering"
+              },
+              {
+                "id": "EVASION-DATA-ANALYST-BYPASS",
+                "title": "Craft guardrail bypass",
+                "type": "LEAF",
+                "probability": 0.2,
+                "impact": 6,
+                "risk_score": 1.2000000000000002,
+                "mitigated": false,
+                "agent": "data-analyst",
+                "category": "tampering"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "AGENT-DEPLOYMENT-BOT",
+        "title": "Compromise deployment-bot",
+        "type": "OR",
+        "probability": 0.98012219392,
+        "impact": 10,
+        "risk_score": 9.8012219392,
+        "mitigated": false,
+        "agent": "deployment-bot",
+        "children": [
+          {
+            "id": "TOOLS-DEPLOYMENT-BOT",
+            "title": "Exploit deployment-bot Tools",
+            "type": "OR",
+            "probability": 0.96544,
+            "impact": 10,
+            "risk_score": 9.654399999999999,
+            "mitigated": false,
+            "agent": "deployment-bot",
+            "children": [
+              {
+                "id": "TOOL-DEPLOYMENT-BOT-CONTAINER-DEPLOY",
+                "title": "Exploit tool: container_deploy",
+                "type": "LEAF",
+                "probability": 0.6,
+                "impact": 10,
+                "risk_score": 6,
+                "mitigated": false,
+                "agent": "deployment-bot",
+                "tool": "container_deploy",
+                "category": "elevation_of_privilege"
+              },
+              {
+                "id": "TOOL-DEPLOYMENT-BOT-CONFIG-UPDATE",
+                "title": "Exploit tool: config_update",
+                "type": "LEAF",
+                "probability": 0.4,
+                "impact": 8,
+                "risk_score": 3.2,
+                "mitigated": false,
+                "agent": "deployment-bot",
+                "tool": "config_update",
+                "category": "elevation_of_privilege"
+              },
+              {
+                "id": "TOOL-DEPLOYMENT-BOT-ROLLBACK",
+                "title": "Exploit tool: rollback",
+                "type": "LEAF",
+                "probability": 0.4,
+                "impact": 8,
+                "risk_score": 3.2,
+                "mitigated": false,
+                "agent": "deployment-bot",
+                "tool": "rollback",
+                "category": "elevation_of_privilege"
+              },
+              {
+                "id": "TOOL-DEPLOYMENT-BOT-HEALTH-CHECK",
+                "title": "Exploit tool: health_check",
+                "type": "LEAF",
+                "probability": 0.4,
+                "impact": 8,
+                "risk_score": 3.2,
+                "mitigated": false,
+                "agent": "deployment-bot",
+                "tool": "health_check",
+                "category": "elevation_of_privilege"
+              },
+              {
+                "id": "TOOL-DEPLOYMENT-BOT-DNS-UPDATE",
+                "title": "Exploit tool: dns_update",
+                "type": "LEAF",
+                "probability": 0.6,
+                "impact": 10,
+                "risk_score": 6,
+                "mitigated": false,
+                "agent": "deployment-bot",
+                "tool": "dns_update",
+                "category": "elevation_of_privilege"
+              }
+            ]
+          },
+          {
+            "id": "TRUST-DEPLOYMENT-BOT",
+            "title": "Exploit Trust of deployment-bot",
+            "type": "AND",
+            "probability": 0.24,
+            "impact": 10,
+            "risk_score": 2.4,
+            "mitigated": false,
+            "agent": "deployment-bot",
+            "category": "elevation_of_privilege",
+            "children": [
+              {
+                "id": "TRUST-DEPLOYMENT-BOT-IMPERSONATE",
+                "title": "Impersonate trusted delegator",
+                "type": "LEAF",
+                "probability": 0.3,
+                "impact": 8,
+                "risk_score": 2.4,
+                "mitigated": false,
+                "agent": "deployment-bot",
+                "category": "spoofing"
+              },
+              {
+                "id": "TRUST-DEPLOYMENT-BOT-ESCALATE",
+                "title": "Leverage escalation capability",
+                "type": "LEAF",
+                "probability": 0.8,
+                "impact": 10,
+                "risk_score": 8,
+                "mitigated": false,
+                "agent": "deployment-bot",
+                "category": "elevation_of_privilege"
+              }
+            ]
+          },
+          {
+            "id": "INJ-DEPLOYMENT-BOT",
+            "title": "Prompt Injection on deployment-bot",
+            "description": "Inject malicious instructions via crafted input to hijack agent behavior",
+            "type": "AND",
+            "probability": 0.13999999999999999,
+            "impact": 10,
+            "risk_score": 1.4,
+            "mitigated": true,
+            "agent": "deployment-bot",
+            "category": "spoofing",
+            "children": [
+              {
+                "id": "INJ-DEPLOYMENT-BOT-CRAFT",
+                "title": "Craft adversarial input",
+                "type": "LEAF",
+                "probability": 0.7,
+                "impact": 8,
+                "risk_score": 5.6,
+                "mitigated": false,
+                "agent": "deployment-bot",
+                "category": "spoofing"
+              },
+              {
+                "id": "INJ-DEPLOYMENT-BOT-BYPASS",
+                "title": "Bypass input guardrails",
+                "type": "LEAF",
+                "probability": 0.2,
+                "impact": 8,
+                "risk_score": 1.6,
+                "mitigated": true,
+                "mitigation": "guardrails: tool-call, tool-call, tool-call, tool-call",
+                "agent": "deployment-bot",
+                "category": "spoofing"
+              }
+            ]
+          },
+          {
+            "id": "EVASION-DEPLOYMENT-BOT",
+            "title": "Evade Guardrails on deployment-bot",
+            "description": "Circumvent declared guardrails to perform unauthorized actions",
+            "type": "AND",
+            "probability": 0.12,
+            "impact": 10,
+            "risk_score": 1.2,
+            "mitigated": false,
+            "agent": "deployment-bot",
+            "category": "tampering",
+            "children": [
+              {
+                "id": "EVASION-DEPLOYMENT-BOT-RECON",
+                "title": "Enumerate guardrail boundaries",
+                "type": "LEAF",
+                "probability": 0.6,
+                "impact": 3,
+                "risk_score": 1.7999999999999998,
+                "mitigated": false,
+                "agent": "deployment-bot",
+                "category": "tampering"
+              },
+              {
+                "id": "EVASION-DEPLOYMENT-BOT-BYPASS",
+                "title": "Craft guardrail bypass",
+                "type": "LEAF",
+                "probability": 0.2,
+                "impact": 8,
+                "risk_score": 1.6,
+                "mitigated": false,
+                "agent": "deployment-bot",
+                "category": "tampering"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "AGENT-ORCHESTRATOR",
+        "title": "Compromise orchestrator",
+        "type": "OR",
+        "probability": 0.917175808,
+        "impact": 10,
+        "risk_score": 9.17175808,
+        "mitigated": false,
+        "agent": "orchestrator",
+        "children": [
+          {
+            "id": "TOOLS-ORCHESTRATOR",
+            "title": "Exploit orchestrator Tools",
+            "type": "OR",
+            "probability": 0.856,
+            "impact": 10,
+            "risk_score": 8.56,
+            "mitigated": false,
+            "agent": "orchestrator",
+            "children": [
+              {
+                "id": "TOOL-ORCHESTRATOR-AGENT-ROUTER",
+                "title": "Exploit tool: agent_router",
+                "type": "LEAF",
+                "probability": 0.4,
+                "impact": 10,
+                "risk_score": 4,
+                "mitigated": false,
+                "agent": "orchestrator",
+                "tool": "agent_router",
+                "category": "elevation_of_privilege"
+              },
+              {
+                "id": "TOOL-ORCHESTRATOR-CONTEXT-MANAGER",
+                "title": "Exploit tool: context_manager",
+                "type": "LEAF",
+                "probability": 0.4,
+                "impact": 10,
+                "risk_score": 4,
+                "mitigated": false,
+                "agent": "orchestrator",
+                "tool": "context_manager",
+                "category": "elevation_of_privilege"
+              },
+              {
+                "id": "TOOL-ORCHESTRATOR-AGENT-REGISTRY",
+                "title": "Exploit tool: agent_registry",
+                "type": "LEAF",
+                "probability": 0.6,
+                "impact": 10,
+                "risk_score": 6,
+                "mitigated": false,
+                "agent": "orchestrator",
+                "tool": "agent_registry",
+                "category": "elevation_of_privilege"
+              }
+            ]
+          },
+          {
+            "id": "TRUST-ORCHESTRATOR",
+            "title": "Exploit Trust of orchestrator",
+            "type": "AND",
+            "probability": 0.24,
+            "impact": 10,
+            "risk_score": 2.4,
+            "mitigated": false,
+            "agent": "orchestrator",
+            "category": "elevation_of_privilege",
+            "children": [
+              {
+                "id": "TRUST-ORCHESTRATOR-IMPERSONATE",
+                "title": "Impersonate trusted delegator",
+                "type": "LEAF",
+                "probability": 0.3,
+                "impact": 10,
+                "risk_score": 3,
+                "mitigated": false,
+                "agent": "orchestrator",
+                "category": "spoofing"
+              },
+              {
+                "id": "TRUST-ORCHESTRATOR-ESCALATE",
+                "title": "Leverage escalation capability",
+                "type": "LEAF",
+                "probability": 0.8,
+                "impact": 10,
+                "risk_score": 8,
+                "mitigated": false,
+                "agent": "orchestrator",
+                "category": "elevation_of_privilege"
+              }
+            ]
+          },
+          {
+            "id": "INJ-ORCHESTRATOR",
+            "title": "Prompt Injection on orchestrator",
+            "description": "Inject malicious instructions via crafted input to hijack agent behavior",
+            "type": "AND",
+            "probability": 0.13999999999999999,
+            "impact": 10,
+            "risk_score": 1.4,
+            "mitigated": true,
+            "agent": "orchestrator",
+            "category": "spoofing",
+            "children": [
+              {
+                "id": "INJ-ORCHESTRATOR-CRAFT",
+                "title": "Craft adversarial input",
+                "type": "LEAF",
+                "probability": 0.7,
+                "impact": 10,
+                "risk_score": 7,
+                "mitigated": false,
+                "agent": "orchestrator",
+                "category": "spoofing"
+              },
+              {
+                "id": "INJ-ORCHESTRATOR-BYPASS",
+                "title": "Bypass input guardrails",
+                "type": "LEAF",
+                "probability": 0.2,
+                "impact": 10,
+                "risk_score": 2,
+                "mitigated": true,
+                "mitigation": "guardrails: tool-call, tool-call, content-filter, tool-call",
+                "agent": "orchestrator",
+                "category": "spoofing"
+              }
+            ]
+          },
+          {
+            "id": "EVASION-ORCHESTRATOR",
+            "title": "Evade Guardrails on orchestrator",
+            "description": "Circumvent declared guardrails to perform unauthorized actions",
+            "type": "AND",
+            "probability": 0.12,
+            "impact": 10,
+            "risk_score": 1.2,
+            "mitigated": false,
+            "agent": "orchestrator",
+            "category": "tampering",
+            "children": [
+              {
+                "id": "EVASION-ORCHESTRATOR-RECON",
+                "title": "Enumerate guardrail boundaries",
+                "type": "LEAF",
+                "probability": 0.6,
+                "impact": 3,
+                "risk_score": 1.7999999999999998,
+                "mitigated": false,
+                "agent": "orchestrator",
+                "category": "tampering"
+              },
+              {
+                "id": "EVASION-ORCHESTRATOR-BYPASS",
+                "title": "Craft guardrail bypass",
+                "type": "LEAF",
+                "probability": 0.2,
+                "impact": 10,
+                "risk_score": 2,
+                "mitigated": false,
+                "agent": "orchestrator",
+                "category": "tampering"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "AGENT-RESEARCH-AGENT",
+        "title": "Compromise research-agent",
+        "type": "OR",
+        "probability": 0.88806806912,
+        "impact": 10,
+        "risk_score": 8.8806806912,
+        "mitigated": false,
+        "agent": "research-agent",
+        "children": [
+          {
+            "id": "TOOLS-RESEARCH-AGENT",
+            "title": "Exploit research-agent Tools",
+            "type": "OR",
+            "probability": 0.8319300000000001,
+            "impact": 6,
+            "risk_score": 4.991580000000001,
+            "mitigated": false,
+            "agent": "research-agent",
+            "children": [
+              {
+                "id": "TOOL-RESEARCH-AGENT-WEB-SEARCH",
+                "title": "Exploit tool: web_search",
+                "type": "LEAF",
+                "probability": 0.3,
+                "impact": 6,
+                "risk_score": 1.7999999999999998,
+                "mitigated": false,
+                "agent": "research-agent",
+                "tool": "web_search",
+                "category": "elevation_of_privilege"
+              },
+              {
+                "id": "TOOL-RESEARCH-AGENT-DOCUMENT-READ",
+                "title": "Exploit tool: document_read",
+                "type": "LEAF",
+                "probability": 0.3,
+                "impact": 6,
+                "risk_score": 1.7999999999999998,
+                "mitigated": false,
+                "agent": "research-agent",
+                "tool": "document_read",
+                "category": "elevation_of_privilege"
+              },
+              {
+                "id": "TOOL-RESEARCH-AGENT-SUMMARIZE",
+                "title": "Exploit tool: summarize",
+                "type": "LEAF",
+                "probability": 0.3,
+                "impact": 6,
+                "risk_score": 1.7999999999999998,
+                "mitigated": false,
+                "agent": "research-agent",
+                "tool": "summarize",
+                "category": "elevation_of_privilege"
+              },
+              {
+                "id": "TOOL-RESEARCH-AGENT-CITATION-CHECK",
+                "title": "Exploit tool: citation_check",
+                "type": "LEAF",
+                "probability": 0.3,
+                "impact": 6,
+                "risk_score": 1.7999999999999998,
+                "mitigated": false,
+                "agent": "research-agent",
+                "tool": "citation_check",
+                "category": "elevation_of_privilege"
+              },
+              {
+                "id": "TOOL-RESEARCH-AGENT-PAPER-DOWNLOAD",
+                "title": "Exploit tool: paper_download",
+                "type": "LEAF",
+                "probability": 0.3,
+                "impact": 6,
+                "risk_score": 1.7999999999999998,
+                "mitigated": false,
+                "agent": "research-agent",
+                "tool": "paper_download",
+                "category": "elevation_of_privilege"
+              }
+            ]
+          },
+          {
+            "id": "TRUST-RESEARCH-AGENT",
+            "title": "Exploit Trust of research-agent",
+            "type": "AND",
+            "probability": 0.12,
+            "impact": 10,
+            "risk_score": 1.2,
+            "mitigated": false,
+            "agent": "research-agent",
+            "category": "elevation_of_privilege",
+            "children": [
+              {
+                "id": "TRUST-RESEARCH-AGENT-IMPERSONATE",
+                "title": "Impersonate trusted delegator",
+                "type": "LEAF",
+                "probability": 0.3,
+                "impact": 6,
+                "risk_score": 1.7999999999999998,
+                "mitigated": false,
+                "agent": "research-agent",
+                "category": "spoofing"
+              },
+              {
+                "id": "TRUST-RESEARCH-AGENT-ABUSE",
+                "title": "Abuse delegation chain",
+                "type": "LEAF",
+                "probability": 0.4,
+                "impact": 6,
+                "risk_score": 2.4000000000000004,
+                "mitigated": false,
+                "agent": "research-agent",
+                "category": "elevation_of_privilege"
+              }
+            ]
+          },
+          {
+            "id": "INJ-RESEARCH-AGENT",
+            "title": "Prompt Injection on research-agent",
+            "description": "Inject malicious instructions via crafted input to hijack agent behavior",
+            "type": "AND",
+            "probability": 0.13999999999999999,
+            "impact": 10,
+            "risk_score": 1.4,
+            "mitigated": true,
+            "agent": "research-agent",
+            "category": "spoofing",
+            "children": [
+              {
+                "id": "INJ-RESEARCH-AGENT-CRAFT",
+                "title": "Craft adversarial input",
+                "type": "LEAF",
+                "probability": 0.7,
+                "impact": 6,
+                "risk_score": 4.199999999999999,
+                "mitigated": false,
+                "agent": "research-agent",
+                "category": "spoofing"
+              },
+              {
+                "id": "INJ-RESEARCH-AGENT-BYPASS",
+                "title": "Bypass input guardrails",
+                "type": "LEAF",
+                "probability": 0.2,
+                "impact": 6,
+                "risk_score": 1.2000000000000002,
+                "mitigated": true,
+                "mitigation": "guardrails: content-filter, tool-call, output",
+                "agent": "research-agent",
+                "category": "spoofing"
+              }
+            ]
+          },
+          {
+            "id": "EVASION-RESEARCH-AGENT",
+            "title": "Evade Guardrails on research-agent",
+            "description": "Circumvent declared guardrails to perform unauthorized actions",
+            "type": "AND",
+            "probability": 0.12,
+            "impact": 9,
+            "risk_score": 1.08,
+            "mitigated": false,
+            "agent": "research-agent",
+            "category": "tampering",
+            "children": [
+              {
+                "id": "EVASION-RESEARCH-AGENT-RECON",
+                "title": "Enumerate guardrail boundaries",
+                "type": "LEAF",
+                "probability": 0.6,
+                "impact": 3,
+                "risk_score": 1.7999999999999998,
+                "mitigated": false,
+                "agent": "research-agent",
+                "category": "tampering"
+              },
+              {
+                "id": "EVASION-RESEARCH-AGENT-BYPASS",
+                "title": "Craft guardrail bypass",
+                "type": "LEAF",
+                "probability": 0.2,
+                "impact": 6,
+                "risk_score": 1.2000000000000002,
+                "mitigated": false,
+                "agent": "research-agent",
+                "category": "tampering"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "AGENT-SECURITY-SCANNER",
+        "title": "Compromise security-scanner",
+        "type": "OR",
+        "probability": 0.97018329088,
+        "impact": 10,
+        "risk_score": 9.7018329088,
+        "mitigated": false,
+        "agent": "security-scanner",
+        "children": [
+          {
+            "id": "TOOLS-SECURITY-SCANNER",
+            "title": "Exploit security-scanner Tools",
+            "type": "OR",
+            "probability": 0.94816,
+            "impact": 10,
+            "risk_score": 9.4816,
+            "mitigated": false,
+            "agent": "security-scanner",
+            "children": [
+              {
+                "id": "TOOL-SECURITY-SCANNER-PORT-SCAN",
+                "title": "Exploit tool: port_scan",
+                "type": "LEAF",
+                "probability": 0.6,
+                "impact": 10,
+                "risk_score": 6,
+                "mitigated": false,
+                "agent": "security-scanner",
+                "tool": "port_scan",
+                "category": "elevation_of_privilege"
+              },
+              {
+                "id": "TOOL-SECURITY-SCANNER-VULN-CHECK",
+                "title": "Exploit tool: vuln_check",
+                "type": "LEAF",
+                "probability": 0.4,
+                "impact": 8,
+                "risk_score": 3.2,
+                "mitigated": false,
+                "agent": "security-scanner",
+                "tool": "vuln_check",
+                "category": "elevation_of_privilege"
+              },
+              {
+                "id": "TOOL-SECURITY-SCANNER-CONFIG-AUDIT",
+                "title": "Exploit tool: config_audit",
+                "type": "LEAF",
+                "probability": 0.4,
+                "impact": 8,
+                "risk_score": 3.2,
+                "mitigated": false,
+                "agent": "security-scanner",
+                "tool": "config_audit",
+                "category": "elevation_of_privilege"
+              },
+              {
+                "id": "TOOL-SECURITY-SCANNER-LOG-ANALYZE",
+                "title": "Exploit tool: log_analyze",
+                "type": "LEAF",
+                "probability": 0.4,
+                "impact": 8,
+                "risk_score": 3.2,
+                "mitigated": false,
+                "agent": "security-scanner",
+                "tool": "log_analyze",
+                "category": "elevation_of_privilege"
+              },
+              {
+                "id": "TOOL-SECURITY-SCANNER-ALERT-CREATE",
+                "title": "Exploit tool: alert_create",
+                "type": "LEAF",
+                "probability": 0.4,
+                "impact": 8,
+                "risk_score": 3.2,
+                "mitigated": false,
+                "agent": "security-scanner",
+                "tool": "alert_create",
+                "category": "elevation_of_privilege"
+              }
+            ]
+          },
+          {
+            "id": "TRUST-SECURITY-SCANNER",
+            "title": "Exploit Trust of security-scanner",
+            "type": "AND",
+            "probability": 0.24,
+            "impact": 10,
+            "risk_score": 2.4,
+            "mitigated": false,
+            "agent": "security-scanner",
+            "category": "elevation_of_privilege",
+            "children": [
+              {
+                "id": "TRUST-SECURITY-SCANNER-IMPERSONATE",
+                "title": "Impersonate trusted delegator",
+                "type": "LEAF",
+                "probability": 0.3,
+                "impact": 8,
+                "risk_score": 2.4,
+                "mitigated": false,
+                "agent": "security-scanner",
+                "category": "spoofing"
+              },
+              {
+                "id": "TRUST-SECURITY-SCANNER-ESCALATE",
+                "title": "Leverage escalation capability",
+                "type": "LEAF",
+                "probability": 0.8,
+                "impact": 10,
+                "risk_score": 8,
+                "mitigated": false,
+                "agent": "security-scanner",
+                "category": "elevation_of_privilege"
+              }
+            ]
+          },
+          {
+            "id": "INJ-SECURITY-SCANNER",
+            "title": "Prompt Injection on security-scanner",
+            "description": "Inject malicious instructions via crafted input to hijack agent behavior",
+            "type": "AND",
+            "probability": 0.13999999999999999,
+            "impact": 10,
+            "risk_score": 1.4,
+            "mitigated": true,
+            "agent": "security-scanner",
+            "category": "spoofing",
+            "children": [
+              {
+                "id": "INJ-SECURITY-SCANNER-CRAFT",
+                "title": "Craft adversarial input",
+                "type": "LEAF",
+                "probability": 0.7,
+                "impact": 8,
+                "risk_score": 5.6,
+                "mitigated": false,
+                "agent": "security-scanner",
+                "category": "spoofing"
+              },
+              {
+                "id": "INJ-SECURITY-SCANNER-BYPASS",
+                "title": "Bypass input guardrails",
+                "type": "LEAF",
+                "probability": 0.2,
+                "impact": 8,
+                "risk_score": 1.6,
+                "mitigated": true,
+                "mitigation": "guardrails: tool-call, output, tool-call",
+                "agent": "security-scanner",
+                "category": "spoofing"
+              }
+            ]
+          },
+          {
+            "id": "EVASION-SECURITY-SCANNER",
+            "title": "Evade Guardrails on security-scanner",
+            "description": "Circumvent declared guardrails to perform unauthorized actions",
+            "type": "AND",
+            "probability": 0.12,
+            "impact": 10,
+            "risk_score": 1.2,
+            "mitigated": false,
+            "agent": "security-scanner",
+            "category": "tampering",
+            "children": [
+              {
+                "id": "EVASION-SECURITY-SCANNER-RECON",
+                "title": "Enumerate guardrail boundaries",
+                "type": "LEAF",
+                "probability": 0.6,
+                "impact": 3,
+                "risk_score": 1.7999999999999998,
+                "mitigated": false,
+                "agent": "security-scanner",
+                "category": "tampering"
+              },
+              {
+                "id": "EVASION-SECURITY-SCANNER-BYPASS",
+                "title": "Craft guardrail bypass",
+                "type": "LEAF",
+                "probability": 0.2,
+                "impact": 8,
+                "risk_score": 1.6,
+                "mitigated": false,
+                "agent": "security-scanner",
+                "category": "tampering"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "AGENT-SUPPORT-AGENT",
+        "title": "Compromise support-agent",
+        "type": "OR",
+        "probability": 0.7343808000000001,
+        "impact": 10,
+        "risk_score": 7.343808000000001,
+        "mitigated": false,
+        "agent": "support-agent",
+        "children": [
+          {
+            "id": "TOOLS-SUPPORT-AGENT",
+            "title": "Exploit support-agent Tools",
+            "type": "OR",
+            "probability": 0.657,
+            "impact": 6,
+            "risk_score": 3.942,
+            "mitigated": false,
+            "agent": "support-agent",
+            "children": [
+              {
+                "id": "TOOL-SUPPORT-AGENT-SEARCH-KNOWLEDGE-BASE",
+                "title": "Exploit tool: search_knowledge_base",
+                "type": "LEAF",
+                "probability": 0.3,
+                "impact": 6,
+                "risk_score": 1.7999999999999998,
+                "mitigated": false,
+                "agent": "support-agent",
+                "tool": "search_knowledge_base",
+                "category": "elevation_of_privilege"
+              },
+              {
+                "id": "TOOL-SUPPORT-AGENT-CREATE-TICKET",
+                "title": "Exploit tool: create_ticket",
+                "type": "LEAF",
+                "probability": 0.3,
+                "impact": 6,
+                "risk_score": 1.7999999999999998,
+                "mitigated": false,
+                "agent": "support-agent",
+                "tool": "create_ticket",
+                "category": "elevation_of_privilege"
+              },
+              {
+                "id": "TOOL-SUPPORT-AGENT-SEND-EMAIL",
+                "title": "Exploit tool: send_email",
+                "type": "LEAF",
+                "probability": 0.3,
+                "impact": 6,
+                "risk_score": 1.7999999999999998,
+                "mitigated": false,
+                "agent": "support-agent",
+                "tool": "send_email",
+                "category": "elevation_of_privilege"
+              }
+            ]
+          },
+          {
+            "id": "TRUST-SUPPORT-AGENT",
+            "title": "Exploit Trust of support-agent",
+            "type": "AND",
+            "probability": 0.12,
+            "impact": 10,
+            "risk_score": 1.2,
+            "mitigated": false,
+            "agent": "support-agent",
+            "category": "elevation_of_privilege",
+            "children": [
+              {
+                "id": "TRUST-SUPPORT-AGENT-IMPERSONATE",
+                "title": "Impersonate trusted delegator",
+                "type": "LEAF",
+                "probability": 0.3,
+                "impact": 6,
+                "risk_score": 1.7999999999999998,
+                "mitigated": false,
+                "agent": "support-agent",
+                "category": "spoofing"
+              },
+              {
+                "id": "TRUST-SUPPORT-AGENT-ABUSE",
+                "title": "Abuse delegation chain",
+                "type": "LEAF",
+                "probability": 0.4,
+                "impact": 6,
+                "risk_score": 2.4000000000000004,
+                "mitigated": false,
+                "agent": "support-agent",
+                "category": "elevation_of_privilege"
+              }
+            ]
+          },
+          {
+            "id": "EVASION-SUPPORT-AGENT",
+            "title": "Evade Guardrails on support-agent",
+            "description": "Circumvent declared guardrails to perform unauthorized actions",
+            "type": "AND",
+            "probability": 0.12,
+            "impact": 9,
+            "risk_score": 1.08,
+            "mitigated": false,
+            "agent": "support-agent",
+            "category": "tampering",
+            "children": [
+              {
+                "id": "EVASION-SUPPORT-AGENT-RECON",
+                "title": "Enumerate guardrail boundaries",
+                "type": "LEAF",
+                "probability": 0.6,
+                "impact": 3,
+                "risk_score": 1.7999999999999998,
+                "mitigated": false,
+                "agent": "support-agent",
+                "category": "tampering"
+              },
+              {
+                "id": "EVASION-SUPPORT-AGENT-BYPASS",
+                "title": "Craft guardrail bypass",
+                "type": "LEAF",
+                "probability": 0.2,
+                "impact": 6,
+                "risk_score": 1.2000000000000002,
+                "mitigated": false,
+                "agent": "support-agent",
+                "category": "tampering"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "AGENT-TRADING-BOT",
+        "title": "Compromise trading-bot",
+        "type": "OR",
+        "probability": 0.97018329088,
+        "impact": 10,
+        "risk_score": 9.7018329088,
+        "mitigated": false,
+        "agent": "trading-bot",
+        "children": [
+          {
+            "id": "TOOLS-TRADING-BOT",
+            "title": "Exploit trading-bot Tools",
+            "type": "OR",
+            "probability": 0.94816,
+            "impact": 10,
+            "risk_score": 9.4816,
+            "mitigated": false,
+            "agent": "trading-bot",
+            "children": [
+              {
+                "id": "TOOL-TRADING-BOT-MARKET-QUERY",
+                "title": "Exploit tool: market_query",
+                "type": "LEAF",
+                "probability": 0.4,
+                "impact": 8,
+                "risk_score": 3.2,
+                "mitigated": false,
+                "agent": "trading-bot",
+                "tool": "market_query",
+                "category": "elevation_of_privilege"
+              },
+              {
+                "id": "TOOL-TRADING-BOT-ORDER-PLACE",
+                "title": "Exploit tool: order_place",
+                "type": "LEAF",
+                "probability": 0.6,
+                "impact": 10,
+                "risk_score": 6,
+                "mitigated": false,
+                "agent": "trading-bot",
+                "tool": "order_place",
+                "category": "elevation_of_privilege"
+              },
+              {
+                "id": "TOOL-TRADING-BOT-PORTFOLIO-READ",
+                "title": "Exploit tool: portfolio_read",
+                "type": "LEAF",
+                "probability": 0.4,
+                "impact": 8,
+                "risk_score": 3.2,
+                "mitigated": false,
+                "agent": "trading-bot",
+                "tool": "portfolio_read",
+                "category": "elevation_of_privilege"
+              },
+              {
+                "id": "TOOL-TRADING-BOT-RISK-CALCULATE",
+                "title": "Exploit tool: risk_calculate",
+                "type": "LEAF",
+                "probability": 0.4,
+                "impact": 8,
+                "risk_score": 3.2,
+                "mitigated": false,
+                "agent": "trading-bot",
+                "tool": "risk_calculate",
+                "category": "elevation_of_privilege"
+              },
+              {
+                "id": "TOOL-TRADING-BOT-ALERT-SET",
+                "title": "Exploit tool: alert_set",
+                "type": "LEAF",
+                "probability": 0.4,
+                "impact": 8,
+                "risk_score": 3.2,
+                "mitigated": false,
+                "agent": "trading-bot",
+                "tool": "alert_set",
+                "category": "elevation_of_privilege"
+              }
+            ]
+          },
+          {
+            "id": "TRUST-TRADING-BOT",
+            "title": "Exploit Trust of trading-bot",
+            "type": "AND",
+            "probability": 0.24,
+            "impact": 10,
+            "risk_score": 2.4,
+            "mitigated": false,
+            "agent": "trading-bot",
+            "category": "elevation_of_privilege",
+            "children": [
+              {
+                "id": "TRUST-TRADING-BOT-IMPERSONATE",
+                "title": "Impersonate trusted delegator",
+                "type": "LEAF",
+                "probability": 0.3,
+                "impact": 8,
+                "risk_score": 2.4,
+                "mitigated": false,
+                "agent": "trading-bot",
+                "category": "spoofing"
+              },
+              {
+                "id": "TRUST-TRADING-BOT-ESCALATE",
+                "title": "Leverage escalation capability",
+                "type": "LEAF",
+                "probability": 0.8,
+                "impact": 10,
+                "risk_score": 8,
+                "mitigated": false,
+                "agent": "trading-bot",
+                "category": "elevation_of_privilege"
+              }
+            ]
+          },
+          {
+            "id": "INJ-TRADING-BOT",
+            "title": "Prompt Injection on trading-bot",
+            "description": "Inject malicious instructions via crafted input to hijack agent behavior",
+            "type": "AND",
+            "probability": 0.13999999999999999,
+            "impact": 10,
+            "risk_score": 1.4,
+            "mitigated": true,
+            "agent": "trading-bot",
+            "category": "spoofing",
+            "children": [
+              {
+                "id": "INJ-TRADING-BOT-CRAFT",
+                "title": "Craft adversarial input",
+                "type": "LEAF",
+                "probability": 0.7,
+                "impact": 8,
+                "risk_score": 5.6,
+                "mitigated": false,
+                "agent": "trading-bot",
+                "category": "spoofing"
+              },
+              {
+                "id": "INJ-TRADING-BOT-BYPASS",
+                "title": "Bypass input guardrails",
+                "type": "LEAF",
+                "probability": 0.2,
+                "impact": 8,
+                "risk_score": 1.6,
+                "mitigated": true,
+                "mitigation": "guardrails: tool-call, tool-call, tool-call, tool-call, tool-call",
+                "agent": "trading-bot",
+                "category": "spoofing"
+              }
+            ]
+          },
+          {
+            "id": "EVASION-TRADING-BOT",
+            "title": "Evade Guardrails on trading-bot",
+            "description": "Circumvent declared guardrails to perform unauthorized actions",
+            "type": "AND",
+            "probability": 0.12,
+            "impact": 10,
+            "risk_score": 1.2,
+            "mitigated": false,
+            "agent": "trading-bot",
+            "category": "tampering",
+            "children": [
+              {
+                "id": "EVASION-TRADING-BOT-RECON",
+                "title": "Enumerate guardrail boundaries",
+                "type": "LEAF",
+                "probability": 0.6,
+                "impact": 3,
+                "risk_score": 1.7999999999999998,
+                "mitigated": false,
+                "agent": "trading-bot",
+                "category": "tampering"
+              },
+              {
+                "id": "EVASION-TRADING-BOT-BYPASS",
+                "title": "Craft guardrail bypass",
+                "type": "LEAF",
+                "probability": 0.2,
+                "impact": 8,
+                "risk_score": 1.6,
+                "mitigated": false,
+                "agent": "trading-bot",
+                "category": "tampering"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "node_count": 152,
+  "leaf_count": 102,
+  "max_depth": 4,
+  "risk_score": 9.999999999935014,
+  "top_paths": [
+    {
+      "steps": [
+        "Compromise Agent Deployment",
+        "Compromise deployment-bot",
+        "Exploit deployment-bot Tools",
+        "Exploit tool: container_deploy"
+      ],
+      "probability": 0.6,
+      "impact": 10,
+      "risk_score": 6,
+      "mitigated": false
+    },
+    {
+      "steps": [
+        "Compromise Agent Deployment",
+        "Compromise deployment-bot",
+        "Exploit deployment-bot Tools",
+        "Exploit tool: dns_update"
+      ],
+      "probability": 0.6,
+      "impact": 10,
+      "risk_score": 6,
+      "mitigated": false
+    },
+    {
+      "steps": [
+        "Compromise Agent Deployment",
+        "Compromise orchestrator",
+        "Exploit orchestrator Tools",
+        "Exploit tool: agent_registry"
+      ],
+      "probability": 0.6,
+      "impact": 10,
+      "risk_score": 6,
+      "mitigated": false
+    },
+    {
+      "steps": [
+        "Compromise Agent Deployment",
+        "Compromise security-scanner",
+        "Exploit security-scanner Tools",
+        "Exploit tool: port_scan"
+      ],
+      "probability": 0.6,
+      "impact": 10,
+      "risk_score": 6,
+      "mitigated": false
+    },
+    {
+      "steps": [
+        "Compromise Agent Deployment",
+        "Compromise trading-bot",
+        "Exploit trading-bot Tools",
+        "Exploit tool: order_place"
+      ],
+      "probability": 0.6,
+      "impact": 10,
+      "risk_score": 6,
+      "mitigated": false
+    }
+  ],
+  "mitigated": 9,
+  "unmitigated": 93
+}

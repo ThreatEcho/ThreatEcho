@@ -1,0 +1,11 @@
+api_version: v1
+kind: Scenario
+
+meta:
+  name: scenario-two
+  description: "Second listed scenario"
+  severity: medium
+  tags: [beta]
+
+campaign: agent-jailbreak
+policy: ai-agent-policy

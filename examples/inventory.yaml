@@ -1,0 +1,56 @@
+# Example target inventory for threatecho deploy.
+#
+# Usage:
+#   threatecho deploy -inventory inventory.yaml campaigns/art-discovery-linux/
+#   threatecho deploy -inventory inventory.yaml -parallel -verbose campaigns/apt29-cozy-bear/
+#   threatecho deploy -validate -inventory inventory.yaml campaigns/art-discovery-linux/
+#
+# Passwords support ${env:VAR} expansion for secrets management:
+#   export WIN_PASSWORD='P@ssw0rd'
+#   threatecho deploy -inventory inventory.yaml campaigns/art-discovery-windows/
+
+api_version: v1
+kind: TargetInventory
+
+meta:
+  name: example-lab
+  description: "Example inventory with Linux and Windows targets"
+
+targets:
+  # Linux target with SSH key authentication (recommended).
+  - name: web-server
+    host: 10.0.0.10
+    port: 22                      # default for linux
+    os: linux
+    user: operator
+    key_path: ~/.ssh/id_ed25519
+    mode: agentless               # run commands directly over SSH
+
+  # Linux target in agent mode — pushes the threatecho-agent binary
+  # to the target, runs it, and pulls the JSON report back.
+  # Requires: threatecho deploy -agent-binary ./threatecho-agent ...
+  - name: db-server
+    host: 10.0.0.11
+    os: linux                     # port defaults to 22
+    user: deploy
+    key_path: ~/.ssh/id_ed25519
+    mode: agent
+
+  # Windows target with WinRM/NTLM authentication.
+  # Password is required (WinRM does not support SSH keys).
+  # Use DOMAIN\User format for domain-joined machines.
+  - name: dc01
+    host: 10.0.0.20
+    port: 5985                    # default for windows (HTTP WinRM)
+    os: windows
+    user: "CORP\\Administrator"
+    password: "${env:WIN_PASSWORD}"
+    mode: agentless
+
+  # Windows target in agent mode.
+  - name: workstation01
+    host: 10.0.0.21
+    os: windows
+    user: "CORP\\Administrator"
+    password: "${env:WIN_PASSWORD}"
+    mode: agent

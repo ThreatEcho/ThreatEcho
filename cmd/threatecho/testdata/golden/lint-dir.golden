@@ -1,0 +1,241 @@
+✓ agent-api-abuse — clean
+⚠ agent-capability-probing — 3 warning(s), 0 info
+  ⚠ stages[1] (permission-boundary-test): ATLAS technique AML.T0049 used with ATT&CK tactic "discovery"
+  ⚠ stages[2] (data-scope-discovery): ATLAS technique AML.T0056 used with ATT&CK tactic "discovery"
+  ⚠ stages[3] (hidden-capability-discovery): ATLAS technique AML.T0049 used with ATT&CK tactic "discovery"
+✓ agent-context-manipulation — clean
+⚠ agent-credential-harvest — 2 warning(s), 0 info
+  ⚠ stages[1] (error-message-credential-leak): ATLAS technique AML.T0056 used with ATT&CK tactic "credential-access"
+  ⚠ stages[3] (response-metadata-extraction): ATLAS technique AML.T0056 used with ATT&CK tactic "collection"
+⚠ agent-credential-theft — 2 warning(s), 0 info
+  ⚠ stages[0] (env-var-extraction): ATLAS technique AML.T0056 used with ATT&CK tactic "credential-access"
+  ⚠ stages[1] (config-file-read): ATLAS technique AML.T0051 used with ATT&CK tactic "credential-access"
+⚠ agent-data-exfiltration — 1 warning(s), 0 info
+  ⚠ stages[0] (data-discovery): ATLAS technique AML.T0056 used with ATT&CK tactic "discovery"
+⚠ agent-delegation-abuse — 1 warning(s), 0 info
+  ⚠ stages[1] (confused-deputy): ATLAS technique AML.T0050 used with ATT&CK tactic "privilege-escalation"
+⚠ agent-feedback-loop-attack — 2 warning(s), 0 info
+  ⚠ stages[1] (trigger-reinforced-behavior): ATLAS technique AML.T0048 used with ATT&CK tactic "execution"
+  ⚠ stages[3] (output-recycling-attack): shell stage with no commands
+⚠ agent-function-squatting — 1 warning(s), 0 info
+  ⚠ stages[2] (trigger-squatted-tool): ATLAS technique AML.T0051 used with ATT&CK tactic "execution"
+⚠ agent-guardrail-bypass — 4 warning(s), 0 info
+  ⚠ stages[1] (encoding-bypass): ATLAS technique AML.T0015 used with ATT&CK tactic "defense-evasion"
+  ⚠ stages[2] (language-switch-bypass): ATLAS technique AML.T0015 used with ATT&CK tactic "defense-evasion"
+  ⚠ stages[3] (fragment-reassembly): ATLAS technique AML.T0043 used with ATT&CK tactic "defense-evasion"
+  ⚠ stages[4] (token-smuggling): ATLAS technique AML.T0015 used with ATT&CK tactic "defense-evasion"
+⚠ agent-identity-spoofing — 22 warning(s), 0 info
+  ⚠ stages[0] (agent-name-spoofing): no expected telemetry — gap analysis will be limited
+  ⚠ stages[0] (agent-name-spoofing): http stage with no target URL
+  ⚠ stages[1] (delegation-chain-forgery): ATLAS technique AML.T0051 used with ATT&CK tactic "privilege-escalation"
+  ⚠ stages[1] (delegation-chain-forgery): no expected telemetry — gap analysis will be limited
+  ⚠ stages[1] (delegation-chain-forgery): http stage with no target URL
+  ⚠ stages[2] (privilege-impersonation): ATLAS technique AML.T0051 used with ATT&CK tactic "privilege-escalation"
+  ⚠ stages[2] (privilege-impersonation): no expected telemetry — gap analysis will be limited
+  ⚠ stages[2] (privilege-impersonation): http stage with no target URL
+  ⚠ stages[3] (credential-relay): no expected telemetry — gap analysis will be limited
+  ⚠ stages[3] (credential-relay): http stage with no target URL
+  ⚠ stages[4] (response-tampering): ATLAS technique AML.T0051 used with ATT&CK tactic "defense-evasion"
+  ⚠ stages[4] (response-tampering): no expected telemetry — gap analysis will be limited
+  ⚠ stages[4] (response-tampering): http stage with no target URL
+  ⚠ stages[5] (capability-claim-injection): ATLAS technique AML.T0051 used with ATT&CK tactic "privilege-escalation"
+  ⚠ stages[5] (capability-claim-injection): no expected telemetry — gap analysis will be limited
+  ⚠ stages[5] (capability-claim-injection): http stage with no target URL
+  ⚠ stages[6] (session-hijacking): ATLAS technique AML.T0051 used with ATT&CK tactic "lateral-movement"
+  ⚠ stages[6] (session-hijacking): no expected telemetry — gap analysis will be limited
+  ⚠ stages[6] (session-hijacking): http stage with no target URL
+  ⚠ stages[7] (trust-level-downgrade): ATLAS technique AML.T0051 used with ATT&CK tactic "privilege-escalation"
+  ⚠ stages[7] (trust-level-downgrade): no expected telemetry — gap analysis will be limited
+  ⚠ stages[7] (trust-level-downgrade): http stage with no target URL
+⚠ agent-jailbreak — 3 warning(s), 0 info
+  ⚠ stages[2] (encoding-bypass): ATLAS technique AML.T0043 used with ATT&CK tactic "defense-evasion"
+  ⚠ stages[3] (context-window-stuff): ATLAS technique AML.T0043 used with ATT&CK tactic "defense-evasion"
+  ⚠ stages[7] (tool-invocation-jailbreak): ATLAS technique AML.T0040 used with ATT&CK tactic "privilege-escalation"
+⚠ agent-memory-attack — 2 warning(s), 0 info
+  ⚠ stages[3] (memory-persistence): ATLAS technique AML.T0043 used with ATT&CK tactic "defense-evasion"
+  ⚠ stages[4] (context-window-manipulation): ATLAS technique AML.T0043 used with ATT&CK tactic "defense-evasion"
+⚠ agent-memory-manipulation — 5 warning(s), 0 info
+  ⚠ stages[0] (enumerate-memories): ATLAS technique AML.T0056 used with ATT&CK tactic "discovery"
+  ⚠ stages[1] (inject-false-memory): ATLAS technique AML.T0053 used with ATT&CK tactic "persistence"
+  ⚠ stages[2] (direct-memory-api-write): ATLAS technique AML.T0053 used with ATT&CK tactic "persistence"
+  ⚠ stages[3] (delete-safety-memories): ATLAS technique AML.T0053 used with ATT&CK tactic "defense-evasion"
+  ⚠ stages[4] (verify-persistence): ATLAS technique AML.T0056 used with ATT&CK tactic "collection"
+✓ agent-model-fingerprint — clean
+⚠ agent-multi-tenant-escape — 1 warning(s), 0 info
+  ⚠ stages[2] (shared-memory-exploitation): ATLAS technique AML.T0043 used with ATT&CK tactic "collection"
+⚠ agent-orchestrator-takeover — 4 warning(s), 0 info
+  ⚠ stages[1] (inject-routing-override): ATLAS technique AML.T0051 used with ATT&CK tactic "defense-evasion"
+  ⚠ stages[2] (sub-agent-impersonation): ATLAS technique AML.T0053 used with ATT&CK tactic "lateral-movement"
+  ⚠ stages[3] (task-redistribution): ATLAS technique AML.T0053 used with ATT&CK tactic "collection"
+  ⚠ stages[4] (persistent-orchestrator-control): ATLAS technique AML.T0051 used with ATT&CK tactic "persistence"
+✓ agent-output-poisoning — clean
+✓ agent-plugin-backdoor — clean
+⚠ agent-privilege-escalation — 2 warning(s), 0 info
+  ⚠ stages[0] (enumerate-tools): ATLAS technique AML.T0049 used with ATT&CK tactic "discovery"
+  ⚠ stages[1] (role-confusion): ATLAS technique AML.T0054 used with ATT&CK tactic "privilege-escalation"
+✓ agent-prompt-injection-indirect — clean
+⚠ agent-session-hijack — 1 warning(s), 0 info
+  ⚠ stages[2] (shared-context-injection): ATLAS technique AML.T0051 used with ATT&CK tactic "persistence"
+⚠ agent-state-desync — 3 warning(s), 0 info
+  ⚠ stages[1] (concurrent-conflicting-updates): ATLAS technique AML.T0053 used with ATT&CK tactic "execution"
+  ⚠ stages[3] (replica-divergence): ATLAS technique AML.T0053 used with ATT&CK tactic "defense-evasion"
+  ⚠ stages[4] (verify-behavioral-divergence): ATLAS technique AML.T0056 used with ATT&CK tactic "collection"
+✓ agent-supply-chain — clean
+✓ agent-tool-abuse — clean
+⚠ agent-tool-confusion — 3 warning(s), 0 info
+  ⚠ stages[2] (tool-name-confusion): ATLAS technique AML.T0043 used with ATT&CK tactic "defense-evasion"
+  ⚠ stages[3] (tool-shadowing): ATLAS technique AML.T0043 used with ATT&CK tactic "defense-evasion"
+  ⚠ stages[5] (tool-chain-hijack): ATLAS technique AML.T0050 used with ATT&CK tactic "lateral-movement"
+⚠ agent-tool-injection — 3 warning(s), 0 info
+  ⚠ stages[0] (register-malicious-tool): ATLAS technique AML.T0043 used with ATT&CK tactic "persistence"
+  ⚠ stages[1] (override-existing-tool): ATLAS technique AML.T0043 used with ATT&CK tactic "persistence"
+  ⚠ stages[2] (prompt-based-tool-injection): ATLAS technique AML.T0051 used with ATT&CK tactic "execution"
+⚠ agent-trust-exploitation — 2 warning(s), 0 info
+  ⚠ stages[1] (impersonate-trusted): ATLAS technique AML.T0050 used with ATT&CK tactic "lateral-movement"
+  ⚠ stages[2] (transitive-trust-abuse): ATLAS technique AML.T0050 used with ATT&CK tactic "privilege-escalation"
+⚠ api-key-compromise — 3 warning(s), 0 info
+  ⚠ stages[0] (git-secret-scanning): shell stage with no commands
+  ⚠ stages[1] (env-var-harvesting): shell stage with no commands
+  ⚠ stages[4] (mass-data-access): shell stage with no commands
+⚠ apt-lateral-movement — 5 warning(s), 0 info
+  ⚠ stages[0] (credential-dump): shell stage with no commands
+  ⚠ stages[1] (pass-the-hash): shell stage with no commands
+  ⚠ stages[2] (wmi-remote-exec): shell stage with no commands
+  ⚠ stages[3] (rdp-session-hijack): shell stage with no commands
+  ⚠ stages[4] (dc-replication): shell stage with no commands
+✓ apt28-fancy-bear — clean
+✓ apt29-cozy-bear — clean
+✓ art-credential-access-linux — clean
+✓ art-credential-access-windows — clean
+✓ art-defense-evasion-linux — clean
+✓ art-defense-evasion-windows — clean
+✓ art-discovery-linux — clean
+✓ art-discovery-windows — clean
+✓ art-execution-linux — clean
+✓ art-execution-windows — clean
+✓ art-exfiltration-multi — clean
+✓ art-lateral-movement-linux — clean
+✓ art-lateral-movement-windows — clean
+✓ art-persistence-linux — clean
+⚠ art-persistence-windows — 0 warning(s), 1 info
+  ℹ stages[0] (prep-payload): telemetry defined but no expected detections — will flag as detection gap
+⚠ cloud-privilege-escalation — 4 warning(s), 0 info
+  ⚠ stages[0] (imds-credential-theft): shell stage with no commands
+  ⚠ stages[1] (iam-policy-enumeration): shell stage with no commands
+  ⚠ stages[2] (assume-role-chain): shell stage with no commands
+  ⚠ stages[3] (persistence-backdoor-role): shell stage with no commands
+⚠ context-window-stuffing — 2 warning(s), 0 info
+  ⚠ stages[2] (verify-safety-eviction): ATLAS technique AML.T0051 used with ATT&CK tactic "discovery"
+  ⚠ stages[3] (inject-replacement-instructions): ATLAS technique AML.T0051 used with ATT&CK tactic "persistence"
+⚠ credential-spray — 4 warning(s), 0 info
+  ⚠ stages[0] (user-enumeration): shell stage with no commands
+  ⚠ stages[1] (lockout-policy-recon): shell stage with no commands
+  ⚠ stages[2] (password-spray-wave1): shell stage with no commands
+  ⚠ stages[3] (mfa-bypass-check): shell stage with no commands
+⚠ data-staging-exfil — 5 warning(s), 0 info
+  ⚠ stages[0] (sensitive-data-discovery): shell stage with no commands
+  ⚠ stages[1] (data-staging): shell stage with no commands
+  ⚠ stages[2] (dns-tunnel-exfil): shell stage with no commands
+  ⚠ stages[3] (cloud-exfil-backup): shell stage with no commands
+  ⚠ stages[4] (cleanup): shell stage with no commands
+✓ fin7-carbanak — clean
+⚠ function-calling-overflow — 2 warning(s), 0 info
+  ⚠ stages[1] (description-field-injection): ATLAS technique AML.T0051 used with ATT&CK tactic "execution"
+  ⚠ stages[3] (parameter-overflow-directive): ATLAS technique AML.T0043 used with ATT&CK tactic "persistence"
+⚠ insider-threat — 4 warning(s), 0 info
+  ⚠ stages[0] (abnormal-data-access): shell stage with no commands
+  ⚠ stages[2] (privilege-abuse): shell stage with no commands
+  ⚠ stages[3] (slow-drip-exfil): shell stage with no commands
+  ⚠ stages[4] (evidence-destruction): shell stage with no commands
+✓ lazarus-group — clean
+⚠ living-off-the-land — 5 warning(s), 0 info
+  ⚠ stages[0] (recon-native): shell stage with no commands
+  ⚠ stages[1] (certutil-download): shell stage with no commands
+  ⚠ stages[2] (mshta-execution): shell stage with no commands
+  ⚠ stages[3] (scheduled-task-persistence): shell stage with no commands
+  ⚠ stages[4] (wmic-lateral): shell stage with no commands
+✓ llm-agent-hijack — clean
+⚠ llm-output-parsing-exploit — 1 warning(s), 0 info
+  ⚠ stages[1] (json-control-injection): ATLAS technique AML.T0051 used with ATT&CK tactic "execution"
+✓ lockbit-ransomware — clean
+⚠ mcp-server-attack — 3 warning(s), 0 info
+  ⚠ stages[1] (schema-manipulation): ATLAS technique AML.T0043 used with ATT&CK tactic "defense-evasion"
+  ⚠ stages[5] (transport-layer-attack): ATLAS technique AML.T0043 used with ATT&CK tactic "defense-evasion"
+  ⚠ stages[6] (cross-server-pivot): ATLAS technique AML.T0050 used with ATT&CK tactic "lateral-movement"
+✓ mcp-server-impersonation — clean
+⚠ model-extraction — 2 warning(s), 0 info
+  ⚠ stages[3] (prompt-template-extraction): ATLAS technique AML.T0056 used with ATT&CK tactic "collection"
+  ⚠ stages[4] (fine-tuning-data-recovery): ATLAS technique AML.T0037 used with ATT&CK tactic "collection"
+⚠ multi-agent-attack — 1 warning(s), 0 info
+  ⚠ stages[4] (message-injection): ATLAS technique AML.T0050 used with ATT&CK tactic "lateral-movement"
+⚠ multi-model-arbitrage — 3 warning(s), 0 info
+  ⚠ stages[1] (probe-weaker-model): ATLAS technique AML.T0049 used with ATT&CK tactic "discovery"
+  ⚠ stages[3] (exploit-weak-guardrails): ATLAS technique AML.T0043 used with ATT&CK tactic "defense-evasion"
+  ⚠ stages[4] (chain-model-handoff): ATLAS technique AML.T0054 used with ATT&CK tactic "lateral-movement"
+⚠ prompt-leaking — 20 warning(s), 0 info
+  ⚠ stages[0] (direct-extraction): no expected telemetry — gap analysis will be limited
+  ⚠ stages[0] (direct-extraction): http stage with no target URL
+  ⚠ stages[1] (role-play-extraction): no expected telemetry — gap analysis will be limited
+  ⚠ stages[1] (role-play-extraction): http stage with no target URL
+  ⚠ stages[2] (translation-extraction): ATLAS technique AML.T0043 used with ATT&CK tactic "defense-evasion"
+  ⚠ stages[2] (translation-extraction): no expected telemetry — gap analysis will be limited
+  ⚠ stages[2] (translation-extraction): http stage with no target URL
+  ⚠ stages[3] (encoding-extraction): ATLAS technique AML.T0043 used with ATT&CK tactic "defense-evasion"
+  ⚠ stages[3] (encoding-extraction): no expected telemetry — gap analysis will be limited
+  ⚠ stages[3] (encoding-extraction): http stage with no target URL
+  ⚠ stages[4] (incremental-elicitation): no expected telemetry — gap analysis will be limited
+  ⚠ stages[4] (incremental-elicitation): http stage with no target URL
+  ⚠ stages[5] (completion-attack): no expected telemetry — gap analysis will be limited
+  ⚠ stages[5] (completion-attack): http stage with no target URL
+  ⚠ stages[6] (tool-schema-extraction): no expected telemetry — gap analysis will be limited
+  ⚠ stages[6] (tool-schema-extraction): http stage with no target URL
+  ⚠ stages[7] (markdown-injection-leak): no expected telemetry — gap analysis will be limited
+  ⚠ stages[7] (markdown-injection-leak): http stage with no target URL
+  ⚠ stages[8] (few-shot-extraction): no expected telemetry — gap analysis will be limited
+  ⚠ stages[8] (few-shot-extraction): http stage with no target URL
+⚠ rag-data-poisoning — 3 warning(s), 0 info
+  ⚠ stages[2] (embedding-space-attack): ATLAS technique AML.T0043 used with ATT&CK tactic "defense-evasion"
+  ⚠ stages[3] (chunk-boundary-exploit): ATLAS technique AML.T0043 used with ATT&CK tactic "defense-evasion"
+  ⚠ stages[6] (context-overflow-rag): ATLAS technique AML.T0043 used with ATT&CK tactic "defense-evasion"
+⚠ rag-index-poisoning — 2 warning(s), 0 info
+  ⚠ stages[1] (upload-poisoned-documents): ATLAS technique AML.T0020 used with ATT&CK tactic "persistence"
+  ⚠ stages[2] (verify-poisoned-retrieval): ATLAS technique AML.T0053 used with ATT&CK tactic "collection"
+✓ rag-poisoning — clean
+⚠ ransomware-simulation — 4 warning(s), 0 info
+  ⚠ stages[0] (inhibit-recovery): shell stage with no commands
+  ⚠ stages[1] (enumerate-targets): shell stage with no commands
+  ⚠ stages[2] (encryption-staging): shell stage with no commands
+  ⚠ stages[4] (cleanup-simulation): shell stage with no commands
+✓ scattered-spider — clean
+⚠ supply-chain-compromise — 2 warning(s), 0 info
+  ⚠ stages[0] (dependency-confusion): shell stage with no commands
+  ⚠ stages[2] (package-integrity-bypass): shell stage with no commands
+⚠ tool-call-injection — 25 warning(s), 0 info
+  ⚠ stages[0] (parameter-injection): no expected telemetry — gap analysis will be limited
+  ⚠ stages[0] (parameter-injection): http stage with no target URL
+  ⚠ stages[1] (tool-name-confusion): ATLAS technique AML.T0051 used with ATT&CK tactic "execution"
+  ⚠ stages[1] (tool-name-confusion): no expected telemetry — gap analysis will be limited
+  ⚠ stages[1] (tool-name-confusion): http stage with no target URL
+  ⚠ stages[2] (chained-tool-exploit): ATLAS technique AML.T0051 used with ATT&CK tactic "execution"
+  ⚠ stages[2] (chained-tool-exploit): no expected telemetry — gap analysis will be limited
+  ⚠ stages[2] (chained-tool-exploit): http stage with no target URL
+  ⚠ stages[3] (json-parameter-injection): ATLAS technique AML.T0051 used with ATT&CK tactic "execution"
+  ⚠ stages[3] (json-parameter-injection): no expected telemetry — gap analysis will be limited
+  ⚠ stages[3] (json-parameter-injection): http stage with no target URL
+  ⚠ stages[4] (tool-call-in-response): ATLAS technique AML.T0051 used with ATT&CK tactic "execution"
+  ⚠ stages[4] (tool-call-in-response): no expected telemetry — gap analysis will be limited
+  ⚠ stages[4] (tool-call-in-response): http stage with no target URL
+  ⚠ stages[5] (path-traversal-in-tool): ATLAS technique AML.T0051 used with ATT&CK tactic "collection"
+  ⚠ stages[5] (path-traversal-in-tool): no expected telemetry — gap analysis will be limited
+  ⚠ stages[5] (path-traversal-in-tool): http stage with no target URL
+  ⚠ stages[6] (wildcard-tool-abuse): ATLAS technique AML.T0051 used with ATT&CK tactic "privilege-escalation"
+  ⚠ stages[6] (wildcard-tool-abuse): no expected telemetry — gap analysis will be limited
+  ⚠ stages[6] (wildcard-tool-abuse): http stage with no target URL
+  ⚠ stages[7] (unicode-tool-bypass): ATLAS technique AML.T0043 used with ATT&CK tactic "defense-evasion"
+  ⚠ stages[7] (unicode-tool-bypass): no expected telemetry — gap analysis will be limited
+  ⚠ stages[7] (unicode-tool-bypass): http stage with no target URL
+  ⚠ stages[8] (batch-tool-overflow): no expected telemetry — gap analysis will be limited
+  ⚠ stages[8] (batch-tool-overflow): http stage with no target URL
+✓ volt-typhoon — clean
+⚠ zero-day-web-exploit — 1 warning(s), 0 info
+  ⚠ stages[0] (vuln-probe): shell stage with no commands

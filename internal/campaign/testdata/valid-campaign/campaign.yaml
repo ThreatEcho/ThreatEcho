@@ -1,0 +1,46 @@
+api_version: v1
+kind: Campaign
+
+meta:
+  name: test-campaign
+  adversary: TestActor
+  description: "A minimal test campaign"
+  objective: "Validate loader and engine"
+  mitre_version: "15.1"
+  severity: medium
+  tags: [test]
+  authors: ["Test"]
+  created: "2026-01-01"
+  modified: "2026-01-01"
+
+variables:
+  target_host: "10.0.0.1"
+
+stages:
+  - id: recon
+    name: Network Scan of {{target_host}}
+    technique: T1016
+    tactic: discovery
+    execute:
+      type: shell
+      commands:
+        - 'echo "scanning {{target_host}}"'
+    expect:
+      telemetry: [process_create]
+      detections: [scan_detected]
+    on_success: access
+    on_failure: abort
+
+  - id: access
+    name: Initial Access
+    technique: T1190
+    tactic: initial-access
+    depends_on: [recon]
+    execute:
+      type: shell
+      commands:
+        - 'echo "exploiting target"'
+    expect:
+      telemetry: [network_connection]
+      detections: [exploit_attempt]
+    on_failure: abort

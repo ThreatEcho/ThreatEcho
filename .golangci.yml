@@ -1,0 +1,62 @@
+# golangci-lint configuration for ThreatEcho
+# Run: golangci-lint run ./...
+
+run:
+  timeout: 5m
+  go: "1.26"
+  modules-download-mode: readonly
+
+linters:
+  enable:
+    - govet
+    - errcheck
+    - staticcheck
+    - unused
+    - gosimple
+    - ineffassign
+    - typecheck
+    - gocritic
+    - gofmt
+    - misspell
+  disable:
+    # Too noisy for a project of this size.
+    - exhaustive
+    - exhaustruct
+    - wrapcheck
+    - varnamelen
+    - ireturn
+    - nonamedreturns
+    - nlreturn
+    - wsl
+    - godox
+    - depguard
+
+linters-settings:
+  govet:
+    shadow: false
+  errcheck:
+    check-type-assertions: true
+    check-blank: false
+  gocritic:
+    enabled-tags:
+      - diagnostic
+      - style
+    disabled-checks:
+      - hugeParam
+      - rangeValCopy
+  misspell:
+    locale: US
+
+issues:
+  max-issues-per-linter: 50
+  max-same-issues: 5
+  exclude-rules:
+    # Test files can be more relaxed.
+    - path: _test\.go
+      linters:
+        - errcheck
+        - gocritic
+    # Allow fmt.Println in main.
+    - path: cmd/threatecho/main\.go
+      linters:
+        - gocritic

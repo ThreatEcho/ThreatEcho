@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Documentation
+    url: https://github.com/ThreatEcho/threatecho/tree/main/docs
+    about: Read the docs before opening an issue
+  - name: Security vulnerability
+    url: https://github.com/ThreatEcho/threatecho/blob/main/SECURITY.md
+    about: Report security vulnerabilities privately via SECURITY.md

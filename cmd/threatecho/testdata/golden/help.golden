@@ -1,0 +1,75 @@
+ThreatEcho — Adversary Campaign Simulation Engine
+
+Usage:
+  threatecho <command> [flags] [args]
+
+Execution:
+  simulate        Dry-run a campaign (no execution)
+  run             Execute a campaign live (shell stages only)
+  deploy          Deploy a campaign to remote targets (SSH/WinRM, agentless or agent)
+  deploy-baseline Capture and diff deployment posture snapshots
+
+Campaign Management:
+  validate    Validate a campaign file or directory
+  lint        Run quality checks beyond structural validation
+  fmt         Canonically format campaign YAML files
+  campaigns   List and inspect campaigns
+  diff        Compare two campaign files (structural diff)
+  merge       Combine multiple campaigns into one
+  search      Search campaigns by technique, tactic, adversary, keyword
+  import      Import Atomic Red Team tests as ThreatEcho campaigns
+  convert     Convert campaigns between formats (JSON, Markdown, CSV)
+  template    List and generate campaign scaffolds from built-in templates
+
+Analysis:
+  gap         Analyze detection coverage gaps across campaigns
+  compare     Compare detection coverage between two campaign sets (before/after delta)
+  matrix      Display ATT&CK technique coverage matrix
+  coverage    Technique-level coverage analysis
+  score       Campaign risk and complexity scoring
+  enrich      Enrich campaign stages with ATT&CK metadata
+  graph       Campaign dependency graph analysis and export
+  profile     Campaign complexity profile and metrics
+  timeline    Estimate campaign execution time from DAG structure
+  tag         Tag management and suggestions across campaigns
+
+Risk & Compliance:
+  policy      Validate or evaluate agent tool-call policies
+  summary     Security posture dashboard across all campaigns
+  report      Generate executive assessment reports
+  compliance  Map to compliance frameworks (NIST CSF, 800-53, CIS, AI RMF, OWASP LLM, ATLAS)
+  risk-posture Unified risk assessment across all analysis dimensions
+  threat-model Generate STRIDE threat models for agent deployments
+  attack-tree Build attack trees from agent inventory with probability analysis
+  dashboard   Generate HTML security assessment dashboard
+
+Agent:
+  agent       Agent inventory, trust, attestation, and capability mapping
+  scenario    Generate and analyze agent execution traces from campaigns
+  trace       Agent execution trace analysis and anomaly replay
+  baseline    Behavioral baseline and drift detection
+
+Workspace:
+  init        Initialize a new campaign workspace
+  config      Show or initialize project configuration
+  doctor      Workspace health check (campaigns, policies, config)
+  stats       Project-wide campaign analytics dashboard
+  export      Export to ATT&CK Navigator or Sigma rule scaffolds
+  audit       Campaign state snapshot and change tracking
+  hash        Campaign content fingerprinting (SHA256)
+  telemetry   Inspect the telemetry type registry
+  env         Show environment variable references in campaigns
+  watch       Watch campaign files for changes (live re-validation)
+  completion  Generate shell completion scripts (bash/zsh/fish)
+  version     Print version information
+  help        Show this help
+
+Exit codes (for CI integration):
+  0   Success
+  1   Validation error (campaign/policy YAML invalid)
+  2   Policy denied (risk/compliance violations found)
+  3   Runtime error (execution or processing failure)
+  4   I/O error (file read/write failure)
+  64  Usage error (bad arguments, unknown command)
+
+Run 'threatecho <command> -h' for command-specific help.

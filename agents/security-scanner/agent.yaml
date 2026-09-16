@@ -1,0 +1,62 @@
+api_version: v1
+kind: Agent
+
+meta:
+  name: security-scanner
+  type: autonomous
+  description: "Automated security scanning agent performing vulnerability assessments, configuration audits, log analysis, and alert triage. Runs on schedule and during CI/CD pipelines with elevated read access."
+  model: claude-3-opus
+  version: "1.1.0"
+  owner: security-team
+  tags: [internal, tier-0, production, security-scope]
+
+capabilities:
+  tool_calling: true
+  rag: false
+  code_execution: true
+  web_access: true
+  file_access: true
+  message_passing: true
+  memory: false
+  autonomous: true
+
+tools:
+  - name: port_scan
+    actions: [scan, discover]
+    targets: ["10.0.0.0/8", "172.16.0.0/12"]
+    rate_limit: 5
+    elevated: true
+  - name: vuln_check
+    actions: [scan, assess, report]
+    targets: ["https://*.internal/*"]
+    rate_limit: 20
+  - name: config_audit
+    actions: [read, compare, validate]
+    targets: ["*/configs/*", "*/policies/*"]
+    rate_limit: 50
+  - name: log_analyze
+    actions: [search, correlate, aggregate]
+    targets: ["https://siem.internal/*"]
+    rate_limit: 200
+  - name: alert_create
+    actions: [create, escalate, acknowledge]
+    targets: ["https://alerts.internal/api/*"]
+    rate_limit: 30
+
+trust:
+  level: elevated
+  trusts_from: []
+  trusted_by: [orchestrator]
+  boundaries: [security]
+  can_escalate: true
+
+guardrails:
+  - name: scan-scope-limiter
+    type: tool-call
+    enforced: true
+  - name: finding-classifier
+    type: output
+    enforced: true
+  - name: rate-limiter
+    type: tool-call
+    enforced: true

@@ -1,0 +1,110 @@
+api_version: v1
+kind: Policy
+
+meta:
+  name: agent-default
+  description: >
+    Default security policy for AI agent tool-call enforcement.
+    Blocks dangerous operations (shell exec, agent messaging, knowledge base writes)
+    unless explicitly allowed. Alerts on data exfiltration tactics.
+  authors:
+    - ThreatEcho
+  created: "2026-09-14"
+  modified: "2026-09-14"
+
+agent:
+  name: "*"
+  type: llm
+  tools:
+    - shell_exec
+    - http_request
+    - send_email
+    - tool_call
+    - search_knowledge_base
+    - write_knowledge_base
+    - agent_message
+
+rules:
+  # --- DENY rules (high priority) ---
+
+  - id: deny-shell-exec
+    description: Block all shell command execution by agents
+    effect: deny
+    priority: 100
+    match:
+      tools: ["shell_exec"]
+
+  - id: deny-elevated-exec
+    description: Block any stage requiring elevated/root privileges
+    effect: deny
+    priority: 100
+    match:
+      actions: ["execute"]
+    conditions:
+      - field: elevated
+        operator: eq
+        value: "true"
+
+  - id: deny-kb-write
+    description: Block writes to the knowledge base (RAG poisoning vector)
+    effect: deny
+    priority: 90
+    match:
+      tools: ["write_knowledge_base"]
+
+  - id: deny-agent-lateral
+    description: Block agent-to-agent message passing (lateral movement vector)
+    effect: deny
+    priority: 90
+    match:
+      tools: ["agent_message"]
+
+  - id: deny-c2-domains
+    description: Block requests to known C2 infrastructure patterns
+    effect: deny
+    priority: 95
+    match:
+      targets: ["https://*.evil.com/*", "https://*.c2.*/*", "http://*:4444/*"]
+
+  # --- ALERT rules (medium priority) ---
+
+  - id: alert-exfiltration
+    description: Alert on stages using exfiltration tactics
+    effect: alert
+    priority: 50
+    match:
+      tactics: ["exfiltration"]
+
+  - id: alert-email-send
+    description: Alert when agent sends email (data exfil channel)
+    effect: alert
+    priority: 50
+    match:
+      tools: ["send_email"]
+
+  - id: alert-credential-access
+    description: Alert on credential access tactics
+    effect: alert
+    priority: 50
+    match:
+      tactics: ["credential-access"]
+
+  # --- ALLOW rules (low priority, explicit permits) ---
+
+  - id: allow-http-read
+    description: Allow HTTP requests for non-blocked targets
+    effect: allow
+    priority: 10
+    match:
+      tools: ["http_request"]
+    conditions:
+      - field: exec_type
+        operator: eq
+        value: "http"
+
+  - id: allow-kb-search
+    description: Allow knowledge base searches (read-only)
+    effect: allow
+    priority: 10
+    match:
+      tools: ["search_knowledge_base"]

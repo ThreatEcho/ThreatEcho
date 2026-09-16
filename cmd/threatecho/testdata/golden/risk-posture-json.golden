@@ -1,0 +1,77 @@
+{
+  "overall_score": 0.5,
+  "grade": "C",
+  "verdict": "at_risk",
+  "dimensions": [
+    {
+      "name": "policy_lint",
+      "score": 0.005555555555555536,
+      "weight": 0.15,
+      "findings": 1,
+      "critical_findings": 0,
+      "details": "lint score A (1 findings)",
+      "available": true
+    },
+    {
+      "name": "coverage_gaps",
+      "score": 0.453781512605042,
+      "weight": 0.25,
+      "findings": 8,
+      "critical_findings": 6,
+      "details": "53% coverage (8 gaps)",
+      "available": true
+    },
+    {
+      "name": "threat_model",
+      "score": 0.43,
+      "weight": 0.25,
+      "findings": 49,
+      "critical_findings": 9,
+      "details": "49 threats (overall risk 4.3/10)",
+      "available": true
+    },
+    {
+      "name": "agent_chains",
+      "score": 1,
+      "weight": 0.2,
+      "findings": 25,
+      "critical_findings": 0,
+      "details": "25 violations across 41 chains",
+      "available": true
+    },
+    {
+      "name": "policy_drift",
+      "score": 0,
+      "weight": 0.1,
+      "findings": 0,
+      "critical_findings": 0,
+      "details": "not computed",
+      "available": false
+    },
+    {
+      "name": "behavior_profile",
+      "score": 0,
+      "weight": 0.05,
+      "findings": 0,
+      "critical_findings": 0,
+      "details": "not computed",
+      "available": false
+    }
+  ],
+  "top_risks": [
+    "[agent_chains] 25 violations across 41 chains (score 1.00)",
+    "[coverage_gaps] 53% coverage (8 gaps) (score 0.45)",
+    "[threat_model] 49 threats (overall risk 4.3/10) (score 0.43)",
+    "[policy_lint] lint score A (1 findings) (score 0.01)"
+  ],
+  "recommendations": [
+    "Review coverage_gaps findings (8 issues)",
+    "Review threat_model findings (49 issues)",
+    "CRITICAL: address agent_chains issues immediately (25 findings)",
+    "Run policy_drift analysis to improve visibility",
+    "Run behavior_profile analysis to improve visibility",
+    "Resolve 15 critical findings before deployment"
+  ],
+  "total_findings": 83,
+  "critical_findings": 15
+}

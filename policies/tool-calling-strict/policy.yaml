@@ -1,0 +1,111 @@
+api_version: v1
+kind: Policy
+
+meta:
+  name: tool-calling-strict
+  description: >
+    Strict tool-call enforcement policy. Blocks shell execution,
+    restricts network access to an explicit allowlist, and requires
+    authentication tokens for all write operations. Designed for
+    environments where tool misuse is the primary attack surface.
+  authors:
+    - ThreatEcho
+  created: "2025-02-18"
+  modified: "2025-10-05"
+
+agent:
+  name: "*"
+  type: llm
+  tools:
+    - shell_exec
+    - http_request
+    - file_write
+    - file_read
+    - code_execute
+    - database_query
+    - send_email
+    - api_call
+
+rules:
+  - id: deny-shell-all
+    description: Block all shell command execution without exception
+    effect: deny
+    priority: 100
+    match:
+      tools: ["shell_exec"]
+
+  - id: deny-code-execute
+    description: Block arbitrary code execution
+    effect: deny
+    priority: 100
+    match:
+      tools: ["code_execute"]
+
+  - id: deny-unauthenticated-write
+    description: Block write operations without authentication context
+    effect: deny
+    priority: 95
+    match:
+      tools: ["file_write", "database_query"]
+      actions: ["write", "create", "update", "delete"]
+
+  - id: deny-external-network
+    description: Block network requests to non-allowlisted domains
+    effect: deny
+    priority: 90
+    match:
+      tools: ["http_request", "api_call"]
+      targets: ["http://*", "https://*.onion/*"]
+
+  - id: deny-email-attachments
+    description: Block email with attachments (data exfiltration vector)
+    effect: deny
+    priority: 90
+    match:
+      tools: ["send_email"]
+      actions: ["send"]
+    conditions:
+      - field: technique
+        operator: eq
+        value: "T1567"
+
+  - id: deny-lateral-movement
+    description: Block tool calls associated with lateral movement
+    effect: deny
+    priority: 85
+    match:
+      tactics: ["lateral-movement"]
+
+  # --- ALERT rules ---
+
+  - id: alert-file-write
+    description: Alert on all file write operations
+    effect: alert
+    priority: 60
+    match:
+      tools: ["file_write"]
+
+  - id: alert-api-mutation
+    description: Alert on API calls that modify state
+    effect: alert
+    priority: 55
+    match:
+      tools: ["api_call"]
+      actions: ["post", "put", "patch", "delete"]
+
+  # --- ALLOW rules ---
+
+  - id: allow-internal-api
+    description: Allow API calls to internal services
+    effect: allow
+    priority: 10
+    match:
+      tools: ["api_call", "http_request"]
+      targets: ["https://*.internal/*", "https://*.corp.example.com/*"]
+
+  - id: allow-file-read
+    description: Allow file read operations
+    effect: allow
+    priority: 10
+    match:
+      tools: ["file_read"]

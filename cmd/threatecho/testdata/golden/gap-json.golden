@@ -1,0 +1,5044 @@
+{
+  "version": "1.0",
+  "generated_at": "<TIMESTAMP>",
+  "campaigns": [
+    {
+      "name": "agent-api-abuse",
+      "adversary": "ai-red-team",
+      "stages": 3,
+      "completed": 3,
+      "skipped": 0,
+      "techniques": 1,
+      "attack_tactics": {
+        "total": 14,
+        "covered": 1,
+        "percent": 7,
+        "details": [
+          {
+            "short": "impact",
+            "name": "Impact",
+            "stages": 3
+          }
+        ],
+        "missing": [
+          "reconnaissance",
+          "resource-development",
+          "initial-access",
+          "execution",
+          "persistence",
+          "privilege-escalation",
+          "defense-evasion",
+          "credential-access",
+          "discovery",
+          "lateral-movement",
+          "collection",
+          "command-and-control",
+          "exfiltration"
+        ]
+      },
+      "atlas_tactics": {
+        "total": 7,
+        "covered": 0,
+        "percent": 0,
+        "details": null,
+        "missing": [
+          "reconnaissance",
+          "resource-development",
+          "initial-access",
+          "ml-attack-staging",
+          "ml-model-access",
+          "exfiltration",
+          "impact"
+        ]
+      },
+      "framework": {
+        "attack_stages": 3,
+        "atlas_stages": 0,
+        "owasp_stages": 0
+      }
+    },
+    {
+      "name": "agent-capability-probing",
+      "adversary": "ai-red-team",
+      "stages": 4,
+      "completed": 4,
+      "skipped": 0,
+      "techniques": 2,
+      "attack_tactics": {
+        "total": 14,
+        "covered": 0,
+        "percent": 0,
+        "details": null,
+        "missing": [
+          "reconnaissance",
+          "resource-development",
+          "initial-access",
+          "execution",
+          "persistence",
+          "privilege-escalation",
+          "defense-evasion",
+          "credential-access",
+          "discovery",
+          "lateral-movement",
+          "collection",
+          "command-and-control",
+          "exfiltration",
+          "impact"
+        ]
+      },
+      "atlas_tactics": {
+        "total": 7,
+        "covered": 1,
+        "percent": 14,
+        "details": [
+          {
+            "short": "reconnaissance",
+            "name": "Reconnaissance",
+            "stages": 1
+          }
+        ],
+        "missing": [
+          "resource-development",
+          "initial-access",
+          "ml-attack-staging",
+          "ml-model-access",
+          "exfiltration",
+          "impact"
+        ]
+      },
+      "framework": {
+        "attack_stages": 0,
+        "atlas_stages": 4,
+        "owasp_stages": 0
+      }
+    },
+    {
+      "name": "agent-context-manipulation",
+      "adversary": "ai-red-team",
+      "stages": 3,
+      "completed": 3,
+      "skipped": 0,
+      "techniques": 3,
+      "attack_tactics": {
+        "total": 14,
+        "covered": 0,
+        "percent": 0,
+        "details": null,
+        "missing": [
+          "reconnaissance",
+          "resource-development",
+          "initial-access",
+          "execution",
+          "persistence",
+          "privilege-escalation",
+          "defense-evasion",
+          "credential-access",
+          "discovery",
+          "lateral-movement",
+          "collection",
+          "command-and-control",
+          "exfiltration",
+          "impact"
+        ]
+      },
+      "atlas_tactics": {
+        "total": 7,
+        "covered": 2,
+        "percent": 28,
+        "details": [
+          {
+            "short": "initial-access",
+            "name": "Initial Access",
+            "stages": 2
+          },
+          {
+            "short": "ml-attack-staging",
+            "name": "ML Attack Staging",
+            "stages": 1
+          }
+        ],
+        "missing": [
+          "reconnaissance",
+          "resource-development",
+          "ml-model-access",
+          "exfiltration",
+          "impact"
+        ]
+      },
+      "framework": {
+        "attack_stages": 0,
+        "atlas_stages": 3,
+        "owasp_stages": 0
+      }
+    },
+    {
+      "name": "agent-credential-harvest",
+      "adversary": "ai-red-team",
+      "stages": 5,
+      "completed": 5,
+      "skipped": 0,
+      "techniques": 2,
+      "attack_tactics": {
+        "total": 14,
+        "covered": 2,
+        "percent": 14,
+        "details": [
+          {
+            "short": "credential-access",
+            "name": "Credential Access",
+            "stages": 2
+          },
+          {
+            "short": "lateral-movement",
+            "name": "Lateral Movement",
+            "stages": 1
+          }
+        ],
+        "missing": [
+          "reconnaissance",
+          "resource-development",
+          "initial-access",
+          "execution",
+          "persistence",
+          "privilege-escalation",
+          "defense-evasion",
+          "discovery",
+          "collection",
+          "command-and-control",
+          "exfiltration",
+          "impact"
+        ]
+      },
+      "atlas_tactics": {
+        "total": 7,
+        "covered": 0,
+        "percent": 0,
+        "details": null,
+        "missing": [
+          "reconnaissance",
+          "resource-development",
+          "initial-access",
+          "ml-attack-staging",
+          "ml-model-access",
+          "exfiltration",
+          "impact"
+        ]
+      },
+      "framework": {
+        "attack_stages": 3,
+        "atlas_stages": 2,
+        "owasp_stages": 0
+      }
+    },
+    {
+      "name": "agent-credential-theft",
+      "adversary": "ai-red-team",
+      "stages": 4,
+      "completed": 4,
+      "skipped": 0,
+      "techniques": 4,
+      "attack_tactics": {
+        "total": 14,
+        "covered": 0,
+        "percent": 0,
+        "details": null,
+        "missing": [
+          "reconnaissance",
+          "resource-development",
+          "initial-access",
+          "execution",
+          "persistence",
+          "privilege-escalation",
+          "defense-evasion",
+          "credential-access",
+          "discovery",
+          "lateral-movement",
+          "collection",
+          "command-and-control",
+          "exfiltration",
+          "impact"
+        ]
+      },
+      "atlas_tactics": {
+        "total": 7,
+        "covered": 1,
+        "percent": 14,
+        "details": [
+          {
+            "short": "exfiltration",
+            "name": "Exfiltration",
+            "stages": 1
+          }
+        ],
+        "missing": [
+          "reconnaissance",
+          "resource-development",
+          "initial-access",
+          "ml-attack-staging",
+          "ml-model-access",
+          "impact"
+        ]
+      },
+      "framework": {
+        "attack_stages": 0,
+        "atlas_stages": 2,
+        "owasp_stages": 2
+      }
+    },
+    {
+      "name": "agent-data-exfiltration",
+      "adversary": "ai-red-team",
+      "stages": 4,
+      "completed": 4,
+      "skipped": 0,
+      "techniques": 4,
+      "attack_tactics": {
+        "total": 14,
+        "covered": 1,
+        "percent": 7,
+        "details": [
+          {
+            "short": "exfiltration",
+            "name": "Exfiltration",
+            "stages": 2
+          }
+        ],
+        "missing": [
+          "reconnaissance",
+          "resource-development",
+          "initial-access",
+          "execution",
+          "persistence",
+          "privilege-escalation",
+          "defense-evasion",
+          "credential-access",
+          "discovery",
+          "lateral-movement",
+          "collection",
+          "command-and-control",
+          "impact"
+        ]
+      },
+      "atlas_tactics": {
+        "total": 7,
+        "covered": 0,
+        "percent": 0,
+        "details": null,
+        "missing": [
+          "reconnaissance",
+          "resource-development",
+          "initial-access",
+          "ml-attack-staging",
+          "ml-model-access",
+          "exfiltration",
+          "impact"
+        ]
+      },
+      "framework": {
+        "attack_stages": 2,
+        "atlas_stages": 1,
+        "owasp_stages": 1
+      }
+    },
+    {
+      "name": "agent-delegation-abuse",
+      "adversary": "ai-red-team",
+      "stages": 3,
+      "completed": 3,
+      "skipped": 0,
+      "techniques": 2,
+      "attack_tactics": {
+        "total": 14,
+        "covered": 0,
+        "percent": 0,
+        "details": null,
+        "missing": [
+          "reconnaissance",
+          "resource-development",
+          "initial-access",
+          "execution",
+          "persistence",
+          "privilege-escalation",
+          "defense-evasion",
+          "credential-access",
+          "discovery",
+          "lateral-movement",
+          "collection",
+          "command-and-control",
+          "exfiltration",
+          "impact"
+        ]
+      },
+      "atlas_tactics": {
+        "total": 7,
+        "covered": 2,
+        "percent": 28,
+        "details": [
+          {
+            "short": "reconnaissance",
+            "name": "Reconnaissance",
+            "stages": 1
+          },
+          {
+            "short": "impact",
+            "name": "Impact",
+            "stages": 1
+          }
+        ],
+        "missing": [
+          "resource-development",
+          "initial-access",
+          "ml-attack-staging",
+          "ml-model-access",
+          "exfiltration"
+        ]
+      },
+      "framework": {
+        "attack_stages": 0,
+        "atlas_stages": 3,
+        "owasp_stages": 0
+      }
+    },
+    {
+      "name": "agent-feedback-loop-attack",
+      "adversary": "ai-red-team",
+      "stages": 4,
+      "completed": 4,
+      "skipped": 0,
+      "techniques": 1,
+      "attack_tactics": {
+        "total": 14,
+        "covered": 0,
+        "percent": 0,
+        "details": null,
+        "missing": [
+          "reconnaissance",
+          "resource-development",
+          "initial-access",
+          "execution",
+          "persistence",
+          "privilege-escalation",
+          "defense-evasion",
+          "credential-access",
+          "discovery",
+          "lateral-movement",
+          "collection",
+          "command-and-control",
+          "exfiltration",
+          "impact"
+        ]
+      },
+      "atlas_tactics": {
+        "total": 7,
+        "covered": 2,
+        "percent": 28,
+        "details": [
+          {
+            "short": "initial-access",
+            "name": "Initial Access",
+            "stages": 1
+          },
+          {
+            "short": "impact",
+            "name": "Impact",
+            "stages": 2
+          }
+        ],
+        "missing": [
+          "reconnaissance",
+          "resource-development",
+          "ml-attack-staging",
+          "ml-model-access",
+          "exfiltration"
+        ]
+      },
+      "framework": {
+        "attack_stages": 0,
+        "atlas_stages": 4,
+        "owasp_stages": 0
+      }
+    },
+    {
+      "name": "agent-function-squatting",
+      "adversary": "ai-red-team",
+      "stages": 3,
+      "completed": 3,
+      "skipped": 0,
+      "techniques": 3,
+      "attack_tactics": {
+        "total": 14,
+        "covered": 0,
+        "percent": 0,
+        "details": null,
+        "missing": [
+          "reconnaissance",
+          "resource-development",
+          "initial-access",
+          "execution",
+          "persistence",
+          "privilege-escalation",
+          "defense-evasion",
+          "credential-access",
+          "discovery",
+          "lateral-movement",
+          "collection",
+          "command-and-control",
+          "exfiltration",
+          "impact"
+        ]
+      },
+      "atlas_tactics": {
+        "total": 7,
+        "covered": 2,
+        "percent": 28,
+        "details": [
+          {
+            "short": "reconnaissance",
+            "name": "Reconnaissance",
+            "stages": 1
+          },
+          {
+            "short": "resource-development",
+            "name": "Resource Development",
+            "stages": 1
+          }
+        ],
+        "missing": [
+          "initial-access",
+          "ml-attack-staging",
+          "ml-model-access",
+          "exfiltration",
+          "impact"
+        ]
+      },
+      "framework": {
+        "attack_stages": 0,
+        "atlas_stages": 3,
+        "owasp_stages": 0
+      }
+    },
+    {
+      "name": "agent-guardrail-bypass",
+      "adversary": "ai-red-team",
+      "stages": 5,
+      "completed": 5,
+      "skipped": 0,
+      "techniques": 3,
+      "attack_tactics": {
+        "total": 14,
+        "covered": 0,
+        "percent": 0,
+        "details": null,
+        "missing": [
+          "reconnaissance",
+          "resource-development",
+          "initial-access",
+          "execution",
+          "persistence",
+          "privilege-escalation",
+          "defense-evasion",
+          "credential-access",
+          "discovery",
+          "lateral-movement",
+          "collection",
+          "command-and-control",
+          "exfiltration",
+          "impact"
+        ]
+      },
+      "atlas_tactics": {
+        "total": 7,
+        "covered": 1,
+        "percent": 14,
+        "details": [
+          {
+            "short": "initial-access",
+            "name": "Initial Access",
+            "stages": 1
+          }
+        ],
+        "missing": [
+          "reconnaissance",
+          "resource-development",
+          "ml-attack-staging",
+          "ml-model-access",
+          "exfiltration",
+          "impact"
+        ]
+      },
+      "framework": {
+        "attack_stages": 0,
+        "atlas_stages": 5,
+        "owasp_stages": 0
+      }
+    },
+    {
+      "name": "agent-identity-spoofing",
+      "adversary": "ai-red-team",
+      "stages": 8,
+      "completed": 8,
+      "skipped": 0,
+      "techniques": 1,
+      "attack_tactics": {
+        "total": 14,
+        "covered": 0,
+        "percent": 0,
+        "details": null,
+        "missing": [
+          "reconnaissance",
+          "resource-development",
+          "initial-access",
+          "execution",
+          "persistence",
+          "privilege-escalation",
+          "defense-evasion",
+          "credential-access",
+          "discovery",
+          "lateral-movement",
+          "collection",
+          "command-and-control",
+          "exfiltration",
+          "impact"
+        ]
+      },
+      "atlas_tactics": {
+        "total": 7,
+        "covered": 2,
+        "percent": 28,
+        "details": [
+          {
+            "short": "initial-access",
+            "name": "Initial Access",
+            "stages": 1
+          },
+          {
+            "short": "exfiltration",
+            "name": "Exfiltration",
+            "stages": 1
+          }
+        ],
+        "missing": [
+          "reconnaissance",
+          "resource-development",
+          "ml-attack-staging",
+          "ml-model-access",
+          "impact"
+        ]
+      },
+      "framework": {
+        "attack_stages": 0,
+        "atlas_stages": 8,
+        "owasp_stages": 0
+      }
+    },
+    {
+      "name": "agent-jailbreak",
+      "adversary": "Prompt-Adversary",
+      "stages": 10,
+      "completed": 10,
+      "skipped": 0,
+      "techniques": 6,
+      "attack_tactics": {
+        "total": 14,
+        "covered": 0,
+        "percent": 0,
+        "details": null,
+        "missing": [
+          "reconnaissance",
+          "resource-development",
+          "initial-access",
+          "execution",
+          "persistence",
+          "privilege-escalation",
+          "defense-evasion",
+          "credential-access",
+          "discovery",
+          "lateral-movement",
+          "collection",
+          "command-and-control",
+          "exfiltration",
+          "impact"
+        ]
+      },
+      "atlas_tactics": {
+        "total": 7,
+        "covered": 3,
+        "percent": 42,
+        "details": [
+          {
+            "short": "reconnaissance",
+            "name": "Reconnaissance",
+            "stages": 1
+          },
+          {
+            "short": "initial-access",
+            "name": "Initial Access",
+            "stages": 5
+          },
+          {
+            "short": "impact",
+            "name": "Impact",
+            "stages": 1
+          }
+        ],
+        "missing": [
+          "resource-development",
+          "ml-attack-staging",
+          "ml-model-access",
+          "exfiltration"
+        ]
+      },
+      "framework": {
+        "attack_stages": 0,
+        "atlas_stages": 9,
+        "owasp_stages": 1
+      }
+    },
+    {
+      "name": "agent-memory-attack",
+      "adversary": "Memory-Corruption-Actor",
+      "stages": 8,
+      "completed": 8,
+      "skipped": 0,
+      "techniques": 7,
+      "attack_tactics": {
+        "total": 14,
+        "covered": 1,
+        "percent": 7,
+        "details": [
+          {
+            "short": "collection",
+            "name": "Collection",
+            "stages": 1
+          }
+        ],
+        "missing": [
+          "reconnaissance",
+          "resource-development",
+          "initial-access",
+          "execution",
+          "persistence",
+          "privilege-escalation",
+          "defense-evasion",
+          "credential-access",
+          "discovery",
+          "lateral-movement",
+          "command-and-control",
+          "exfiltration",
+          "impact"
+        ]
+      },
+      "atlas_tactics": {
+        "total": 7,
+        "covered": 4,
+        "percent": 57,
+        "details": [
+          {
+            "short": "reconnaissance",
+            "name": "Reconnaissance",
+            "stages": 1
+          },
+          {
+            "short": "initial-access",
+            "name": "Initial Access",
+            "stages": 1
+          },
+          {
+            "short": "ml-attack-staging",
+            "name": "ML Attack Staging",
+            "stages": 1
+          },
+          {
+            "short": "impact",
+            "name": "Impact",
+            "stages": 1
+          }
+        ],
+        "missing": [
+          "resource-development",
+          "ml-model-access",
+          "exfiltration"
+        ]
+      },
+      "framework": {
+        "attack_stages": 1,
+        "atlas_stages": 5,
+        "owasp_stages": 2
+      }
+    },
+    {
+      "name": "agent-memory-manipulation",
+      "adversary": "ai-red-team",
+      "stages": 5,
+      "completed": 5,
+      "skipped": 0,
+      "techniques": 2,
+      "attack_tactics": {
+        "total": 14,
+        "covered": 0,
+        "percent": 0,
+        "details": null,
+        "missing": [
+          "reconnaissance",
+          "resource-development",
+          "initial-access",
+          "execution",
+          "persistence",
+          "privilege-escalation",
+          "defense-evasion",
+          "credential-access",
+          "discovery",
+          "lateral-movement",
+          "collection",
+          "command-and-control",
+          "exfiltration",
+          "impact"
+        ]
+      },
+      "atlas_tactics": {
+        "total": 7,
+        "covered": 0,
+        "percent": 0,
+        "details": null,
+        "missing": [
+          "reconnaissance",
+          "resource-development",
+          "initial-access",
+          "ml-attack-staging",
+          "ml-model-access",
+          "exfiltration",
+          "impact"
+        ]
+      },
+      "framework": {
+        "attack_stages": 0,
+        "atlas_stages": 5,
+        "owasp_stages": 0
+      }
+    },
+    {
+      "name": "agent-model-fingerprint",
+      "adversary": "ai-red-team",
+      "stages": 3,
+      "completed": 3,
+      "skipped": 0,
+      "techniques": 1,
+      "attack_tactics": {
+        "total": 14,
+        "covered": 0,
+        "percent": 0,
+        "details": null,
+        "missing": [
+          "reconnaissance",
+          "resource-development",
+          "initial-access",
+          "execution",
+          "persistence",
+          "privilege-escalation",
+          "defense-evasion",
+          "credential-access",
+          "discovery",
+          "lateral-movement",
+          "collection",
+          "command-and-control",
+          "exfiltration",
+          "impact"
+        ]
+      },
+      "atlas_tactics": {
+        "total": 7,
+        "covered": 1,
+        "percent": 14,
+        "details": [
+          {
+            "short": "reconnaissance",
+            "name": "Reconnaissance",
+            "stages": 3
+          }
+        ],
+        "missing": [
+          "resource-development",
+          "initial-access",
+          "ml-attack-staging",
+          "ml-model-access",
+          "exfiltration",
+          "impact"
+        ]
+      },
+      "framework": {
+        "attack_stages": 0,
+        "atlas_stages": 3,
+        "owasp_stages": 0
+      }
+    },
+    {
+      "name": "agent-multi-tenant-escape",
+      "adversary": "ai-red-team",
+      "stages": 4,
+      "completed": 4,
+      "skipped": 0,
+      "techniques": 4,
+      "attack_tactics": {
+        "total": 14,
+        "covered": 1,
+        "percent": 7,
+        "details": [
+          {
+            "short": "privilege-escalation",
+            "name": "Privilege Escalation",
+            "stages": 1
+          }
+        ],
+        "missing": [
+          "reconnaissance",
+          "resource-development",
+          "initial-access",
+          "execution",
+          "persistence",
+          "defense-evasion",
+          "credential-access",
+          "discovery",
+          "lateral-movement",
+          "collection",
+          "command-and-control",
+          "exfiltration",
+          "impact"
+        ]
+      },
+      "atlas_tactics": {
+        "total": 7,
+        "covered": 2,
+        "percent": 28,
+        "details": [
+          {
+            "short": "reconnaissance",
+            "name": "Reconnaissance",
+            "stages": 1
+          },
+          {
+            "short": "initial-access",
+            "name": "Initial Access",
+            "stages": 1
+          }
+        ],
+        "missing": [
+          "resource-development",
+          "ml-attack-staging",
+          "ml-model-access",
+          "exfiltration",
+          "impact"
+        ]
+      },
+      "framework": {
+        "attack_stages": 1,
+        "atlas_stages": 3,
+        "owasp_stages": 0
+      }
+    },
+    {
+      "name": "agent-orchestrator-takeover",
+      "adversary": "ai-red-team",
+      "stages": 5,
+      "completed": 5,
+      "skipped": 0,
+      "techniques": 3,
+      "attack_tactics": {
+        "total": 14,
+        "covered": 0,
+        "percent": 0,
+        "details": null,
+        "missing": [
+          "reconnaissance",
+          "resource-development",
+          "initial-access",
+          "execution",
+          "persistence",
+          "privilege-escalation",
+          "defense-evasion",
+          "credential-access",
+          "discovery",
+          "lateral-movement",
+          "collection",
+          "command-and-control",
+          "exfiltration",
+          "impact"
+        ]
+      },
+      "atlas_tactics": {
+        "total": 7,
+        "covered": 1,
+        "percent": 14,
+        "details": [
+          {
+            "short": "reconnaissance",
+            "name": "Reconnaissance",
+            "stages": 1
+          }
+        ],
+        "missing": [
+          "resource-development",
+          "initial-access",
+          "ml-attack-staging",
+          "ml-model-access",
+          "exfiltration",
+          "impact"
+        ]
+      },
+      "framework": {
+        "attack_stages": 0,
+        "atlas_stages": 5,
+        "owasp_stages": 0
+      }
+    },
+    {
+      "name": "agent-output-poisoning",
+      "adversary": "ai-red-team",
+      "stages": 4,
+      "completed": 4,
+      "skipped": 0,
+      "techniques": 2,
+      "attack_tactics": {
+        "total": 14,
+        "covered": 0,
+        "percent": 0,
+        "details": null,
+        "missing": [
+          "reconnaissance",
+          "resource-development",
+          "initial-access",
+          "execution",
+          "persistence",
+          "privilege-escalation",
+          "defense-evasion",
+          "credential-access",
+          "discovery",
+          "lateral-movement",
+          "collection",
+          "command-and-control",
+          "exfiltration",
+          "impact"
+        ]
+      },
+      "atlas_tactics": {
+        "total": 7,
+        "covered": 1,
+        "percent": 14,
+        "details": [
+          {
+            "short": "impact",
+            "name": "Impact",
+            "stages": 4
+          }
+        ],
+        "missing": [
+          "reconnaissance",
+          "resource-development",
+          "initial-access",
+          "ml-attack-staging",
+          "ml-model-access",
+          "exfiltration"
+        ]
+      },
+      "framework": {
+        "attack_stages": 0,
+        "atlas_stages": 1,
+        "owasp_stages": 3
+      }
+    },
+    {
+      "name": "agent-plugin-backdoor",
+      "adversary": "ai-red-team",
+      "stages": 4,
+      "completed": 4,
+      "skipped": 0,
+      "techniques": 3,
+      "attack_tactics": {
+        "total": 14,
+        "covered": 2,
+        "percent": 14,
+        "details": [
+          {
+            "short": "persistence",
+            "name": "Persistence",
+            "stages": 2
+          },
+          {
+            "short": "exfiltration",
+            "name": "Exfiltration",
+            "stages": 1
+          }
+        ],
+        "missing": [
+          "reconnaissance",
+          "resource-development",
+          "initial-access",
+          "execution",
+          "privilege-escalation",
+          "defense-evasion",
+          "credential-access",
+          "discovery",
+          "lateral-movement",
+          "collection",
+          "command-and-control",
+          "impact"
+        ]
+      },
+      "atlas_tactics": {
+        "total": 7,
+        "covered": 1,
+        "percent": 14,
+        "details": [
+          {
+            "short": "reconnaissance",
+            "name": "Reconnaissance",
+            "stages": 1
+          }
+        ],
+        "missing": [
+          "resource-development",
+          "initial-access",
+          "ml-attack-staging",
+          "ml-model-access",
+          "exfiltration",
+          "impact"
+        ]
+      },
+      "framework": {
+        "attack_stages": 3,
+        "atlas_stages": 1,
+        "owasp_stages": 0
+      }
+    },
+    {
+      "name": "agent-privilege-escalation",
+      "adversary": "ai-red-team",
+      "stages": 4,
+      "completed": 4,
+      "skipped": 0,
+      "techniques": 4,
+      "attack_tactics": {
+        "total": 14,
+        "covered": 0,
+        "percent": 0,
+        "details": null,
+        "missing": [
+          "reconnaissance",
+          "resource-development",
+          "initial-access",
+          "execution",
+          "persistence",
+          "privilege-escalation",
+          "defense-evasion",
+          "credential-access",
+          "discovery",
+          "lateral-movement",
+          "collection",
+          "command-and-control",
+          "exfiltration",
+          "impact"
+        ]
+      },
+      "atlas_tactics": {
+        "total": 7,
+        "covered": 1,
+        "percent": 14,
+        "details": [
+          {
+            "short": "impact",
+            "name": "Impact",
+            "stages": 1
+          }
+        ],
+        "missing": [
+          "reconnaissance",
+          "resource-development",
+          "initial-access",
+          "ml-attack-staging",
+          "ml-model-access",
+          "exfiltration"
+        ]
+      },
+      "framework": {
+        "attack_stages": 0,
+        "atlas_stages": 3,
+        "owasp_stages": 1
+      }
+    },
+    {
+      "name": "agent-prompt-injection-indirect",
+      "adversary": "ai-red-team",
+      "stages": 4,
+      "completed": 4,
+      "skipped": 0,
+      "techniques": 2,
+      "attack_tactics": {
+        "total": 14,
+        "covered": 0,
+        "percent": 0,
+        "details": null,
+        "missing": [
+          "reconnaissance",
+          "resource-development",
+          "initial-access",
+          "execution",
+          "persistence",
+          "privilege-escalation",
+          "defense-evasion",
+          "credential-access",
+          "discovery",
+          "lateral-movement",
+          "collection",
+          "command-and-control",
+          "exfiltration",
+          "impact"
+        ]
+      },
+      "atlas_tactics": {
+        "total": 7,
+        "covered": 2,
+        "percent": 28,
+        "details": [
+          {
+            "short": "initial-access",
+            "name": "Initial Access",
+            "stages": 3
+          },
+          {
+            "short": "ml-attack-staging",
+            "name": "ML Attack Staging",
+            "stages": 1
+          }
+        ],
+        "missing": [
+          "reconnaissance",
+          "resource-development",
+          "ml-model-access",
+          "exfiltration",
+          "impact"
+        ]
+      },
+      "framework": {
+        "attack_stages": 0,
+        "atlas_stages": 4,
+        "owasp_stages": 0
+      }
+    },
+    {
+      "name": "agent-session-hijack",
+      "adversary": "ai-red-team",
+      "stages": 3,
+      "completed": 3,
+      "skipped": 0,
+      "techniques": 3,
+      "attack_tactics": {
+        "total": 14,
+        "covered": 2,
+        "percent": 14,
+        "details": [
+          {
+            "short": "credential-access",
+            "name": "Credential Access",
+            "stages": 1
+          },
+          {
+            "short": "lateral-movement",
+            "name": "Lateral Movement",
+            "stages": 1
+          }
+        ],
+        "missing": [
+          "reconnaissance",
+          "resource-development",
+          "initial-access",
+          "execution",
+          "persistence",
+          "privilege-escalation",
+          "defense-evasion",
+          "discovery",
+          "collection",
+          "command-and-control",
+          "exfiltration",
+          "impact"
+        ]
+      },
+      "atlas_tactics": {
+        "total": 7,
+        "covered": 0,
+        "percent": 0,
+        "details": null,
+        "missing": [
+          "reconnaissance",
+          "resource-development",
+          "initial-access",
+          "ml-attack-staging",
+          "ml-model-access",
+          "exfiltration",
+          "impact"
+        ]
+      },
+      "framework": {
+        "attack_stages": 2,
+        "atlas_stages": 1,
+        "owasp_stages": 0
+      }
+    },
+    {
+      "name": "agent-state-desync",
+      "adversary": "ai-red-team",
+      "stages": 5,
+      "completed": 5,
+      "skipped": 0,
+      "techniques": 4,
+      "attack_tactics": {
+        "total": 14,
+        "covered": 1,
+        "percent": 7,
+        "details": [
+          {
+            "short": "impact",
+            "name": "Impact",
+            "stages": 1
+          }
+        ],
+        "missing": [
+          "reconnaissance",
+          "resource-development",
+          "initial-access",
+          "execution",
+          "persistence",
+          "privilege-escalation",
+          "defense-evasion",
+          "credential-access",
+          "discovery",
+          "lateral-movement",
+          "collection",
+          "command-and-control",
+          "exfiltration"
+        ]
+      },
+      "atlas_tactics": {
+        "total": 7,
+        "covered": 1,
+        "percent": 14,
+        "details": [
+          {
+            "short": "reconnaissance",
+            "name": "Reconnaissance",
+            "stages": 1
+          }
+        ],
+        "missing": [
+          "resource-development",
+          "initial-access",
+          "ml-attack-staging",
+          "ml-model-access",
+          "exfiltration",
+          "impact"
+        ]
+      },
+      "framework": {
+        "attack_stages": 1,
+        "atlas_stages": 4,
+        "owasp_stages": 0
+      }
+    },
+    {
+      "name": "agent-supply-chain",
+      "adversary": "Supply-Chain-Threat-Actor",
+      "stages": 9,
+      "completed": 9,
+      "skipped": 0,
+      "techniques": 8,
+      "attack_tactics": {
+        "total": 14,
+        "covered": 3,
+        "percent": 21,
+        "details": [
+          {
+            "short": "initial-access",
+            "name": "Initial Access",
+            "stages": 2
+          },
+          {
+            "short": "persistence",
+            "name": "Persistence",
+            "stages": 1
+          },
+          {
+            "short": "credential-access",
+            "name": "Credential Access",
+            "stages": 1
+          }
+        ],
+        "missing": [
+          "reconnaissance",
+          "resource-development",
+          "execution",
+          "privilege-escalation",
+          "defense-evasion",
+          "discovery",
+          "lateral-movement",
+          "collection",
+          "command-and-control",
+          "exfiltration",
+          "impact"
+        ]
+      },
+      "atlas_tactics": {
+        "total": 7,
+        "covered": 4,
+        "percent": 57,
+        "details": [
+          {
+            "short": "reconnaissance",
+            "name": "Reconnaissance",
+            "stages": 1
+          },
+          {
+            "short": "initial-access",
+            "name": "Initial Access",
+            "stages": 1
+          },
+          {
+            "short": "ml-attack-staging",
+            "name": "ML Attack Staging",
+            "stages": 2
+          },
+          {
+            "short": "impact",
+            "name": "Impact",
+            "stages": 1
+          }
+        ],
+        "missing": [
+          "resource-development",
+          "ml-model-access",
+          "exfiltration"
+        ]
+      },
+      "framework": {
+        "attack_stages": 4,
+        "atlas_stages": 5,
+        "owasp_stages": 0
+      }
+    },
+    {
+      "name": "agent-tool-abuse",
+      "adversary": "ai-red-team",
+      "stages": 3,
+      "completed": 3,
+      "skipped": 0,
+      "techniques": 3,
+      "attack_tactics": {
+        "total": 14,
+        "covered": 1,
+        "percent": 7,
+        "details": [
+          {
+            "short": "impact",
+            "name": "Impact",
+            "stages": 1
+          }
+        ],
+        "missing": [
+          "reconnaissance",
+          "resource-development",
+          "initial-access",
+          "execution",
+          "persistence",
+          "privilege-escalation",
+          "defense-evasion",
+          "credential-access",
+          "discovery",
+          "lateral-movement",
+          "collection",
+          "command-and-control",
+          "exfiltration"
+        ]
+      },
+      "atlas_tactics": {
+        "total": 7,
+        "covered": 2,
+        "percent": 28,
+        "details": [
+          {
+            "short": "reconnaissance",
+            "name": "Reconnaissance",
+            "stages": 1
+          },
+          {
+            "short": "impact",
+            "name": "Impact",
+            "stages": 1
+          }
+        ],
+        "missing": [
+          "resource-development",
+          "initial-access",
+          "ml-attack-staging",
+          "ml-model-access",
+          "exfiltration"
+        ]
+      },
+      "framework": {
+        "attack_stages": 1,
+        "atlas_stages": 1,
+        "owasp_stages": 1
+      }
+    },
+    {
+      "name": "agent-tool-confusion",
+      "adversary": "Tool-Confusion-Actor",
+      "stages": 7,
+      "completed": 7,
+      "skipped": 0,
+      "techniques": 5,
+      "attack_tactics": {
+        "total": 14,
+        "covered": 0,
+        "percent": 0,
+        "details": null,
+        "missing": [
+          "reconnaissance",
+          "resource-development",
+          "initial-access",
+          "execution",
+          "persistence",
+          "privilege-escalation",
+          "defense-evasion",
+          "credential-access",
+          "discovery",
+          "lateral-movement",
+          "collection",
+          "command-and-control",
+          "exfiltration",
+          "impact"
+        ]
+      },
+      "atlas_tactics": {
+        "total": 7,
+        "covered": 3,
+        "percent": 42,
+        "details": [
+          {
+            "short": "reconnaissance",
+            "name": "Reconnaissance",
+            "stages": 1
+          },
+          {
+            "short": "initial-access",
+            "name": "Initial Access",
+            "stages": 2
+          },
+          {
+            "short": "impact",
+            "name": "Impact",
+            "stages": 1
+          }
+        ],
+        "missing": [
+          "resource-development",
+          "ml-attack-staging",
+          "ml-model-access",
+          "exfiltration"
+        ]
+      },
+      "framework": {
+        "attack_stages": 0,
+        "atlas_stages": 7,
+        "owasp_stages": 0
+      }
+    },
+    {
+      "name": "agent-tool-injection",
+      "adversary": "ai-red-team",
+      "stages": 3,
+      "completed": 3,
+      "skipped": 0,
+      "techniques": 2,
+      "attack_tactics": {
+        "total": 14,
+        "covered": 0,
+        "percent": 0,
+        "details": null,
+        "missing": [
+          "reconnaissance",
+          "resource-development",
+          "initial-access",
+          "execution",
+          "persistence",
+          "privilege-escalation",
+          "defense-evasion",
+          "credential-access",
+          "discovery",
+          "lateral-movement",
+          "collection",
+          "command-and-control",
+          "exfiltration",
+          "impact"
+        ]
+      },
+      "atlas_tactics": {
+        "total": 7,
+        "covered": 0,
+        "percent": 0,
+        "details": null,
+        "missing": [
+          "reconnaissance",
+          "resource-development",
+          "initial-access",
+          "ml-attack-staging",
+          "ml-model-access",
+          "exfiltration",
+          "impact"
+        ]
+      },
+      "framework": {
+        "attack_stages": 0,
+        "atlas_stages": 3,
+        "owasp_stages": 0
+      }
+    },
+    {
+      "name": "agent-trust-exploitation",
+      "adversary": "ai-red-team",
+      "stages": 3,
+      "completed": 3,
+      "skipped": 0,
+      "techniques": 2,
+      "attack_tactics": {
+        "total": 14,
+        "covered": 0,
+        "percent": 0,
+        "details": null,
+        "missing": [
+          "reconnaissance",
+          "resource-development",
+          "initial-access",
+          "execution",
+          "persistence",
+          "privilege-escalation",
+          "defense-evasion",
+          "credential-access",
+          "discovery",
+          "lateral-movement",
+          "collection",
+          "command-and-control",
+          "exfiltration",
+          "impact"
+        ]
+      },
+      "atlas_tactics": {
+        "total": 7,
+        "covered": 1,
+        "percent": 14,
+        "details": [
+          {
+            "short": "reconnaissance",
+            "name": "Reconnaissance",
+            "stages": 1
+          }
+        ],
+        "missing": [
+          "resource-development",
+          "initial-access",
+          "ml-attack-staging",
+          "ml-model-access",
+          "exfiltration",
+          "impact"
+        ]
+      },
+      "framework": {
+        "attack_stages": 0,
+        "atlas_stages": 3,
+        "owasp_stages": 0
+      }
+    },
+    {
+      "name": "api-key-compromise",
+      "adversary": "fin7",
+      "stages": 5,
+      "completed": 5,
+      "skipped": 0,
+      "techniques": 4,
+      "attack_tactics": {
+        "total": 14,
+        "covered": 4,
+        "percent": 28,
+        "details": [
+          {
+            "short": "initial-access",
+            "name": "Initial Access",
+            "stages": 1
+          },
+          {
+            "short": "privilege-escalation",
+            "name": "Privilege Escalation",
+            "stages": 1
+          },
+          {
+            "short": "credential-access",
+            "name": "Credential Access",
+            "stages": 2
+          },
+          {
+            "short": "collection",
+            "name": "Collection",
+            "stages": 1
+          }
+        ],
+        "missing": [
+          "reconnaissance",
+          "resource-development",
+          "execution",
+          "persistence",
+          "defense-evasion",
+          "discovery",
+          "lateral-movement",
+          "command-and-control",
+          "exfiltration",
+          "impact"
+        ]
+      },
+      "atlas_tactics": {
+        "total": 7,
+        "covered": 0,
+        "percent": 0,
+        "details": null,
+        "missing": [
+          "reconnaissance",
+          "resource-development",
+          "initial-access",
+          "ml-attack-staging",
+          "ml-model-access",
+          "exfiltration",
+          "impact"
+        ]
+      },
+      "framework": {
+        "attack_stages": 5,
+        "atlas_stages": 0,
+        "owasp_stages": 0
+      }
+    },
+    {
+      "name": "apt-lateral-movement",
+      "adversary": "apt29",
+      "stages": 5,
+      "completed": 5,
+      "skipped": 0,
+      "techniques": 5,
+      "attack_tactics": {
+        "total": 14,
+        "covered": 3,
+        "percent": 21,
+        "details": [
+          {
+            "short": "execution",
+            "name": "Execution",
+            "stages": 1
+          },
+          {
+            "short": "credential-access",
+            "name": "Credential Access",
+            "stages": 2
+          },
+          {
+            "short": "lateral-movement",
+            "name": "Lateral Movement",
+            "stages": 2
+          }
+        ],
+        "missing": [
+          "reconnaissance",
+          "resource-development",
+          "initial-access",
+          "persistence",
+          "privilege-escalation",
+          "defense-evasion",
+          "discovery",
+          "collection",
+          "command-and-control",
+          "exfiltration",
+          "impact"
+        ]
+      },
+      "atlas_tactics": {
+        "total": 7,
+        "covered": 0,
+        "percent": 0,
+        "details": null,
+        "missing": [
+          "reconnaissance",
+          "resource-development",
+          "initial-access",
+          "ml-attack-staging",
+          "ml-model-access",
+          "exfiltration",
+          "impact"
+        ]
+      },
+      "framework": {
+        "attack_stages": 5,
+        "atlas_stages": 0,
+        "owasp_stages": 0
+      }
+    },
+    {
+      "name": "apt28-fancy-bear",
+      "adversary": "APT28",
+      "stages": 11,
+      "completed": 11,
+      "skipped": 0,
+      "techniques": 11,
+      "attack_tactics": {
+        "total": 14,
+        "covered": 8,
+        "percent": 57,
+        "details": [
+          {
+            "short": "initial-access",
+            "name": "Initial Access",
+            "stages": 1
+          },
+          {
+            "short": "execution",
+            "name": "Execution",
+            "stages": 1
+          },
+          {
+            "short": "credential-access",
+            "name": "Credential Access",
+            "stages": 4
+          },
+          {
+            "short": "discovery",
+            "name": "Discovery",
+            "stages": 1
+          },
+          {
+            "short": "lateral-movement",
+            "name": "Lateral Movement",
+            "stages": 1
+          },
+          {
+            "short": "collection",
+            "name": "Collection",
+            "stages": 1
+          },
+          {
+            "short": "command-and-control",
+            "name": "Command and Control",
+            "stages": 1
+          },
+          {
+            "short": "exfiltration",
+            "name": "Exfiltration",
+            "stages": 1
+          }
+        ],
+        "missing": [
+          "reconnaissance",
+          "resource-development",
+          "persistence",
+          "privilege-escalation",
+          "defense-evasion",
+          "impact"
+        ]
+      },
+      "atlas_tactics": {
+        "total": 7,
+        "covered": 0,
+        "percent": 0,
+        "details": null,
+        "missing": [
+          "reconnaissance",
+          "resource-development",
+          "initial-access",
+          "ml-attack-staging",
+          "ml-model-access",
+          "exfiltration",
+          "impact"
+        ]
+      },
+      "framework": {
+        "attack_stages": 11,
+        "atlas_stages": 0,
+        "owasp_stages": 0
+      }
+    },
+    {
+      "name": "apt29-cozy-bear",
+      "adversary": "APT29",
+      "stages": 8,
+      "completed": 8,
+      "skipped": 0,
+      "techniques": 8,
+      "attack_tactics": {
+        "total": 14,
+        "covered": 8,
+        "percent": 57,
+        "details": [
+          {
+            "short": "initial-access",
+            "name": "Initial Access",
+            "stages": 1
+          },
+          {
+            "short": "defense-evasion",
+            "name": "Defense Evasion",
+            "stages": 1
+          },
+          {
+            "short": "credential-access",
+            "name": "Credential Access",
+            "stages": 1
+          },
+          {
+            "short": "discovery",
+            "name": "Discovery",
+            "stages": 1
+          },
+          {
+            "short": "lateral-movement",
+            "name": "Lateral Movement",
+            "stages": 1
+          },
+          {
+            "short": "collection",
+            "name": "Collection",
+            "stages": 1
+          },
+          {
+            "short": "command-and-control",
+            "name": "Command and Control",
+            "stages": 1
+          },
+          {
+            "short": "exfiltration",
+            "name": "Exfiltration",
+            "stages": 1
+          }
+        ],
+        "missing": [
+          "reconnaissance",
+          "resource-development",
+          "execution",
+          "persistence",
+          "privilege-escalation",
+          "impact"
+        ]
+      },
+      "atlas_tactics": {
+        "total": 7,
+        "covered": 0,
+        "percent": 0,
+        "details": null,
+        "missing": [
+          "reconnaissance",
+          "resource-development",
+          "initial-access",
+          "ml-attack-staging",
+          "ml-model-access",
+          "exfiltration",
+          "impact"
+        ]
+      },
+      "framework": {
+        "attack_stages": 8,
+        "atlas_stages": 0,
+        "owasp_stages": 0
+      }
+    },
+    {
+      "name": "art-credential-access-linux",
+      "adversary": "Atomic Red Team",
+      "stages": 6,
+      "completed": 6,
+      "skipped": 0,
+      "techniques": 5,
+      "attack_tactics": {
+        "total": 14,
+        "covered": 1,
+        "percent": 7,
+        "details": [
+          {
+            "short": "credential-access",
+            "name": "Credential Access",
+            "stages": 6
+          }
+        ],
+        "missing": [
+          "reconnaissance",
+          "resource-development",
+          "initial-access",
+          "execution",
+          "persistence",
+          "privilege-escalation",
+          "defense-evasion",
+          "discovery",
+          "lateral-movement",
+          "collection",
+          "command-and-control",
+          "exfiltration",
+          "impact"
+        ]
+      },
+      "atlas_tactics": {
+        "total": 7,
+        "covered": 0,
+        "percent": 0,
+        "details": null,
+        "missing": [
+          "reconnaissance",
+          "resource-development",
+          "initial-access",
+          "ml-attack-staging",
+          "ml-model-access",
+          "exfiltration",
+          "impact"
+        ]
+      },
+      "framework": {
+        "attack_stages": 6,
+        "atlas_stages": 0,
+        "owasp_stages": 0
+      }
+    },
+    {
+      "name": "art-credential-access-windows",
+      "adversary": "Atomic Red Team",
+      "stages": 7,
+      "completed": 7,
+      "skipped": 0,
+      "techniques": 6,
+      "attack_tactics": {
+        "total": 14,
+        "covered": 1,
+        "percent": 7,
+        "details": [
+          {
+            "short": "credential-access",
+            "name": "Credential Access",
+            "stages": 7
+          }
+        ],
+        "missing": [
+          "reconnaissance",
+          "resource-development",
+          "initial-access",
+          "execution",
+          "persistence",
+          "privilege-escalation",
+          "defense-evasion",
+          "discovery",
+          "lateral-movement",
+          "collection",
+          "command-and-control",
+          "exfiltration",
+          "impact"
+        ]
+      },
+      "atlas_tactics": {
+        "total": 7,
+        "covered": 0,
+        "percent": 0,
+        "details": null,
+        "missing": [
+          "reconnaissance",
+          "resource-development",
+          "initial-access",
+          "ml-attack-staging",
+          "ml-model-access",
+          "exfiltration",
+          "impact"
+        ]
+      },
+      "framework": {
+        "attack_stages": 7,
+        "atlas_stages": 0,
+        "owasp_stages": 0
+      }
+    },
+    {
+      "name": "art-defense-evasion-linux",
+      "adversary": "Atomic Red Team",
+      "stages": 6,
+      "completed": 6,
+      "skipped": 0,
+      "techniques": 6,
+      "attack_tactics": {
+        "total": 14,
+        "covered": 1,
+        "percent": 7,
+        "details": [
+          {
+            "short": "defense-evasion",
+            "name": "Defense Evasion",
+            "stages": 6
+          }
+        ],
+        "missing": [
+          "reconnaissance",
+          "resource-development",
+          "initial-access",
+          "execution",
+          "persistence",
+          "privilege-escalation",
+          "credential-access",
+          "discovery",
+          "lateral-movement",
+          "collection",
+          "command-and-control",
+          "exfiltration",
+          "impact"
+        ]
+      },
+      "atlas_tactics": {
+        "total": 7,
+        "covered": 0,
+        "percent": 0,
+        "details": null,
+        "missing": [
+          "reconnaissance",
+          "resource-development",
+          "initial-access",
+          "ml-attack-staging",
+          "ml-model-access",
+          "exfiltration",
+          "impact"
+        ]
+      },
+      "framework": {
+        "attack_stages": 6,
+        "atlas_stages": 0,
+        "owasp_stages": 0
+      }
+    },
+    {
+      "name": "art-defense-evasion-windows",
+      "adversary": "Atomic Red Team",
+      "stages": 6,
+      "completed": 6,
+      "skipped": 0,
+      "techniques": 6,
+      "attack_tactics": {
+        "total": 14,
+        "covered": 1,
+        "percent": 7,
+        "details": [
+          {
+            "short": "defense-evasion",
+            "name": "Defense Evasion",
+            "stages": 6
+          }
+        ],
+        "missing": [
+          "reconnaissance",
+          "resource-development",
+          "initial-access",
+          "execution",
+          "persistence",
+          "privilege-escalation",
+          "credential-access",
+          "discovery",
+          "lateral-movement",
+          "collection",
+          "command-and-control",
+          "exfiltration",
+          "impact"
+        ]
+      },
+      "atlas_tactics": {
+        "total": 7,
+        "covered": 0,
+        "percent": 0,
+        "details": null,
+        "missing": [
+          "reconnaissance",
+          "resource-development",
+          "initial-access",
+          "ml-attack-staging",
+          "ml-model-access",
+          "exfiltration",
+          "impact"
+        ]
+      },
+      "framework": {
+        "attack_stages": 6,
+        "atlas_stages": 0,
+        "owasp_stages": 0
+      }
+    },
+    {
+      "name": "art-discovery-linux",
+      "adversary": "Atomic Red Team",
+      "stages": 6,
+      "completed": 6,
+      "skipped": 0,
+      "techniques": 6,
+      "attack_tactics": {
+        "total": 14,
+        "covered": 2,
+        "percent": 14,
+        "details": [
+          {
+            "short": "credential-access",
+            "name": "Credential Access",
+            "stages": 1
+          },
+          {
+            "short": "discovery",
+            "name": "Discovery",
+            "stages": 5
+          }
+        ],
+        "missing": [
+          "reconnaissance",
+          "resource-development",
+          "initial-access",
+          "execution",
+          "persistence",
+          "privilege-escalation",
+          "defense-evasion",
+          "lateral-movement",
+          "collection",
+          "command-and-control",
+          "exfiltration",
+          "impact"
+        ]
+      },
+      "atlas_tactics": {
+        "total": 7,
+        "covered": 0,
+        "percent": 0,
+        "details": null,
+        "missing": [
+          "reconnaissance",
+          "resource-development",
+          "initial-access",
+          "ml-attack-staging",
+          "ml-model-access",
+          "exfiltration",
+          "impact"
+        ]
+      },
+      "framework": {
+        "attack_stages": 6,
+        "atlas_stages": 0,
+        "owasp_stages": 0
+      }
+    },
+    {
+      "name": "art-discovery-windows",
+      "adversary": "Atomic Red Team",
+      "stages": 7,
+      "completed": 7,
+      "skipped": 0,
+      "techniques": 7,
+      "attack_tactics": {
+        "total": 14,
+        "covered": 1,
+        "percent": 7,
+        "details": [
+          {
+            "short": "discovery",
+            "name": "Discovery",
+            "stages": 7
+          }
+        ],
+        "missing": [
+          "reconnaissance",
+          "resource-development",
+          "initial-access",
+          "execution",
+          "persistence",
+          "privilege-escalation",
+          "defense-evasion",
+          "credential-access",
+          "lateral-movement",
+          "collection",
+          "command-and-control",
+          "exfiltration",
+          "impact"
+        ]
+      },
+      "atlas_tactics": {
+        "total": 7,
+        "covered": 0,
+        "percent": 0,
+        "details": null,
+        "missing": [
+          "reconnaissance",
+          "resource-development",
+          "initial-access",
+          "ml-attack-staging",
+          "ml-model-access",
+          "exfiltration",
+          "impact"
+        ]
+      },
+      "framework": {
+        "attack_stages": 7,
+        "atlas_stages": 0,
+        "owasp_stages": 0
+      }
+    },
+    {
+      "name": "art-execution-linux",
+      "adversary": "Atomic Red Team",
+      "stages": 6,
+      "completed": 6,
+      "skipped": 0,
+      "techniques": 6,
+      "attack_tactics": {
+        "total": 14,
+        "covered": 1,
+        "percent": 7,
+        "details": [
+          {
+            "short": "execution",
+            "name": "Execution",
+            "stages": 6
+          }
+        ],
+        "missing": [
+          "reconnaissance",
+          "resource-development",
+          "initial-access",
+          "persistence",
+          "privilege-escalation",
+          "defense-evasion",
+          "credential-access",
+          "discovery",
+          "lateral-movement",
+          "collection",
+          "command-and-control",
+          "exfiltration",
+          "impact"
+        ]
+      },
+      "atlas_tactics": {
+        "total": 7,
+        "covered": 0,
+        "percent": 0,
+        "details": null,
+        "missing": [
+          "reconnaissance",
+          "resource-development",
+          "initial-access",
+          "ml-attack-staging",
+          "ml-model-access",
+          "exfiltration",
+          "impact"
+        ]
+      },
+      "framework": {
+        "attack_stages": 6,
+        "atlas_stages": 0,
+        "owasp_stages": 0
+      }
+    },
+    {
+      "name": "art-execution-windows",
+      "adversary": "Atomic Red Team",
+      "stages": 7,
+      "completed": 7,
+      "skipped": 0,
+      "techniques": 7,
+      "attack_tactics": {
+        "total": 14,
+        "covered": 2,
+        "percent": 14,
+        "details": [
+          {
+            "short": "execution",
+            "name": "Execution",
+            "stages": 2
+          },
+          {
+            "short": "defense-evasion",
+            "name": "Defense Evasion",
+            "stages": 5
+          }
+        ],
+        "missing": [
+          "reconnaissance",
+          "resource-development",
+          "initial-access",
+          "persistence",
+          "privilege-escalation",
+          "credential-access",
+          "discovery",
+          "lateral-movement",
+          "collection",
+          "command-and-control",
+          "exfiltration",
+          "impact"
+        ]
+      },
+      "atlas_tactics": {
+        "total": 7,
+        "covered": 0,
+        "percent": 0,
+        "details": null,
+        "missing": [
+          "reconnaissance",
+          "resource-development",
+          "initial-access",
+          "ml-attack-staging",
+          "ml-model-access",
+          "exfiltration",
+          "impact"
+        ]
+      },
+      "framework": {
+        "attack_stages": 7,
+        "atlas_stages": 0,
+        "owasp_stages": 0
+      }
+    },
+    {
+      "name": "art-exfiltration-multi",
+      "adversary": "Atomic Red Team",
+      "stages": 7,
+      "completed": 7,
+      "skipped": 0,
+      "techniques": 7,
+      "attack_tactics": {
+        "total": 14,
+        "covered": 3,
+        "percent": 21,
+        "details": [
+          {
+            "short": "defense-evasion",
+            "name": "Defense Evasion",
+            "stages": 1
+          },
+          {
+            "short": "collection",
+            "name": "Collection",
+            "stages": 3
+          },
+          {
+            "short": "exfiltration",
+            "name": "Exfiltration",
+            "stages": 3
+          }
+        ],
+        "missing": [
+          "reconnaissance",
+          "resource-development",
+          "initial-access",
+          "execution",
+          "persistence",
+          "privilege-escalation",
+          "credential-access",
+          "discovery",
+          "lateral-movement",
+          "command-and-control",
+          "impact"
+        ]
+      },
+      "atlas_tactics": {
+        "total": 7,
+        "covered": 0,
+        "percent": 0,
+        "details": null,
+        "missing": [
+          "reconnaissance",
+          "resource-development",
+          "initial-access",
+          "ml-attack-staging",
+          "ml-model-access",
+          "exfiltration",
+          "impact"
+        ]
+      },
+      "framework": {
+        "attack_stages": 7,
+        "atlas_stages": 0,
+        "owasp_stages": 0
+      }
+    },
+    {
+      "name": "art-lateral-movement-linux",
+      "adversary": "Atomic Red Team",
+      "stages": 6,
+      "completed": 6,
+      "skipped": 0,
+      "techniques": 6,
+      "attack_tactics": {
+        "total": 14,
+        "covered": 3,
+        "percent": 21,
+        "details": [
+          {
+            "short": "credential-access",
+            "name": "Credential Access",
+            "stages": 1
+          },
+          {
+            "short": "discovery",
+            "name": "Discovery",
+            "stages": 2
+          },
+          {
+            "short": "lateral-movement",
+            "name": "Lateral Movement",
+            "stages": 3
+          }
+        ],
+        "missing": [
+          "reconnaissance",
+          "resource-development",
+          "initial-access",
+          "execution",
+          "persistence",
+          "privilege-escalation",
+          "defense-evasion",
+          "collection",
+          "command-and-control",
+          "exfiltration",
+          "impact"
+        ]
+      },
+      "atlas_tactics": {
+        "total": 7,
+        "covered": 0,
+        "percent": 0,
+        "details": null,
+        "missing": [
+          "reconnaissance",
+          "resource-development",
+          "initial-access",
+          "ml-attack-staging",
+          "ml-model-access",
+          "exfiltration",
+          "impact"
+        ]
+      },
+      "framework": {
+        "attack_stages": 6,
+        "atlas_stages": 0,
+        "owasp_stages": 0
+      }
+    },
+    {
+      "name": "art-lateral-movement-windows",
+      "adversary": "Atomic Red Team",
+      "stages": 6,
+      "completed": 6,
+      "skipped": 0,
+      "techniques": 6,
+      "attack_tactics": {
+        "total": 14,
+        "covered": 3,
+        "percent": 21,
+        "details": [
+          {
+            "short": "execution",
+            "name": "Execution",
+            "stages": 2
+          },
+          {
+            "short": "discovery",
+            "name": "Discovery",
+            "stages": 1
+          },
+          {
+            "short": "lateral-movement",
+            "name": "Lateral Movement",
+            "stages": 3
+          }
+        ],
+        "missing": [
+          "reconnaissance",
+          "resource-development",
+          "initial-access",
+          "persistence",
+          "privilege-escalation",
+          "defense-evasion",
+          "credential-access",
+          "collection",
+          "command-and-control",
+          "exfiltration",
+          "impact"
+        ]
+      },
+      "atlas_tactics": {
+        "total": 7,
+        "covered": 0,
+        "percent": 0,
+        "details": null,
+        "missing": [
+          "reconnaissance",
+          "resource-development",
+          "initial-access",
+          "ml-attack-staging",
+          "ml-model-access",
+          "exfiltration",
+          "impact"
+        ]
+      },
+      "framework": {
+        "attack_stages": 6,
+        "atlas_stages": 0,
+        "owasp_stages": 0
+      }
+    },
+    {
+      "name": "art-persistence-linux",
+      "adversary": "Atomic Red Team",
+      "stages": 6,
+      "completed": 6,
+      "skipped": 0,
+      "techniques": 6,
+      "attack_tactics": {
+        "total": 14,
+        "covered": 1,
+        "percent": 7,
+        "details": [
+          {
+            "short": "persistence",
+            "name": "Persistence",
+            "stages": 6
+          }
+        ],
+        "missing": [
+          "reconnaissance",
+          "resource-development",
+          "initial-access",
+          "execution",
+          "privilege-escalation",
+          "defense-evasion",
+          "credential-access",
+          "discovery",
+          "lateral-movement",
+          "collection",
+          "command-and-control",
+          "exfiltration",
+          "impact"
+        ]
+      },
+      "atlas_tactics": {
+        "total": 7,
+        "covered": 0,
+        "percent": 0,
+        "details": null,
+        "missing": [
+          "reconnaissance",
+          "resource-development",
+          "initial-access",
+          "ml-attack-staging",
+          "ml-model-access",
+          "exfiltration",
+          "impact"
+        ]
+      },
+      "framework": {
+        "attack_stages": 6,
+        "atlas_stages": 0,
+        "owasp_stages": 0
+      }
+    },
+    {
+      "name": "art-persistence-windows",
+      "adversary": "Atomic Red Team",
+      "stages": 7,
+      "completed": 7,
+      "skipped": 0,
+      "techniques": 6,
+      "attack_tactics": {
+        "total": 14,
+        "covered": 3,
+        "percent": 21,
+        "details": [
+          {
+            "short": "execution",
+            "name": "Execution",
+            "stages": 1
+          },
+          {
+            "short": "persistence",
+            "name": "Persistence",
+            "stages": 5
+          },
+          {
+            "short": "defense-evasion",
+            "name": "Defense Evasion",
+            "stages": 1
+          }
+        ],
+        "missing": [
+          "reconnaissance",
+          "resource-development",
+          "initial-access",
+          "privilege-escalation",
+          "credential-access",
+          "discovery",
+          "lateral-movement",
+          "collection",
+          "command-and-control",
+          "exfiltration",
+          "impact"
+        ]
+      },
+      "atlas_tactics": {
+        "total": 7,
+        "covered": 0,
+        "percent": 0,
+        "details": null,
+        "missing": [
+          "reconnaissance",
+          "resource-development",
+          "initial-access",
+          "ml-attack-staging",
+          "ml-model-access",
+          "exfiltration",
+          "impact"
+        ]
+      },
+      "framework": {
+        "attack_stages": 7,
+        "atlas_stages": 0,
+        "owasp_stages": 0
+      }
+    },
+    {
+      "name": "cloud-privilege-escalation",
+      "adversary": "scattered-spider",
+      "stages": 4,
+      "completed": 4,
+      "skipped": 0,
+      "techniques": 4,
+      "attack_tactics": {
+        "total": 14,
+        "covered": 4,
+        "percent": 28,
+        "details": [
+          {
+            "short": "persistence",
+            "name": "Persistence",
+            "stages": 1
+          },
+          {
+            "short": "privilege-escalation",
+            "name": "Privilege Escalation",
+            "stages": 1
+          },
+          {
+            "short": "credential-access",
+            "name": "Credential Access",
+            "stages": 1
+          },
+          {
+            "short": "discovery",
+            "name": "Discovery",
+            "stages": 1
+          }
+        ],
+        "missing": [
+          "reconnaissance",
+          "resource-development",
+          "initial-access",
+          "execution",
+          "defense-evasion",
+          "lateral-movement",
+          "collection",
+          "command-and-control",
+          "exfiltration",
+          "impact"
+        ]
+      },
+      "atlas_tactics": {
+        "total": 7,
+        "covered": 0,
+        "percent": 0,
+        "details": null,
+        "missing": [
+          "reconnaissance",
+          "resource-development",
+          "initial-access",
+          "ml-attack-staging",
+          "ml-model-access",
+          "exfiltration",
+          "impact"
+        ]
+      },
+      "framework": {
+        "attack_stages": 4,
+        "atlas_stages": 0,
+        "owasp_stages": 0
+      }
+    },
+    {
+      "name": "context-window-stuffing",
+      "adversary": "ai-red-team",
+      "stages": 5,
+      "completed": 5,
+      "skipped": 0,
+      "techniques": 4,
+      "attack_tactics": {
+        "total": 14,
+        "covered": 0,
+        "percent": 0,
+        "details": null,
+        "missing": [
+          "reconnaissance",
+          "resource-development",
+          "initial-access",
+          "execution",
+          "persistence",
+          "privilege-escalation",
+          "defense-evasion",
+          "credential-access",
+          "discovery",
+          "lateral-movement",
+          "collection",
+          "command-and-control",
+          "exfiltration",
+          "impact"
+        ]
+      },
+      "atlas_tactics": {
+        "total": 7,
+        "covered": 3,
+        "percent": 42,
+        "details": [
+          {
+            "short": "reconnaissance",
+            "name": "Reconnaissance",
+            "stages": 1
+          },
+          {
+            "short": "initial-access",
+            "name": "Initial Access",
+            "stages": 1
+          },
+          {
+            "short": "impact",
+            "name": "Impact",
+            "stages": 1
+          }
+        ],
+        "missing": [
+          "resource-development",
+          "ml-attack-staging",
+          "ml-model-access",
+          "exfiltration"
+        ]
+      },
+      "framework": {
+        "attack_stages": 0,
+        "atlas_stages": 4,
+        "owasp_stages": 1
+      }
+    },
+    {
+      "name": "credential-spray",
+      "adversary": "apt33",
+      "stages": 4,
+      "completed": 4,
+      "skipped": 0,
+      "techniques": 4,
+      "attack_tactics": {
+        "total": 14,
+        "covered": 2,
+        "percent": 14,
+        "details": [
+          {
+            "short": "credential-access",
+            "name": "Credential Access",
+            "stages": 2
+          },
+          {
+            "short": "discovery",
+            "name": "Discovery",
+            "stages": 2
+          }
+        ],
+        "missing": [
+          "reconnaissance",
+          "resource-development",
+          "initial-access",
+          "execution",
+          "persistence",
+          "privilege-escalation",
+          "defense-evasion",
+          "lateral-movement",
+          "collection",
+          "command-and-control",
+          "exfiltration",
+          "impact"
+        ]
+      },
+      "atlas_tactics": {
+        "total": 7,
+        "covered": 0,
+        "percent": 0,
+        "details": null,
+        "missing": [
+          "reconnaissance",
+          "resource-development",
+          "initial-access",
+          "ml-attack-staging",
+          "ml-model-access",
+          "exfiltration",
+          "impact"
+        ]
+      },
+      "framework": {
+        "attack_stages": 4,
+        "atlas_stages": 0,
+        "owasp_stages": 0
+      }
+    },
+    {
+      "name": "data-staging-exfil",
+      "adversary": "apt1",
+      "stages": 5,
+      "completed": 5,
+      "skipped": 0,
+      "techniques": 5,
+      "attack_tactics": {
+        "total": 14,
+        "covered": 3,
+        "percent": 21,
+        "details": [
+          {
+            "short": "defense-evasion",
+            "name": "Defense Evasion",
+            "stages": 1
+          },
+          {
+            "short": "collection",
+            "name": "Collection",
+            "stages": 2
+          },
+          {
+            "short": "exfiltration",
+            "name": "Exfiltration",
+            "stages": 2
+          }
+        ],
+        "missing": [
+          "reconnaissance",
+          "resource-development",
+          "initial-access",
+          "execution",
+          "persistence",
+          "privilege-escalation",
+          "credential-access",
+          "discovery",
+          "lateral-movement",
+          "command-and-control",
+          "impact"
+        ]
+      },
+      "atlas_tactics": {
+        "total": 7,
+        "covered": 0,
+        "percent": 0,
+        "details": null,
+        "missing": [
+          "reconnaissance",
+          "resource-development",
+          "initial-access",
+          "ml-attack-staging",
+          "ml-model-access",
+          "exfiltration",
+          "impact"
+        ]
+      },
+      "framework": {
+        "attack_stages": 5,
+        "atlas_stages": 0,
+        "owasp_stages": 0
+      }
+    },
+    {
+      "name": "fin7-carbanak",
+      "adversary": "FIN7",
+      "stages": 10,
+      "completed": 10,
+      "skipped": 0,
+      "techniques": 10,
+      "attack_tactics": {
+        "total": 14,
+        "covered": 9,
+        "percent": 64,
+        "details": [
+          {
+            "short": "initial-access",
+            "name": "Initial Access",
+            "stages": 1
+          },
+          {
+            "short": "execution",
+            "name": "Execution",
+            "stages": 1
+          },
+          {
+            "short": "persistence",
+            "name": "Persistence",
+            "stages": 1
+          },
+          {
+            "short": "credential-access",
+            "name": "Credential Access",
+            "stages": 1
+          },
+          {
+            "short": "discovery",
+            "name": "Discovery",
+            "stages": 1
+          },
+          {
+            "short": "lateral-movement",
+            "name": "Lateral Movement",
+            "stages": 1
+          },
+          {
+            "short": "collection",
+            "name": "Collection",
+            "stages": 2
+          },
+          {
+            "short": "command-and-control",
+            "name": "Command and Control",
+            "stages": 1
+          },
+          {
+            "short": "exfiltration",
+            "name": "Exfiltration",
+            "stages": 1
+          }
+        ],
+        "missing": [
+          "reconnaissance",
+          "resource-development",
+          "privilege-escalation",
+          "defense-evasion",
+          "impact"
+        ]
+      },
+      "atlas_tactics": {
+        "total": 7,
+        "covered": 0,
+        "percent": 0,
+        "details": null,
+        "missing": [
+          "reconnaissance",
+          "resource-development",
+          "initial-access",
+          "ml-attack-staging",
+          "ml-model-access",
+          "exfiltration",
+          "impact"
+        ]
+      },
+      "framework": {
+        "attack_stages": 10,
+        "atlas_stages": 0,
+        "owasp_stages": 0
+      }
+    },
+    {
+      "name": "function-calling-overflow",
+      "adversary": "ai-red-team",
+      "stages": 4,
+      "completed": 4,
+      "skipped": 0,
+      "techniques": 3,
+      "attack_tactics": {
+        "total": 14,
+        "covered": 0,
+        "percent": 0,
+        "details": null,
+        "missing": [
+          "reconnaissance",
+          "resource-development",
+          "initial-access",
+          "execution",
+          "persistence",
+          "privilege-escalation",
+          "defense-evasion",
+          "credential-access",
+          "discovery",
+          "lateral-movement",
+          "collection",
+          "command-and-control",
+          "exfiltration",
+          "impact"
+        ]
+      },
+      "atlas_tactics": {
+        "total": 7,
+        "covered": 1,
+        "percent": 14,
+        "details": [
+          {
+            "short": "initial-access",
+            "name": "Initial Access",
+            "stages": 1
+          }
+        ],
+        "missing": [
+          "reconnaissance",
+          "resource-development",
+          "ml-attack-staging",
+          "ml-model-access",
+          "exfiltration",
+          "impact"
+        ]
+      },
+      "framework": {
+        "attack_stages": 0,
+        "atlas_stages": 3,
+        "owasp_stages": 1
+      }
+    },
+    {
+      "name": "insider-threat",
+      "adversary": "insider",
+      "stages": 5,
+      "completed": 5,
+      "skipped": 0,
+      "techniques": 5,
+      "attack_tactics": {
+        "total": 14,
+        "covered": 4,
+        "percent": 28,
+        "details": [
+          {
+            "short": "privilege-escalation",
+            "name": "Privilege Escalation",
+            "stages": 1
+          },
+          {
+            "short": "defense-evasion",
+            "name": "Defense Evasion",
+            "stages": 1
+          },
+          {
+            "short": "collection",
+            "name": "Collection",
+            "stages": 2
+          },
+          {
+            "short": "exfiltration",
+            "name": "Exfiltration",
+            "stages": 1
+          }
+        ],
+        "missing": [
+          "reconnaissance",
+          "resource-development",
+          "initial-access",
+          "execution",
+          "persistence",
+          "credential-access",
+          "discovery",
+          "lateral-movement",
+          "command-and-control",
+          "impact"
+        ]
+      },
+      "atlas_tactics": {
+        "total": 7,
+        "covered": 0,
+        "percent": 0,
+        "details": null,
+        "missing": [
+          "reconnaissance",
+          "resource-development",
+          "initial-access",
+          "ml-attack-staging",
+          "ml-model-access",
+          "exfiltration",
+          "impact"
+        ]
+      },
+      "framework": {
+        "attack_stages": 5,
+        "atlas_stages": 0,
+        "owasp_stages": 0
+      }
+    },
+    {
+      "name": "lazarus-group",
+      "adversary": "LazarusGroup",
+      "stages": 12,
+      "completed": 12,
+      "skipped": 0,
+      "techniques": 12,
+      "attack_tactics": {
+        "total": 14,
+        "covered": 10,
+        "percent": 71,
+        "details": [
+          {
+            "short": "initial-access",
+            "name": "Initial Access",
+            "stages": 1
+          },
+          {
+            "short": "execution",
+            "name": "Execution",
+            "stages": 1
+          },
+          {
+            "short": "persistence",
+            "name": "Persistence",
+            "stages": 1
+          },
+          {
+            "short": "defense-evasion",
+            "name": "Defense Evasion",
+            "stages": 1
+          },
+          {
+            "short": "discovery",
+            "name": "Discovery",
+            "stages": 2
+          },
+          {
+            "short": "lateral-movement",
+            "name": "Lateral Movement",
+            "stages": 1
+          },
+          {
+            "short": "collection",
+            "name": "Collection",
+            "stages": 2
+          },
+          {
+            "short": "command-and-control",
+            "name": "Command and Control",
+            "stages": 1
+          },
+          {
+            "short": "exfiltration",
+            "name": "Exfiltration",
+            "stages": 1
+          },
+          {
+            "short": "impact",
+            "name": "Impact",
+            "stages": 1
+          }
+        ],
+        "missing": [
+          "reconnaissance",
+          "resource-development",
+          "privilege-escalation",
+          "credential-access"
+        ]
+      },
+      "atlas_tactics": {
+        "total": 7,
+        "covered": 0,
+        "percent": 0,
+        "details": null,
+        "missing": [
+          "reconnaissance",
+          "resource-development",
+          "initial-access",
+          "ml-attack-staging",
+          "ml-model-access",
+          "exfiltration",
+          "impact"
+        ]
+      },
+      "framework": {
+        "attack_stages": 12,
+        "atlas_stages": 0,
+        "owasp_stages": 0
+      }
+    },
+    {
+      "name": "living-off-the-land",
+      "adversary": "volt-typhoon",
+      "stages": 5,
+      "completed": 5,
+      "skipped": 0,
+      "techniques": 5,
+      "attack_tactics": {
+        "total": 14,
+        "covered": 5,
+        "percent": 35,
+        "details": [
+          {
+            "short": "persistence",
+            "name": "Persistence",
+            "stages": 1
+          },
+          {
+            "short": "defense-evasion",
+            "name": "Defense Evasion",
+            "stages": 1
+          },
+          {
+            "short": "discovery",
+            "name": "Discovery",
+            "stages": 1
+          },
+          {
+            "short": "lateral-movement",
+            "name": "Lateral Movement",
+            "stages": 1
+          },
+          {
+            "short": "command-and-control",
+            "name": "Command and Control",
+            "stages": 1
+          }
+        ],
+        "missing": [
+          "reconnaissance",
+          "resource-development",
+          "initial-access",
+          "execution",
+          "privilege-escalation",
+          "credential-access",
+          "collection",
+          "exfiltration",
+          "impact"
+        ]
+      },
+      "atlas_tactics": {
+        "total": 7,
+        "covered": 0,
+        "percent": 0,
+        "details": null,
+        "missing": [
+          "reconnaissance",
+          "resource-development",
+          "initial-access",
+          "ml-attack-staging",
+          "ml-model-access",
+          "exfiltration",
+          "impact"
+        ]
+      },
+      "framework": {
+        "attack_stages": 5,
+        "atlas_stages": 0,
+        "owasp_stages": 0
+      }
+    },
+    {
+      "name": "llm-agent-hijack",
+      "adversary": "AI-Threat-Actor",
+      "stages": 13,
+      "completed": 13,
+      "skipped": 0,
+      "techniques": 12,
+      "attack_tactics": {
+        "total": 14,
+        "covered": 0,
+        "percent": 0,
+        "details": null,
+        "missing": [
+          "reconnaissance",
+          "resource-development",
+          "initial-access",
+          "execution",
+          "persistence",
+          "privilege-escalation",
+          "defense-evasion",
+          "credential-access",
+          "discovery",
+          "lateral-movement",
+          "collection",
+          "command-and-control",
+          "exfiltration",
+          "impact"
+        ]
+      },
+      "atlas_tactics": {
+        "total": 7,
+        "covered": 6,
+        "percent": 85,
+        "details": [
+          {
+            "short": "reconnaissance",
+            "name": "Reconnaissance",
+            "stages": 1
+          },
+          {
+            "short": "initial-access",
+            "name": "Initial Access",
+            "stages": 3
+          },
+          {
+            "short": "ml-attack-staging",
+            "name": "ML Attack Staging",
+            "stages": 2
+          },
+          {
+            "short": "ml-model-access",
+            "name": "ML Model Access",
+            "stages": 2
+          },
+          {
+            "short": "exfiltration",
+            "name": "Exfiltration",
+            "stages": 1
+          },
+          {
+            "short": "impact",
+            "name": "Impact",
+            "stages": 4
+          }
+        ],
+        "missing": [
+          "resource-development"
+        ]
+      },
+      "framework": {
+        "attack_stages": 0,
+        "atlas_stages": 9,
+        "owasp_stages": 4
+      }
+    },
+    {
+      "name": "llm-output-parsing-exploit",
+      "adversary": "ai-red-team",
+      "stages": 5,
+      "completed": 5,
+      "skipped": 0,
+      "techniques": 4,
+      "attack_tactics": {
+        "total": 14,
+        "covered": 1,
+        "percent": 7,
+        "details": [
+          {
+            "short": "execution",
+            "name": "Execution",
+            "stages": 1
+          }
+        ],
+        "missing": [
+          "reconnaissance",
+          "resource-development",
+          "initial-access",
+          "persistence",
+          "privilege-escalation",
+          "defense-evasion",
+          "credential-access",
+          "discovery",
+          "lateral-movement",
+          "collection",
+          "command-and-control",
+          "exfiltration",
+          "impact"
+        ]
+      },
+      "atlas_tactics": {
+        "total": 7,
+        "covered": 2,
+        "percent": 28,
+        "details": [
+          {
+            "short": "reconnaissance",
+            "name": "Reconnaissance",
+            "stages": 1
+          },
+          {
+            "short": "exfiltration",
+            "name": "Exfiltration",
+            "stages": 1
+          }
+        ],
+        "missing": [
+          "resource-development",
+          "initial-access",
+          "ml-attack-staging",
+          "ml-model-access",
+          "impact"
+        ]
+      },
+      "framework": {
+        "attack_stages": 1,
+        "atlas_stages": 3,
+        "owasp_stages": 1
+      }
+    },
+    {
+      "name": "lockbit-ransomware",
+      "adversary": "LockBit",
+      "stages": 12,
+      "completed": 12,
+      "skipped": 0,
+      "techniques": 12,
+      "attack_tactics": {
+        "total": 14,
+        "covered": 9,
+        "percent": 64,
+        "details": [
+          {
+            "short": "execution",
+            "name": "Execution",
+            "stages": 1
+          },
+          {
+            "short": "defense-evasion",
+            "name": "Defense Evasion",
+            "stages": 1
+          },
+          {
+            "short": "credential-access",
+            "name": "Credential Access",
+            "stages": 2
+          },
+          {
+            "short": "discovery",
+            "name": "Discovery",
+            "stages": 1
+          },
+          {
+            "short": "lateral-movement",
+            "name": "Lateral Movement",
+            "stages": 1
+          },
+          {
+            "short": "collection",
+            "name": "Collection",
+            "stages": 1
+          },
+          {
+            "short": "command-and-control",
+            "name": "Command and Control",
+            "stages": 1
+          },
+          {
+            "short": "exfiltration",
+            "name": "Exfiltration",
+            "stages": 1
+          },
+          {
+            "short": "impact",
+            "name": "Impact",
+            "stages": 3
+          }
+        ],
+        "missing": [
+          "reconnaissance",
+          "resource-development",
+          "initial-access",
+          "persistence",
+          "privilege-escalation"
+        ]
+      },
+      "atlas_tactics": {
+        "total": 7,
+        "covered": 0,
+        "percent": 0,
+        "details": null,
+        "missing": [
+          "reconnaissance",
+          "resource-development",
+          "initial-access",
+          "ml-attack-staging",
+          "ml-model-access",
+          "exfiltration",
+          "impact"
+        ]
+      },
+      "framework": {
+        "attack_stages": 12,
+        "atlas_stages": 0,
+        "owasp_stages": 0
+      }
+    },
+    {
+      "name": "mcp-server-attack",
+      "adversary": "MCP-Exploit-Actor",
+      "stages": 8,
+      "completed": 8,
+      "skipped": 0,
+      "techniques": 7,
+      "attack_tactics": {
+        "total": 14,
+        "covered": 2,
+        "percent": 14,
+        "details": [
+          {
+            "short": "discovery",
+            "name": "Discovery",
+            "stages": 1
+          },
+          {
+            "short": "exfiltration",
+            "name": "Exfiltration",
+            "stages": 1
+          }
+        ],
+        "missing": [
+          "reconnaissance",
+          "resource-development",
+          "initial-access",
+          "execution",
+          "persistence",
+          "privilege-escalation",
+          "defense-evasion",
+          "credential-access",
+          "lateral-movement",
+          "collection",
+          "command-and-control",
+          "impact"
+        ]
+      },
+      "atlas_tactics": {
+        "total": 7,
+        "covered": 2,
+        "percent": 28,
+        "details": [
+          {
+            "short": "reconnaissance",
+            "name": "Reconnaissance",
+            "stages": 1
+          },
+          {
+            "short": "initial-access",
+            "name": "Initial Access",
+            "stages": 1
+          }
+        ],
+        "missing": [
+          "resource-development",
+          "ml-attack-staging",
+          "ml-model-access",
+          "exfiltration",
+          "impact"
+        ]
+      },
+      "framework": {
+        "attack_stages": 2,
+        "atlas_stages": 5,
+        "owasp_stages": 1
+      }
+    },
+    {
+      "name": "mcp-server-impersonation",
+      "adversary": "ai-red-team",
+      "stages": 5,
+      "completed": 5,
+      "skipped": 0,
+      "techniques": 3,
+      "attack_tactics": {
+        "total": 14,
+        "covered": 3,
+        "percent": 21,
+        "details": [
+          {
+            "short": "persistence",
+            "name": "Persistence",
+            "stages": 2
+          },
+          {
+            "short": "collection",
+            "name": "Collection",
+            "stages": 1
+          },
+          {
+            "short": "impact",
+            "name": "Impact",
+            "stages": 1
+          }
+        ],
+        "missing": [
+          "reconnaissance",
+          "resource-development",
+          "initial-access",
+          "execution",
+          "privilege-escalation",
+          "defense-evasion",
+          "credential-access",
+          "discovery",
+          "lateral-movement",
+          "command-and-control",
+          "exfiltration"
+        ]
+      },
+      "atlas_tactics": {
+        "total": 7,
+        "covered": 1,
+        "percent": 14,
+        "details": [
+          {
+            "short": "reconnaissance",
+            "name": "Reconnaissance",
+            "stages": 1
+          }
+        ],
+        "missing": [
+          "resource-development",
+          "initial-access",
+          "ml-attack-staging",
+          "ml-model-access",
+          "exfiltration",
+          "impact"
+        ]
+      },
+      "framework": {
+        "attack_stages": 4,
+        "atlas_stages": 1,
+        "owasp_stages": 0
+      }
+    },
+    {
+      "name": "model-extraction",
+      "adversary": "Model-Theft-Actor",
+      "stages": 9,
+      "completed": 9,
+      "skipped": 0,
+      "techniques": 8,
+      "attack_tactics": {
+        "total": 14,
+        "covered": 1,
+        "percent": 7,
+        "details": [
+          {
+            "short": "exfiltration",
+            "name": "Exfiltration",
+            "stages": 1
+          }
+        ],
+        "missing": [
+          "reconnaissance",
+          "resource-development",
+          "initial-access",
+          "execution",
+          "persistence",
+          "privilege-escalation",
+          "defense-evasion",
+          "credential-access",
+          "discovery",
+          "lateral-movement",
+          "collection",
+          "command-and-control",
+          "impact"
+        ]
+      },
+      "atlas_tactics": {
+        "total": 7,
+        "covered": 4,
+        "percent": 57,
+        "details": [
+          {
+            "short": "reconnaissance",
+            "name": "Reconnaissance",
+            "stages": 1
+          },
+          {
+            "short": "ml-attack-staging",
+            "name": "ML Attack Staging",
+            "stages": 1
+          },
+          {
+            "short": "ml-model-access",
+            "name": "ML Model Access",
+            "stages": 3
+          },
+          {
+            "short": "impact",
+            "name": "Impact",
+            "stages": 1
+          }
+        ],
+        "missing": [
+          "resource-development",
+          "initial-access",
+          "exfiltration"
+        ]
+      },
+      "framework": {
+        "attack_stages": 1,
+        "atlas_stages": 8,
+        "owasp_stages": 0
+      }
+    },
+    {
+      "name": "multi-agent-attack",
+      "adversary": "Agent-Chain-Threat-Actor",
+      "stages": 11,
+      "completed": 11,
+      "skipped": 0,
+      "techniques": 10,
+      "attack_tactics": {
+        "total": 14,
+        "covered": 3,
+        "percent": 21,
+        "details": [
+          {
+            "short": "defense-evasion",
+            "name": "Defense Evasion",
+            "stages": 1
+          },
+          {
+            "short": "collection",
+            "name": "Collection",
+            "stages": 1
+          },
+          {
+            "short": "exfiltration",
+            "name": "Exfiltration",
+            "stages": 1
+          }
+        ],
+        "missing": [
+          "reconnaissance",
+          "resource-development",
+          "initial-access",
+          "execution",
+          "persistence",
+          "privilege-escalation",
+          "credential-access",
+          "discovery",
+          "lateral-movement",
+          "command-and-control",
+          "impact"
+        ]
+      },
+      "atlas_tactics": {
+        "total": 7,
+        "covered": 5,
+        "percent": 71,
+        "details": [
+          {
+            "short": "reconnaissance",
+            "name": "Reconnaissance",
+            "stages": 1
+          },
+          {
+            "short": "initial-access",
+            "name": "Initial Access",
+            "stages": 1
+          },
+          {
+            "short": "ml-attack-staging",
+            "name": "ML Attack Staging",
+            "stages": 1
+          },
+          {
+            "short": "ml-model-access",
+            "name": "ML Model Access",
+            "stages": 1
+          },
+          {
+            "short": "impact",
+            "name": "Impact",
+            "stages": 2
+          }
+        ],
+        "missing": [
+          "resource-development",
+          "exfiltration"
+        ]
+      },
+      "framework": {
+        "attack_stages": 3,
+        "atlas_stages": 5,
+        "owasp_stages": 3
+      }
+    },
+    {
+      "name": "multi-model-arbitrage",
+      "adversary": "ai-red-team",
+      "stages": 5,
+      "completed": 5,
+      "skipped": 0,
+      "techniques": 3,
+      "attack_tactics": {
+        "total": 14,
+        "covered": 0,
+        "percent": 0,
+        "details": null,
+        "missing": [
+          "reconnaissance",
+          "resource-development",
+          "initial-access",
+          "execution",
+          "persistence",
+          "privilege-escalation",
+          "defense-evasion",
+          "credential-access",
+          "discovery",
+          "lateral-movement",
+          "collection",
+          "command-and-control",
+          "exfiltration",
+          "impact"
+        ]
+      },
+      "atlas_tactics": {
+        "total": 7,
+        "covered": 2,
+        "percent": 28,
+        "details": [
+          {
+            "short": "reconnaissance",
+            "name": "Reconnaissance",
+            "stages": 1
+          },
+          {
+            "short": "initial-access",
+            "name": "Initial Access",
+            "stages": 1
+          }
+        ],
+        "missing": [
+          "resource-development",
+          "ml-attack-staging",
+          "ml-model-access",
+          "exfiltration",
+          "impact"
+        ]
+      },
+      "framework": {
+        "attack_stages": 0,
+        "atlas_stages": 5,
+        "owasp_stages": 0
+      }
+    },
+    {
+      "name": "prompt-leaking",
+      "adversary": "ai-red-team",
+      "stages": 9,
+      "completed": 9,
+      "skipped": 0,
+      "techniques": 2,
+      "attack_tactics": {
+        "total": 14,
+        "covered": 0,
+        "percent": 0,
+        "details": null,
+        "missing": [
+          "reconnaissance",
+          "resource-development",
+          "initial-access",
+          "execution",
+          "persistence",
+          "privilege-escalation",
+          "defense-evasion",
+          "credential-access",
+          "discovery",
+          "lateral-movement",
+          "collection",
+          "command-and-control",
+          "exfiltration",
+          "impact"
+        ]
+      },
+      "atlas_tactics": {
+        "total": 7,
+        "covered": 4,
+        "percent": 57,
+        "details": [
+          {
+            "short": "reconnaissance",
+            "name": "Reconnaissance",
+            "stages": 1
+          },
+          {
+            "short": "initial-access",
+            "name": "Initial Access",
+            "stages": 4
+          },
+          {
+            "short": "ml-model-access",
+            "name": "ML Model Access",
+            "stages": 1
+          },
+          {
+            "short": "exfiltration",
+            "name": "Exfiltration",
+            "stages": 1
+          }
+        ],
+        "missing": [
+          "resource-development",
+          "ml-attack-staging",
+          "impact"
+        ]
+      },
+      "framework": {
+        "attack_stages": 0,
+        "atlas_stages": 9,
+        "owasp_stages": 0
+      }
+    },
+    {
+      "name": "rag-data-poisoning",
+      "adversary": "RAG-Poison-Actor",
+      "stages": 9,
+      "completed": 9,
+      "skipped": 0,
+      "techniques": 6,
+      "attack_tactics": {
+        "total": 14,
+        "covered": 0,
+        "percent": 0,
+        "details": null,
+        "missing": [
+          "reconnaissance",
+          "resource-development",
+          "initial-access",
+          "execution",
+          "persistence",
+          "privilege-escalation",
+          "defense-evasion",
+          "credential-access",
+          "discovery",
+          "lateral-movement",
+          "collection",
+          "command-and-control",
+          "exfiltration",
+          "impact"
+        ]
+      },
+      "atlas_tactics": {
+        "total": 7,
+        "covered": 4,
+        "percent": 57,
+        "details": [
+          {
+            "short": "reconnaissance",
+            "name": "Reconnaissance",
+            "stages": 1
+          },
+          {
+            "short": "ml-attack-staging",
+            "name": "ML Attack Staging",
+            "stages": 2
+          },
+          {
+            "short": "ml-model-access",
+            "name": "ML Model Access",
+            "stages": 1
+          },
+          {
+            "short": "impact",
+            "name": "Impact",
+            "stages": 2
+          }
+        ],
+        "missing": [
+          "resource-development",
+          "initial-access",
+          "exfiltration"
+        ]
+      },
+      "framework": {
+        "attack_stages": 0,
+        "atlas_stages": 7,
+        "owasp_stages": 2
+      }
+    },
+    {
+      "name": "rag-index-poisoning",
+      "adversary": "ai-red-team",
+      "stages": 5,
+      "completed": 5,
+      "skipped": 0,
+      "techniques": 4,
+      "attack_tactics": {
+        "total": 14,
+        "covered": 0,
+        "percent": 0,
+        "details": null,
+        "missing": [
+          "reconnaissance",
+          "resource-development",
+          "initial-access",
+          "execution",
+          "persistence",
+          "privilege-escalation",
+          "defense-evasion",
+          "credential-access",
+          "discovery",
+          "lateral-movement",
+          "collection",
+          "command-and-control",
+          "exfiltration",
+          "impact"
+        ]
+      },
+      "atlas_tactics": {
+        "total": 7,
+        "covered": 2,
+        "percent": 28,
+        "details": [
+          {
+            "short": "reconnaissance",
+            "name": "Reconnaissance",
+            "stages": 1
+          },
+          {
+            "short": "impact",
+            "name": "Impact",
+            "stages": 2
+          }
+        ],
+        "missing": [
+          "resource-development",
+          "initial-access",
+          "ml-attack-staging",
+          "ml-model-access",
+          "exfiltration"
+        ]
+      },
+      "framework": {
+        "attack_stages": 0,
+        "atlas_stages": 5,
+        "owasp_stages": 0
+      }
+    },
+    {
+      "name": "rag-poisoning",
+      "adversary": "RAG-Threat-Actor",
+      "stages": 9,
+      "completed": 9,
+      "skipped": 0,
+      "techniques": 9,
+      "attack_tactics": {
+        "total": 14,
+        "covered": 0,
+        "percent": 0,
+        "details": null,
+        "missing": [
+          "reconnaissance",
+          "resource-development",
+          "initial-access",
+          "execution",
+          "persistence",
+          "privilege-escalation",
+          "defense-evasion",
+          "credential-access",
+          "discovery",
+          "lateral-movement",
+          "collection",
+          "command-and-control",
+          "exfiltration",
+          "impact"
+        ]
+      },
+      "atlas_tactics": {
+        "total": 7,
+        "covered": 6,
+        "percent": 85,
+        "details": [
+          {
+            "short": "reconnaissance",
+            "name": "Reconnaissance",
+            "stages": 1
+          },
+          {
+            "short": "initial-access",
+            "name": "Initial Access",
+            "stages": 1
+          },
+          {
+            "short": "ml-attack-staging",
+            "name": "ML Attack Staging",
+            "stages": 3
+          },
+          {
+            "short": "ml-model-access",
+            "name": "ML Model Access",
+            "stages": 1
+          },
+          {
+            "short": "exfiltration",
+            "name": "Exfiltration",
+            "stages": 1
+          },
+          {
+            "short": "impact",
+            "name": "Impact",
+            "stages": 2
+          }
+        ],
+        "missing": [
+          "resource-development"
+        ]
+      },
+      "framework": {
+        "attack_stages": 0,
+        "atlas_stages": 7,
+        "owasp_stages": 2
+      }
+    },
+    {
+      "name": "ransomware-simulation",
+      "adversary": "lockbit",
+      "stages": 5,
+      "completed": 5,
+      "skipped": 0,
+      "techniques": 4,
+      "attack_tactics": {
+        "total": 14,
+        "covered": 3,
+        "percent": 21,
+        "details": [
+          {
+            "short": "defense-evasion",
+            "name": "Defense Evasion",
+            "stages": 1
+          },
+          {
+            "short": "discovery",
+            "name": "Discovery",
+            "stages": 1
+          },
+          {
+            "short": "impact",
+            "name": "Impact",
+            "stages": 3
+          }
+        ],
+        "missing": [
+          "reconnaissance",
+          "resource-development",
+          "initial-access",
+          "execution",
+          "persistence",
+          "privilege-escalation",
+          "credential-access",
+          "lateral-movement",
+          "collection",
+          "command-and-control",
+          "exfiltration"
+        ]
+      },
+      "atlas_tactics": {
+        "total": 7,
+        "covered": 0,
+        "percent": 0,
+        "details": null,
+        "missing": [
+          "reconnaissance",
+          "resource-development",
+          "initial-access",
+          "ml-attack-staging",
+          "ml-model-access",
+          "exfiltration",
+          "impact"
+        ]
+      },
+      "framework": {
+        "attack_stages": 5,
+        "atlas_stages": 0,
+        "owasp_stages": 0
+      }
+    },
+    {
+      "name": "scattered-spider",
+      "adversary": "Scattered-Spider",
+      "stages": 11,
+      "completed": 11,
+      "skipped": 0,
+      "techniques": 11,
+      "attack_tactics": {
+        "total": 14,
+        "covered": 6,
+        "percent": 42,
+        "details": [
+          {
+            "short": "initial-access",
+            "name": "Initial Access",
+            "stages": 3
+          },
+          {
+            "short": "persistence",
+            "name": "Persistence",
+            "stages": 1
+          },
+          {
+            "short": "credential-access",
+            "name": "Credential Access",
+            "stages": 3
+          },
+          {
+            "short": "discovery",
+            "name": "Discovery",
+            "stages": 2
+          },
+          {
+            "short": "collection",
+            "name": "Collection",
+            "stages": 1
+          },
+          {
+            "short": "exfiltration",
+            "name": "Exfiltration",
+            "stages": 1
+          }
+        ],
+        "missing": [
+          "reconnaissance",
+          "resource-development",
+          "execution",
+          "privilege-escalation",
+          "defense-evasion",
+          "lateral-movement",
+          "command-and-control",
+          "impact"
+        ]
+      },
+      "atlas_tactics": {
+        "total": 7,
+        "covered": 0,
+        "percent": 0,
+        "details": null,
+        "missing": [
+          "reconnaissance",
+          "resource-development",
+          "initial-access",
+          "ml-attack-staging",
+          "ml-model-access",
+          "exfiltration",
+          "impact"
+        ]
+      },
+      "framework": {
+        "attack_stages": 11,
+        "atlas_stages": 0,
+        "owasp_stages": 0
+      }
+    },
+    {
+      "name": "supply-chain-compromise",
+      "adversary": "lazarus-group",
+      "stages": 4,
+      "completed": 4,
+      "skipped": 0,
+      "techniques": 2,
+      "attack_tactics": {
+        "total": 14,
+        "covered": 3,
+        "percent": 21,
+        "details": [
+          {
+            "short": "initial-access",
+            "name": "Initial Access",
+            "stages": 2
+          },
+          {
+            "short": "defense-evasion",
+            "name": "Defense Evasion",
+            "stages": 1
+          },
+          {
+            "short": "impact",
+            "name": "Impact",
+            "stages": 1
+          }
+        ],
+        "missing": [
+          "reconnaissance",
+          "resource-development",
+          "execution",
+          "persistence",
+          "privilege-escalation",
+          "credential-access",
+          "discovery",
+          "lateral-movement",
+          "collection",
+          "command-and-control",
+          "exfiltration"
+        ]
+      },
+      "atlas_tactics": {
+        "total": 7,
+        "covered": 0,
+        "percent": 0,
+        "details": null,
+        "missing": [
+          "reconnaissance",
+          "resource-development",
+          "initial-access",
+          "ml-attack-staging",
+          "ml-model-access",
+          "exfiltration",
+          "impact"
+        ]
+      },
+      "framework": {
+        "attack_stages": 4,
+        "atlas_stages": 0,
+        "owasp_stages": 0
+      }
+    },
+    {
+      "name": "tool-call-injection",
+      "adversary": "ai-red-team",
+      "stages": 9,
+      "completed": 9,
+      "skipped": 0,
+      "techniques": 2,
+      "attack_tactics": {
+        "total": 14,
+        "covered": 0,
+        "percent": 0,
+        "details": null,
+        "missing": [
+          "reconnaissance",
+          "resource-development",
+          "initial-access",
+          "execution",
+          "persistence",
+          "privilege-escalation",
+          "defense-evasion",
+          "credential-access",
+          "discovery",
+          "lateral-movement",
+          "collection",
+          "command-and-control",
+          "exfiltration",
+          "impact"
+        ]
+      },
+      "atlas_tactics": {
+        "total": 7,
+        "covered": 2,
+        "percent": 28,
+        "details": [
+          {
+            "short": "initial-access",
+            "name": "Initial Access",
+            "stages": 1
+          },
+          {
+            "short": "impact",
+            "name": "Impact",
+            "stages": 1
+          }
+        ],
+        "missing": [
+          "reconnaissance",
+          "resource-development",
+          "ml-attack-staging",
+          "ml-model-access",
+          "exfiltration"
+        ]
+      },
+      "framework": {
+        "attack_stages": 0,
+        "atlas_stages": 9,
+        "owasp_stages": 0
+      }
+    },
+    {
+      "name": "volt-typhoon",
+      "adversary": "Volt Typhoon",
+      "stages": 11,
+      "completed": 11,
+      "skipped": 0,
+      "techniques": 11,
+      "attack_tactics": {
+        "total": 14,
+        "covered": 8,
+        "percent": 57,
+        "details": [
+          {
+            "short": "initial-access",
+            "name": "Initial Access",
+            "stages": 2
+          },
+          {
+            "short": "execution",
+            "name": "Execution",
+            "stages": 1
+          },
+          {
+            "short": "defense-evasion",
+            "name": "Defense Evasion",
+            "stages": 1
+          },
+          {
+            "short": "credential-access",
+            "name": "Credential Access",
+            "stages": 1
+          },
+          {
+            "short": "discovery",
+            "name": "Discovery",
+            "stages": 3
+          },
+          {
+            "short": "collection",
+            "name": "Collection",
+            "stages": 1
+          },
+          {
+            "short": "command-and-control",
+            "name": "Command and Control",
+            "stages": 1
+          },
+          {
+            "short": "exfiltration",
+            "name": "Exfiltration",
+            "stages": 1
+          }
+        ],
+        "missing": [
+          "reconnaissance",
+          "resource-development",
+          "persistence",
+          "privilege-escalation",
+          "lateral-movement",
+          "impact"
+        ]
+      },
+      "atlas_tactics": {
+        "total": 7,
+        "covered": 0,
+        "percent": 0,
+        "details": null,
+        "missing": [
+          "reconnaissance",
+          "resource-development",
+          "initial-access",
+          "ml-attack-staging",
+          "ml-model-access",
+          "exfiltration",
+          "impact"
+        ]
+      },
+      "framework": {
+        "attack_stages": 11,
+        "atlas_stages": 0,
+        "owasp_stages": 0
+      }
+    },
+    {
+      "name": "zero-day-web-exploit",
+      "adversary": "hafnium",
+      "stages": 5,
+      "completed": 5,
+      "skipped": 0,
+      "techniques": 4,
+      "attack_tactics": {
+        "total": 14,
+        "covered": 4,
+        "percent": 28,
+        "details": [
+          {
+            "short": "initial-access",
+            "name": "Initial Access",
+            "stages": 2
+          },
+          {
+            "short": "execution",
+            "name": "Execution",
+            "stages": 1
+          },
+          {
+            "short": "persistence",
+            "name": "Persistence",
+            "stages": 1
+          },
+          {
+            "short": "collection",
+            "name": "Collection",
+            "stages": 1
+          }
+        ],
+        "missing": [
+          "reconnaissance",
+          "resource-development",
+          "privilege-escalation",
+          "defense-evasion",
+          "credential-access",
+          "discovery",
+          "lateral-movement",
+          "command-and-control",
+          "exfiltration",
+          "impact"
+        ]
+      },
+      "atlas_tactics": {
+        "total": 7,
+        "covered": 0,
+        "percent": 0,
+        "details": null,
+        "missing": [
+          "reconnaissance",
+          "resource-development",
+          "initial-access",
+          "ml-attack-staging",
+          "ml-model-access",
+          "exfiltration",
+          "impact"
+        ]
+      },
+      "framework": {
+        "attack_stages": 5,
+        "atlas_stages": 0,
+        "owasp_stages": 0
+      }
+    }
+  ],
+  "aggregate": {
+    "total_campaigns": 72,
+    "total_stages": 441,
+    "total_completed": 441,
+    "total_skipped": 0,
+    "unique_techniques": 132,
+    "unique_detections": 1151,
+    "unique_telemetry": 84,
+    "attack_tactics": {
+      "total": 14,
+      "covered": 12,
+      "percent": 85,
+      "details": [
+        {
+          "short": "initial-access",
+          "name": "Initial Access",
+          "stages": 16
+        },
+        {
+          "short": "execution",
+          "name": "Execution",
+          "stages": 19
+        },
+        {
+          "short": "persistence",
+          "name": "Persistence",
+          "stages": 22
+        },
+        {
+          "short": "privilege-escalation",
+          "name": "Privilege Escalation",
+          "stages": 4
+        },
+        {
+          "short": "defense-evasion",
+          "name": "Defense Evasion",
+          "stages": 29
+        },
+        {
+          "short": "credential-access",
+          "name": "Credential Access",
+          "stages": 38
+        },
+        {
+          "short": "discovery",
+          "name": "Discovery",
+          "stages": 32
+        },
+        {
+          "short": "lateral-movement",
+          "name": "Lateral Movement",
+          "stages": 16
+        },
+        {
+          "short": "collection",
+          "name": "Collection",
+          "stages": 21
+        },
+        {
+          "short": "command-and-control",
+          "name": "Command and Control",
+          "stages": 7
+        },
+        {
+          "short": "exfiltration",
+          "name": "Exfiltration",
+          "stages": 19
+        },
+        {
+          "short": "impact",
+          "name": "Impact",
+          "stages": 14
+        }
+      ],
+      "missing": [
+        "reconnaissance",
+        "resource-development"
+      ]
+    },
+    "atlas_tactics": {
+      "total": 7,
+      "covered": 7,
+      "percent": 100,
+      "details": [
+        {
+          "short": "reconnaissance",
+          "name": "Reconnaissance",
+          "stages": 28
+        },
+        {
+          "short": "resource-development",
+          "name": "Resource Development",
+          "stages": 1
+        },
+        {
+          "short": "initial-access",
+          "name": "Initial Access",
+          "stages": 32
+        },
+        {
+          "short": "ml-attack-staging",
+          "name": "ML Attack Staging",
+          "stages": 14
+        },
+        {
+          "short": "ml-model-access",
+          "name": "ML Model Access",
+          "stages": 9
+        },
+        {
+          "short": "exfiltration",
+          "name": "Exfiltration",
+          "stages": 6
+        },
+        {
+          "short": "impact",
+          "name": "Impact",
+          "stages": 28
+        }
+      ],
+      "missing": null
+    },
+    "framework": {
+      "attack_stages": 237,
+      "atlas_stages": 178,
+      "owasp_stages": 26
+    }
+  },
+  "gaps": [
+    {
+      "campaign": "agent-identity-spoofing",
+      "stage_id": "agent-name-spoofing",
+      "stage_name": "Agent name spoofing",
+      "technique": "AML.T0051",
+      "technique_name": "LLM Prompt Injection",
+      "tactic": "initial-access",
+      "type": "telemetry_missing",
+      "risk": "medium",
+      "description": "Stage declares no expected telemetry — detection engineering cannot begin without observable artifacts"
+    },
+    {
+      "campaign": "agent-identity-spoofing",
+      "stage_id": "delegation-chain-forgery",
+      "stage_name": "Delegation chain forgery",
+      "technique": "AML.T0051",
+      "technique_name": "LLM Prompt Injection",
+      "tactic": "privilege-escalation",
+      "type": "telemetry_missing",
+      "risk": "medium",
+      "description": "Stage declares no expected telemetry — detection engineering cannot begin without observable artifacts"
+    },
+    {
+      "campaign": "agent-identity-spoofing",
+      "stage_id": "privilege-impersonation",
+      "stage_name": "Privilege impersonation",
+      "technique": "AML.T0051",
+      "technique_name": "LLM Prompt Injection",
+      "tactic": "privilege-escalation",
+      "type": "telemetry_missing",
+      "risk": "medium",
+      "description": "Stage declares no expected telemetry — detection engineering cannot begin without observable artifacts"
+    },
+    {
+      "campaign": "agent-identity-spoofing",
+      "stage_id": "credential-relay",
+      "stage_name": "Credential relay attack",
+      "technique": "AML.T0051",
+      "technique_name": "LLM Prompt Injection",
+      "tactic": "exfiltration",
+      "type": "telemetry_missing",
+      "risk": "medium",
+      "description": "Stage declares no expected telemetry — detection engineering cannot begin without observable artifacts"
+    },
+    {
+      "campaign": "agent-identity-spoofing",
+      "stage_id": "response-tampering",
+      "stage_name": "Response tampering",
+      "technique": "AML.T0051",
+      "technique_name": "LLM Prompt Injection",
+      "tactic": "defense-evasion",
+      "type": "telemetry_missing",
+      "risk": "medium",
+      "description": "Stage declares no expected telemetry — detection engineering cannot begin without observable artifacts"
+    },
+    {
+      "campaign": "agent-identity-spoofing",
+      "stage_id": "capability-claim-injection",
+      "stage_name": "Capability claim injection",
+      "technique": "AML.T0051",
+      "technique_name": "LLM Prompt Injection",
+      "tactic": "privilege-escalation",
+      "type": "telemetry_missing",
+      "risk": "medium",
+      "description": "Stage declares no expected telemetry — detection engineering cannot begin without observable artifacts"
+    },
+    {
+      "campaign": "agent-identity-spoofing",
+      "stage_id": "session-hijacking",
+      "stage_name": "Session hijacking",
+      "technique": "AML.T0051",
+      "technique_name": "LLM Prompt Injection",
+      "tactic": "lateral-movement",
+      "type": "telemetry_missing",
+      "risk": "medium",
+      "description": "Stage declares no expected telemetry — detection engineering cannot begin without observable artifacts"
+    },
+    {
+      "campaign": "agent-identity-spoofing",
+      "stage_id": "trust-level-downgrade",
+      "stage_name": "Trust level manipulation",
+      "technique": "AML.T0051",
+      "technique_name": "LLM Prompt Injection",
+      "tactic": "privilege-escalation",
+      "type": "telemetry_missing",
+      "risk": "medium",
+      "description": "Stage declares no expected telemetry — detection engineering cannot begin without observable artifacts"
+    },
+    {
+      "campaign": "art-persistence-windows",
+      "stage_id": "prep-payload",
+      "stage_name": "Create Test Payload",
+      "technique": "T1059.003",
+      "technique_name": "Windows Command Shell",
+      "tactic": "execution",
+      "type": "detection_missing",
+      "risk": "high",
+      "description": "Stage declares expected telemetry but no detection rules — telemetry will fire with nothing to catch it"
+    },
+    {
+      "campaign": "prompt-leaking",
+      "stage_id": "direct-extraction",
+      "stage_name": "Direct prompt extraction",
+      "technique": "AML.T0051",
+      "technique_name": "LLM Prompt Injection",
+      "tactic": "initial-access",
+      "type": "telemetry_missing",
+      "risk": "medium",
+      "description": "Stage declares no expected telemetry — detection engineering cannot begin without observable artifacts"
+    },
+    {
+      "campaign": "prompt-leaking",
+      "stage_id": "role-play-extraction",
+      "stage_name": "Debug persona prompt leak",
+      "technique": "AML.T0051",
+      "technique_name": "LLM Prompt Injection",
+      "tactic": "initial-access",
+      "type": "telemetry_missing",
+      "risk": "medium",
+      "description": "Stage declares no expected telemetry — detection engineering cannot begin without observable artifacts"
+    },
+    {
+      "campaign": "prompt-leaking",
+      "stage_id": "translation-extraction",
+      "stage_name": "Translation-based prompt leak",
+      "technique": "AML.T0043",
+      "technique_name": "Craft Adversarial Data",
+      "tactic": "defense-evasion",
+      "type": "telemetry_missing",
+      "risk": "medium",
+      "description": "Stage declares no expected telemetry — detection engineering cannot begin without observable artifacts"
+    },
+    {
+      "campaign": "prompt-leaking",
+      "stage_id": "encoding-extraction",
+      "stage_name": "Base64 encoding prompt leak",
+      "technique": "AML.T0043",
+      "technique_name": "Craft Adversarial Data",
+      "tactic": "defense-evasion",
+      "type": "telemetry_missing",
+      "risk": "medium",
+      "description": "Stage declares no expected telemetry — detection engineering cannot begin without observable artifacts"
+    },
+    {
+      "campaign": "prompt-leaking",
+      "stage_id": "incremental-elicitation",
+      "stage_name": "Incremental instruction elicitation",
+      "technique": "AML.T0051",
+      "technique_name": "LLM Prompt Injection",
+      "tactic": "ml-model-access",
+      "type": "telemetry_missing",
+      "risk": "medium",
+      "description": "Stage declares no expected telemetry — detection engineering cannot begin without observable artifacts"
+    },
+    {
+      "campaign": "prompt-leaking",
+      "stage_id": "completion-attack",
+      "stage_name": "Prompt completion attack",
+      "technique": "AML.T0051",
+      "technique_name": "LLM Prompt Injection",
+      "tactic": "initial-access",
+      "type": "telemetry_missing",
+      "risk": "medium",
+      "description": "Stage declares no expected telemetry — detection engineering cannot begin without observable artifacts"
+    },
+    {
+      "campaign": "prompt-leaking",
+      "stage_id": "tool-schema-extraction",
+      "stage_name": "Tool schema extraction",
+      "technique": "AML.T0051",
+      "technique_name": "LLM Prompt Injection",
+      "tactic": "reconnaissance",
+      "type": "telemetry_missing",
+      "risk": "medium",
+      "description": "Stage declares no expected telemetry — detection engineering cannot begin without observable artifacts"
+    },
+    {
+      "campaign": "prompt-leaking",
+      "stage_id": "markdown-injection-leak",
+      "stage_name": "Markdown image exfiltration",
+      "technique": "AML.T0051",
+      "technique_name": "LLM Prompt Injection",
+      "tactic": "exfiltration",
+      "type": "telemetry_missing",
+      "risk": "medium",
+      "description": "Stage declares no expected telemetry — detection engineering cannot begin without observable artifacts"
+    },
+    {
+      "campaign": "prompt-leaking",
+      "stage_id": "few-shot-extraction",
+      "stage_name": "Few-shot example extraction",
+      "technique": "AML.T0051",
+      "technique_name": "LLM Prompt Injection",
+      "tactic": "initial-access",
+      "type": "telemetry_missing",
+      "risk": "medium",
+      "description": "Stage declares no expected telemetry — detection engineering cannot begin without observable artifacts"
+    },
+    {
+      "campaign": "tool-call-injection",
+      "stage_id": "parameter-injection",
+      "stage_name": "SQL injection in tool parameters",
+      "technique": "AML.T0051",
+      "technique_name": "LLM Prompt Injection",
+      "tactic": "initial-access",
+      "type": "telemetry_missing",
+      "risk": "medium",
+      "description": "Stage declares no expected telemetry — detection engineering cannot begin without observable artifacts"
+    },
+    {
+      "campaign": "tool-call-injection",
+      "stage_id": "tool-name-confusion",
+      "stage_name": "Tool call syntax injection",
+      "technique": "AML.T0051",
+      "technique_name": "LLM Prompt Injection",
+      "tactic": "execution",
+      "type": "telemetry_missing",
+      "risk": "medium",
+      "description": "Stage declares no expected telemetry — detection engineering cannot begin without observable artifacts"
+    },
+    {
+      "campaign": "tool-call-injection",
+      "stage_id": "chained-tool-exploit",
+      "stage_name": "Chained tool output injection",
+      "technique": "AML.T0051",
+      "technique_name": "LLM Prompt Injection",
+      "tactic": "execution",
+      "type": "telemetry_missing",
+      "risk": "medium",
+      "description": "Stage declares no expected telemetry — detection engineering cannot begin without observable artifacts"
+    },
+    {
+      "campaign": "tool-call-injection",
+      "stage_id": "json-parameter-injection",
+      "stage_name": "JSON parameter injection",
+      "technique": "AML.T0051",
+      "technique_name": "LLM Prompt Injection",
+      "tactic": "execution",
+      "type": "telemetry_missing",
+      "risk": "medium",
+      "description": "Stage declares no expected telemetry — detection engineering cannot begin without observable artifacts"
+    },
+    {
+      "campaign": "tool-call-injection",
+      "stage_id": "tool-call-in-response",
+      "stage_name": "Response-embedded tool call",
+      "technique": "AML.T0051",
+      "technique_name": "LLM Prompt Injection",
+      "tactic": "execution",
+      "type": "telemetry_missing",
+      "risk": "medium",
+      "description": "Stage declares no expected telemetry — detection engineering cannot begin without observable artifacts"
+    },
+    {
+      "campaign": "tool-call-injection",
+      "stage_id": "path-traversal-in-tool",
+      "stage_name": "Path traversal in tool parameters",
+      "technique": "AML.T0051",
+      "technique_name": "LLM Prompt Injection",
+      "tactic": "collection",
+      "type": "telemetry_missing",
+      "risk": "medium",
+      "description": "Stage declares no expected telemetry — detection engineering cannot begin without observable artifacts"
+    },
+    {
+      "campaign": "tool-call-injection",
+      "stage_id": "wildcard-tool-abuse",
+      "stage_name": "Wildcard policy abuse",
+      "technique": "AML.T0051",
+      "technique_name": "LLM Prompt Injection",
+      "tactic": "privilege-escalation",
+      "type": "telemetry_missing",
+      "risk": "medium",
+      "description": "Stage declares no expected telemetry — detection engineering cannot begin without observable artifacts"
+    },
+    {
+      "campaign": "tool-call-injection",
+      "stage_id": "unicode-tool-bypass",
+      "stage_name": "Unicode homoglyph tool bypass",
+      "technique": "AML.T0043",
+      "technique_name": "Craft Adversarial Data",
+      "tactic": "defense-evasion",
+      "type": "telemetry_missing",
+      "risk": "medium",
+      "description": "Stage declares no expected telemetry — detection engineering cannot begin without observable artifacts"
+    },
+    {
+      "campaign": "tool-call-injection",
+      "stage_id": "batch-tool-overflow",
+      "stage_name": "Batch tool overflow",
+      "technique": "AML.T0051",
+      "technique_name": "LLM Prompt Injection",
+      "tactic": "impact",
+      "type": "telemetry_missing",
+      "risk": "medium",
+      "description": "Stage declares no expected telemetry — detection engineering cannot begin without observable artifacts"
+    },
+    {
+      "campaign": "",
+      "stage_id": "",
+      "stage_name": "",
+      "technique": "",
+      "technique_name": "",
+      "tactic": "reconnaissance",
+      "type": "tactic_uncovered",
+      "risk": "medium",
+      "description": "ATT\u0026CK tactic \"Reconnaissance\" has no stage coverage across any analyzed campaign"
+    },
+    {
+      "campaign": "",
+      "stage_id": "",
+      "stage_name": "",
+      "technique": "",
+      "technique_name": "",
+      "tactic": "resource-development",
+      "type": "tactic_uncovered",
+      "risk": "medium",
+      "description": "ATT\u0026CK tactic \"Resource Development\" has no stage coverage across any analyzed campaign"
+    }
+  ],
+  "risk_summary": {
+    "critical": 0,
+    "high": 1,
+    "medium": 28,
+    "low": 0,
+    "total": 29,
+    "score": 21.03448275862069
+  }
+}

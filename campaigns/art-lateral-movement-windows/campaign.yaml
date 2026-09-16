@@ -1,0 +1,145 @@
+api_version: v1
+kind: Campaign
+
+meta:
+  name: art-lateral-movement-windows
+  adversary: Atomic Red Team
+  description: "Real lateral movement techniques — PsExec, WMI, WinRM, RDP, admin shares"
+  objective: "Execute real lateral movement to validate detection of remote execution and authentication abuse"
+  mitre_version: "15.1"
+  severity: critical
+  tags: [art, atomic-red-team, lateral-movement, windows, live-execution]
+  authors: ["ThreatEcho"]
+  references:
+    - https://github.com/redcanaryco/atomic-red-team
+    - https://attack.mitre.org/tactics/TA0008/
+  created: "2024-08-15"
+  modified: "2026-09-14"
+
+stages:
+  - id: smb-share-enum
+    name: "SMB Share Enumeration"
+    description: "Enumerate local SMB shares and admin shares — reconnaissance for lateral movement"
+    technique: T1135
+    tactic: discovery
+    platform: [windows]
+    execute:
+      type: shell
+      commands:
+        - 'net share'
+        - 'net view \\127.0.0.1 2>nul || echo "net view completed"'
+        - 'dir \\127.0.0.1\C$\Windows\System32\cmd.exe 2>nul || echo "admin share check completed"'
+      elevated: false
+    expect:
+      telemetry: [process_create, network_connection]
+      detections: [share_enumeration, admin_share_access, lateral_movement_recon]
+    on_success: wmi-local
+    on_failure: continue
+    timeout: 30s
+
+  - id: wmi-local
+    name: "WMI Local Execution"
+    description: "Execute commands via WMI locally — same process creation pattern as remote WMI lateral movement"
+    technique: T1047
+    tactic: execution
+    platform: [windows]
+    depends_on: [smb-share-enum]
+    execute:
+      type: powershell
+      commands:
+        - 'Invoke-WmiMethod -Class Win32_Process -Name Create -ArgumentList "cmd.exe /c echo ThreatEcho_wmi_test > C:\Windows\Temp\wmi_test.txt" | Select-Object ReturnValue, ProcessId'
+        - 'Start-Sleep -Seconds 1; if (Test-Path C:\Windows\Temp\wmi_test.txt) { Get-Content C:\Windows\Temp\wmi_test.txt } else { Write-Host "wmi exec completed" }'
+      elevated: false
+      cleanup:
+        - 'Remove-Item C:\Windows\Temp\wmi_test.txt -Force -ErrorAction SilentlyContinue'
+    expect:
+      telemetry: [process_create]
+      detections: [wmi_process_creation, suspicious_wmi_execution]
+    on_success: winrm-local
+    on_failure: continue
+    timeout: 30s
+
+  - id: winrm-local
+    name: "WinRM Local Command Execution"
+    description: "Execute commands via WinRM locally — same command pattern as remote PowerShell Remoting"
+    technique: T1021.006
+    tactic: lateral-movement
+    platform: [windows]
+    depends_on: [wmi-local]
+    execute:
+      type: shell
+      commands:
+        - 'winrm enumerate winrm/config/listener 2>nul || echo "winrm config check completed"'
+        - 'powershell.exe -Command "Invoke-Command -ComputerName localhost -ScriptBlock { whoami; hostname } -ErrorAction SilentlyContinue; Write-Host ''WinRM local exec completed''"'
+      elevated: false
+    expect:
+      telemetry: [process_create]
+      detections: [winrm_execution, powershell_remoting]
+    on_success: psexec-local
+    on_failure: continue
+    timeout: 30s
+
+  - id: psexec-local
+    name: "PsExec-Style Service Installation"
+    description: "PsExec creates a service on the remote host — test the local detection pattern"
+    technique: T1569.002
+    tactic: execution
+    platform: [windows]
+    depends_on: [winrm-local]
+    execute:
+      type: shell
+      commands:
+        - 'sc create ThreatEchoLat binPath= "cmd.exe /c echo lateral_test" start= demand type= own'
+        - 'sc start ThreatEchoLat 2>nul'
+        - 'sc query ThreatEchoLat'
+      elevated: true
+      cleanup:
+        - 'sc stop ThreatEchoLat 2>nul'
+        - 'sc delete ThreatEchoLat 2>nul'
+    expect:
+      telemetry: [service_create, process_create]
+      detections: [psexec_service_install, suspicious_service_creation, lateral_movement_service]
+    on_success: rdp-enable
+    on_failure: continue
+    timeout: 15s
+
+  - id: rdp-enable
+    name: "Enable RDP & Add Firewall Rule"
+    description: "Enable Remote Desktop and configure firewall — common post-compromise lateral prep"
+    technique: T1021.001
+    tactic: lateral-movement
+    platform: [windows]
+    depends_on: [psexec-local]
+    execute:
+      type: shell
+      commands:
+        - 'reg add "HKLM\SYSTEM\CurrentControlSet\Control\Terminal Server" /v fDenyTSConnections /t REG_DWORD /d 0 /f'
+        - 'netsh advfirewall firewall add rule name="ThreatEcho_RDP" protocol=TCP dir=in localport=3389 action=allow'
+      elevated: true
+      cleanup:
+        - 'reg add "HKLM\SYSTEM\CurrentControlSet\Control\Terminal Server" /v fDenyTSConnections /t REG_DWORD /d 1 /f'
+        - 'netsh advfirewall firewall delete rule name="ThreatEcho_RDP"'
+    expect:
+      telemetry: [registry_write, firewall_rule_add]
+      detections: [rdp_enabled, firewall_rule_added, lateral_movement_prep]
+    on_success: pass-the-hash
+    on_failure: continue
+    timeout: 15s
+
+  - id: pass-the-hash
+    name: "Pass-the-Hash Indicators"
+    description: "Detect NTLM authentication patterns consistent with pass-the-hash attacks"
+    technique: T1550.002
+    tactic: lateral-movement
+    platform: [windows]
+    depends_on: [rdp-enable]
+    execute:
+      type: shell
+      commands:
+        - 'powershell.exe -Command "Get-WinEvent -FilterHashtable @{LogName=''Security''; Id=4624} -MaxEvents 5 -ErrorAction SilentlyContinue | Where-Object {$_.Properties[8].Value -eq 9} | Select-Object TimeCreated, @{N=''User'';E={$_.Properties[5].Value}}"'
+      elevated: true
+    expect:
+      telemetry: [authentication, event_log_query]
+      detections: [pass_the_hash, ntlm_type9_logon]
+    on_failure: continue
+    timeout: 15s

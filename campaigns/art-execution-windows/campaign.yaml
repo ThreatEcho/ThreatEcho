@@ -1,0 +1,166 @@
+api_version: v1
+kind: Campaign
+
+meta:
+  name: art-execution-windows
+  adversary: Atomic Red Team
+  description: "Real execution techniques — PowerShell, MSHTA, WMIC, Regsvr32, LOLBAS"
+  objective: "Execute real code execution techniques to validate detection of scripting engines and living-off-the-land binaries"
+  mitre_version: "15.1"
+  severity: high
+  tags: [art, atomic-red-team, execution, windows, live-execution, lolbas]
+  authors: ["ThreatEcho"]
+  references:
+    - https://github.com/redcanaryco/atomic-red-team
+    - https://attack.mitre.org/tactics/TA0002/
+    - https://lolbas-project.github.io/
+  created: "2024-08-15"
+  modified: "2026-09-14"
+
+stages:
+  - id: powershell-encoded
+    name: "Encoded PowerShell Execution"
+    description: "Execute base64-encoded PowerShell — the most common attack delivery mechanism"
+    technique: T1059.001
+    tactic: execution
+    platform: [windows]
+    execute:
+      type: shell
+      commands:
+        - 'powershell.exe -EncodedCommand dwBoAG8AYQBtAGkA'
+        - 'powershell.exe -NoProfile -NonInteractive -Command "Write-Host ''ThreatEcho execution test''; Get-Process | Select-Object -First 3 ProcessName, Id"'
+        - 'powershell.exe -ExecutionPolicy Bypass -WindowStyle Hidden -Command "$x = ''ThreatEcho''; Write-Host $x"'
+      elevated: false
+    expect:
+      telemetry: [process_create, script_block_logging]
+      detections: [encoded_powershell, suspicious_powershell_flags, powershell_bypass_execution_policy]
+    on_success: mshta-exec
+    on_failure: continue
+    timeout: 15s
+
+  - id: mshta-exec
+    name: "MSHTA Script Execution"
+    description: "Execute script via mshta.exe — a signed Windows binary commonly abused for code execution"
+    technique: T1218.005
+    tactic: defense-evasion
+    platform: [windows]
+    depends_on: [powershell-encoded]
+    execute:
+      type: shell
+      commands:
+        - 'mshta vbscript:Execute("CreateObject(""Wscript.Shell"").Run ""cmd /c echo ThreatEcho mshta test"", 0:close")'
+      elevated: false
+    expect:
+      telemetry: [process_create]
+      detections: [mshta_execution, lolbas_proxy_execution, suspicious_mshta_child]
+    on_success: certutil-download
+    on_failure: continue
+    timeout: 15s
+
+  - id: certutil-download
+    name: "CertUtil Encode/Decode"
+    description: "Use certutil.exe to encode/decode files — a living-off-the-land technique commonly used to obfuscate payloads"
+    technique: T1140
+    tactic: defense-evasion
+    platform: [windows]
+    depends_on: [mshta-exec]
+    execute:
+      type: shell
+      commands:
+        - 'echo ThreatEcho certutil test payload > C:\Windows\Temp\certutil_src.txt'
+        - 'certutil.exe -encode C:\Windows\Temp\certutil_src.txt C:\Windows\Temp\certutil_b64.txt'
+        - 'certutil.exe -decode C:\Windows\Temp\certutil_b64.txt C:\Windows\Temp\certutil_out.txt'
+        - 'type C:\Windows\Temp\certutil_out.txt'
+      elevated: false
+      cleanup:
+        - 'del /f C:\Windows\Temp\certutil_src.txt C:\Windows\Temp\certutil_b64.txt C:\Windows\Temp\certutil_out.txt 2>nul'
+    expect:
+      telemetry: [process_create, file_write]
+      detections: [certutil_encode_decode, lolbas_file_operation, deobfuscation]
+    on_success: bitsadmin-exec
+    on_failure: continue
+    timeout: 30s
+
+  - id: bitsadmin-exec
+    name: "BITSAdmin Job Creation"
+    description: "Use bitsadmin.exe to create and manage BITS jobs — exercises the BITS subsystem monitored by EDR"
+    technique: T1197
+    tactic: defense-evasion
+    platform: [windows]
+    depends_on: [certutil-download]
+    execute:
+      type: shell
+      commands:
+        - 'bitsadmin /reset 2>nul & bitsadmin /create TE_%RANDOM%'
+        - 'bitsadmin /list /allusers'
+      elevated: false
+      cleanup:
+        - 'bitsadmin /reset 2>nul'
+    expect:
+      telemetry: [process_create]
+      detections: [bitsadmin_activity, suspicious_bits_job, lolbas_download]
+    on_success: rundll32-exec
+    on_failure: continue
+    timeout: 30s
+
+  - id: rundll32-exec
+    name: "Rundll32 Execution"
+    description: "Execute code via rundll32.exe — commonly used to load malicious DLLs"
+    technique: T1218.011
+    tactic: defense-evasion
+    platform: [windows]
+    depends_on: [bitsadmin-exec]
+    execute:
+      type: shell
+      commands:
+        - 'rundll32.exe javascript:"\..\mshtml,RunHTMLApplication ";document.write("ThreatEcho");close()'
+      elevated: false
+    expect:
+      telemetry: [process_create]
+      detections: [rundll32_script_execution, lolbas_proxy_execution, suspicious_rundll32]
+    on_success: wscript-exec
+    on_failure: continue
+    timeout: 10s
+
+  - id: wscript-exec
+    name: "WScript/CScript Execution"
+    description: "Execute VBScript via Windows Script Host"
+    technique: T1059.005
+    tactic: execution
+    platform: [windows]
+    depends_on: [rundll32-exec]
+    execute:
+      type: shell
+      commands:
+        - 'echo WScript.Echo "ThreatEcho VBS test" > C:\Windows\Temp\te_test.vbs'
+        - 'cscript //nologo C:\Windows\Temp\te_test.vbs'
+      elevated: false
+      cleanup:
+        - 'del /f C:\Windows\Temp\te_test.vbs 2>nul'
+    expect:
+      telemetry: [process_create, file_write]
+      detections: [wscript_execution, vbscript_execution, script_host_activity]
+    on_success: regsvr32-exec
+    on_failure: continue
+    timeout: 10s
+
+  - id: regsvr32-exec
+    name: "Regsvr32 Script Proxy Execution"
+    description: "Use regsvr32.exe /s /n /u with a local SCT scriptlet — Squiblydoo technique for script proxy execution"
+    technique: T1218.010
+    tactic: defense-evasion
+    platform: [windows]
+    depends_on: [wscript-exec]
+    execute:
+      type: powershell
+      commands:
+        - '$sct = ''<?XML version="1.0"?><scriptlet><registration progid="ThreatEchoTest" classid="{00000000-0000-0000-0000-000000000001}"><script language="JScript"><![CDATA[new ActiveXObject("WScript.Shell").Run("cmd /c echo ThreatEcho_regsvr32_test", 0);]]></script></registration></scriptlet>''; Set-Content -Path C:\Windows\Temp\te_test.sct -Value $sct -Encoding ASCII'
+        - 'Start-Process regsvr32.exe -ArgumentList "/s /n /u /i:C:\Windows\Temp\te_test.sct scrobj.dll" -Wait -NoNewWindow; Write-Host "regsvr32 proxy execution completed"'
+      elevated: false
+      cleanup:
+        - 'Remove-Item C:\Windows\Temp\te_test.sct -Force -ErrorAction SilentlyContinue'
+    expect:
+      telemetry: [process_create, file_write]
+      detections: [regsvr32_script_execution, squiblydoo, lolbas_proxy_execution]
+    on_failure: continue
+    timeout: 15s

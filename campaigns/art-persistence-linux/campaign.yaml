@@ -1,0 +1,160 @@
+api_version: v1
+kind: Campaign
+
+meta:
+  name: art-persistence-linux
+  adversary: Atomic Red Team
+  description: "Real persistence techniques on Linux — cron, systemd, shell profiles, SSH keys"
+  objective: "Execute real persistence mechanisms to validate detection of Linux persistence techniques"
+  mitre_version: "15.1"
+  severity: high
+  tags: [art, atomic-red-team, persistence, linux, live-execution]
+  authors: ["ThreatEcho"]
+  references:
+    - https://github.com/redcanaryco/atomic-red-team
+    - https://attack.mitre.org/tactics/TA0003/
+  created: "2024-08-15"
+  modified: "2026-09-14"
+
+variables:
+  persist_name: "threatecho_test"
+
+stages:
+  - id: cron-persist
+    name: "Cron Job Persistence"
+    description: "Install a cron job for periodic execution — the most common Linux persistence mechanism"
+    technique: T1053.003
+    tactic: persistence
+    platform: [linux]
+    execute:
+      type: shell
+      commands:
+        - '(crontab -l 2>/dev/null; echo "# {{persist_name}}"; echo "*/15 * * * * echo threatecho_cron_test > /dev/null 2>&1") | crontab -'
+        - 'crontab -l'
+      elevated: false
+      cleanup:
+        - 'crontab -l 2>/dev/null | grep -v "{{persist_name}}" | grep -v "threatecho_cron_test" | crontab -'
+    expect:
+      telemetry: [file_write]
+      detections: [cron_job_creation, scheduled_task_persistence]
+    on_success: systemd-persist
+    on_failure: continue
+    timeout: 10s
+
+  - id: systemd-persist
+    name: "Systemd Service Persistence"
+    description: "Create a systemd service unit for persistent execution with auto-restart"
+    technique: T1543.002
+    tactic: persistence
+    platform: [linux]
+    depends_on: [cron-persist]
+    execute:
+      type: shell
+      commands:
+        - 'printf "[Unit]\nDescription=ThreatEcho Test\n[Service]\nType=oneshot\nExecStart=/bin/echo threatecho_systemd_test\n[Install]\nWantedBy=multi-user.target\n" > /etc/systemd/system/{{persist_name}}.service'
+        - 'systemctl daemon-reload'
+        - 'systemctl enable {{persist_name}}.service 2>/dev/null'
+        - 'systemctl status {{persist_name}}.service 2>/dev/null || echo "service created"'
+      elevated: true
+      cleanup:
+        - 'systemctl disable {{persist_name}}.service 2>/dev/null'
+        - 'rm -f /etc/systemd/system/{{persist_name}}.service'
+        - 'systemctl daemon-reload'
+    expect:
+      telemetry: [file_write, process_create]
+      detections: [systemd_service_creation, service_persistence, suspicious_unit_file]
+    on_success: bashrc-persist
+    on_failure: continue
+    timeout: 15s
+
+  - id: bashrc-persist
+    name: "Shell Profile Persistence"
+    description: "Add commands to .bashrc/.profile for execution on user login"
+    technique: T1546.004
+    tactic: persistence
+    platform: [linux]
+    depends_on: [systemd-persist]
+    execute:
+      type: shell
+      commands:
+        - 'echo "# {{persist_name}}" >> ~/.bashrc'
+        - 'echo "echo threatecho_bashrc_test > /dev/null 2>&1 # {{persist_name}}" >> ~/.bashrc'
+        - 'tail -3 ~/.bashrc'
+      elevated: false
+      cleanup:
+        - 'sed -i "/{{persist_name}}/d" ~/.bashrc'
+    expect:
+      telemetry: [file_write]
+      detections: [shell_profile_modification, bashrc_persistence, startup_script_change]
+    on_success: ssh-key-persist
+    on_failure: continue
+    timeout: 10s
+
+  - id: ssh-key-persist
+    name: "SSH Authorized Keys Persistence"
+    description: "Add an SSH public key for passwordless remote access"
+    technique: T1098.004
+    tactic: persistence
+    platform: [linux]
+    depends_on: [bashrc-persist]
+    execute:
+      type: shell
+      commands:
+        - 'mkdir -p ~/.ssh && chmod 700 ~/.ssh'
+        - 'echo "# {{persist_name}} ssh-rsa AAAA_THREATECHO_TEST_KEY_NOT_REAL user@threatecho" >> ~/.ssh/authorized_keys'
+        - 'chmod 600 ~/.ssh/authorized_keys'
+        - 'tail -2 ~/.ssh/authorized_keys'
+      elevated: false
+      cleanup:
+        - 'sed -i "/{{persist_name}}/d" ~/.ssh/authorized_keys'
+    expect:
+      telemetry: [file_write]
+      detections: [authorized_keys_modification, ssh_persistence, account_manipulation]
+    on_success: at-persist
+    on_failure: continue
+    timeout: 10s
+
+  - id: at-persist
+    name: "at Job Scheduling"
+    description: "Schedule a one-time execution using the at daemon"
+    technique: T1053.002
+    tactic: persistence
+    platform: [linux]
+    depends_on: [ssh-key-persist]
+    execute:
+      type: shell
+      commands:
+        - 'echo "echo threatecho_at_test > /dev/null 2>&1" | at now + 60 minutes 2>/dev/null || echo "at daemon not available"'
+        - 'atq 2>/dev/null || echo "no at jobs"'
+      elevated: false
+      cleanup:
+        - 'for j in $(atq 2>/dev/null | awk "{print \$1}"); do atrm "$j" 2>/dev/null; done'
+    expect:
+      telemetry: [process_create, file_write]
+      detections: [at_job_creation, scheduled_execution]
+    on_success: rc-local
+    on_failure: continue
+    timeout: 10s
+
+  - id: rc-local
+    name: "rc.local Persistence"
+    description: "Add commands to /etc/rc.local for execution at boot"
+    technique: T1037.004
+    tactic: persistence
+    platform: [linux]
+    depends_on: [at-persist]
+    execute:
+      type: shell
+      commands:
+        - 'test -f /etc/rc.local && cp /etc/rc.local /etc/rc.local.threatecho_bak || echo "#!/bin/bash" > /etc/rc.local'
+        - 'echo "echo threatecho_rclocal_test > /dev/null 2>&1 # {{persist_name}}" >> /etc/rc.local'
+        - 'chmod +x /etc/rc.local'
+        - 'cat /etc/rc.local'
+      elevated: true
+      cleanup:
+        - 'test -f /etc/rc.local.threatecho_bak && mv /etc/rc.local.threatecho_bak /etc/rc.local || sed -i "/{{persist_name}}/d" /etc/rc.local'
+    expect:
+      telemetry: [file_write]
+      detections: [rc_local_modification, boot_persistence]
+    on_failure: continue
+    timeout: 10s

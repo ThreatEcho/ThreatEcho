@@ -1,0 +1,112 @@
+api_version: v1
+kind: Policy
+
+meta:
+  name: multi-agent-governance
+  description: >
+    Governance policy for multi-agent systems. Controls delegation
+    chains, prevents privilege escalation through agent-to-agent
+    messaging, detects confused-deputy attacks, and enforces
+    boundary isolation between agent trust domains.
+  authors:
+    - ThreatEcho
+  created: "2025-07-15"
+  modified: "2026-03-20"
+
+agent:
+  name: "*"
+  type: orchestrator
+  tools:
+    - agent_message
+    - agent_router
+    - context_manager
+    - tool_call
+    - escalate
+
+rules:
+  - id: deny-delegation-escalation
+    description: Block delegation to agents with higher trust levels
+    effect: deny
+    priority: 100
+    match:
+      tools: ["agent_router", "agent_message"]
+      actions: ["delegate", "escalate"]
+    conditions:
+      - field: elevated
+        operator: eq
+        value: "true"
+
+  - id: deny-circular-delegation
+    description: Block circular delegation chains (A→B→A)
+    effect: deny
+    priority: 100
+    match:
+      tools: ["agent_router"]
+      actions: ["delegate"]
+
+  - id: deny-cross-boundary-write
+    description: Block write operations across trust boundaries
+    effect: deny
+    priority: 95
+    match:
+      tools: ["context_manager"]
+      actions: ["write", "merge"]
+
+  - id: deny-unregistered-agents
+    description: Block communication with unregistered agents
+    effect: deny
+    priority: 95
+    match:
+      tools: ["agent_message"]
+      targets: ["*/unregistered/*"]
+
+  - id: deny-mass-delegation
+    description: Block fan-out delegation to more than 5 agents simultaneously
+    effect: deny
+    priority: 90
+    match:
+      tools: ["agent_router"]
+      actions: ["broadcast"]
+
+  # --- ALERT rules ---
+
+  - id: alert-cross-boundary-delegation
+    description: Alert on delegation across trust domain boundaries
+    effect: alert
+    priority: 60
+    match:
+      tools: ["agent_router"]
+      actions: ["delegate"]
+
+  - id: alert-escalation-request
+    description: Alert on all escalation requests for audit
+    effect: alert
+    priority: 55
+    match:
+      tools: ["escalate"]
+
+  - id: alert-context-sharing
+    description: Alert when agents share execution context
+    effect: alert
+    priority: 50
+    match:
+      tools: ["context_manager"]
+      actions: ["merge", "share"]
+
+  # --- ALLOW rules ---
+
+  - id: allow-agent-status
+    description: Allow agent health checks and status queries
+    effect: allow
+    priority: 10
+    match:
+      tools: ["agent_router"]
+      actions: ["health_check", "list", "status"]
+
+  - id: allow-context-read
+    description: Allow reading own agent context
+    effect: allow
+    priority: 10
+    match:
+      tools: ["context_manager"]
+      actions: ["read"]

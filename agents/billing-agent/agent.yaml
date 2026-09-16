@@ -1,0 +1,55 @@
+api_version: v1
+kind: Agent
+
+meta:
+  name: billing-agent
+  type: tool-calling
+  description: "Financial operations agent with access to payment systems, invoice generation, and revenue reporting. Handles billing queries, processes refunds, and generates financial reports."
+  model: gpt-4
+  version: "1.8.0"
+  owner: finance-team
+  tags: [internal, tier-1, production, pci-scope]
+
+capabilities:
+  tool_calling: true
+  rag: false
+  code_execution: false
+  web_access: false
+  file_access: true
+  message_passing: true
+  memory: false
+  autonomous: false
+
+tools:
+  - name: payment_gateway
+    actions: [query, refund, charge]
+    targets: ["https://payments.internal/api/*"]
+    rate_limit: 30
+  - name: invoice_system
+    actions: [create, read, update]
+    targets: ["https://invoices.internal/api/*"]
+  - name: reporting_db
+    actions: [query]
+    targets: ["https://reports.internal/api/*"]
+  - name: send_email
+    actions: [send]
+    targets: ["*@corp.example.com"]
+    rate_limit: 5
+
+trust:
+  level: elevated
+  trusts_from: [orchestrator]
+  trusted_by: [support-agent]
+  boundaries: [financial]
+  can_escalate: false
+
+guardrails:
+  - name: pci-compliance-check
+    type: tool-call
+    enforced: true
+  - name: amount-limit-validator
+    type: tool-call
+    enforced: true
+  - name: pii-filter
+    type: output
+    enforced: true

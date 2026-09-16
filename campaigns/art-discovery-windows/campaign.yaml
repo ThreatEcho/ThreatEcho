@@ -1,0 +1,173 @@
+api_version: v1
+kind: Campaign
+
+meta:
+  name: art-discovery-windows
+  adversary: Atomic Red Team
+  description: "Real discovery and reconnaissance techniques using native Windows commands"
+  objective: "Execute real enumeration commands to validate detection of reconnaissance patterns"
+  mitre_version: "15.1"
+  severity: medium
+  tags: [art, atomic-red-team, discovery, windows, live-execution]
+  authors: ["ThreatEcho"]
+  references:
+    - https://github.com/redcanaryco/atomic-red-team
+    - https://attack.mitre.org/tactics/TA0007/
+  created: "2024-08-15"
+  modified: "2026-09-15"
+
+stages:
+  - id: system-info
+    name: "System Information Discovery"
+    description: "Gather system information using native Windows commands"
+    technique: T1082
+    tactic: discovery
+    platform: [windows]
+    execute:
+      type: shell
+      commands:
+        - 'systeminfo'
+        - 'hostname'
+        - 'powershell.exe -Command "Get-CimInstance Win32_OperatingSystem | Format-List Caption,Version,BuildNumber"'
+        - 'powershell.exe -Command "Get-CimInstance Win32_ComputerSystem | Format-List Domain,Manufacturer,Model"'
+      elevated: false
+    expect:
+      telemetry: [process_create]
+      detections: [system_info_enumeration, cim_reconnaissance]
+    on_success: user-discovery
+    on_failure: continue
+    timeout: 30s
+
+  - id: user-discovery
+    name: "Local & Domain Account Discovery"
+    description: "Enumerate local users, domain users, and group memberships"
+    technique: T1087.001
+    tactic: discovery
+    platform: [windows]
+    depends_on: [system-info]
+    execute:
+      type: shell
+      commands:
+        - 'whoami /all'
+        - 'net user 2>nul || exit /b 0'
+        - 'net localgroup Administrators'
+        - 'powershell.exe -Command "try { net group ''Domain Admins'' /domain } catch {} ; exit 0"'
+        - 'powershell.exe -Command "try { net group ''Enterprise Admins'' /domain } catch {} ; exit 0"'
+        - 'powershell.exe -Command "try { net group ''Schema Admins'' /domain } catch {} ; exit 0"'
+      elevated: false
+    expect:
+      telemetry: [process_create]
+      detections: [account_enumeration, domain_group_discovery, suspicious_net_commands]
+    on_success: network-discovery
+    on_failure: continue
+    timeout: 30s
+
+  - id: network-discovery
+    name: "Network Configuration & Connection Discovery"
+    description: "Enumerate network interfaces, connections, and routes"
+    technique: T1016
+    tactic: discovery
+    platform: [windows]
+    depends_on: [user-discovery]
+    execute:
+      type: shell
+      commands:
+        - 'ipconfig /all'
+        - 'netstat -ano'
+        - 'arp -a'
+        - 'route print'
+        - 'nslookup -type=SRV _ldap._tcp.dc._msdcs.%USERDNSDOMAIN% 2>nul'
+      elevated: false
+    expect:
+      telemetry: [process_create]
+      detections: [network_enumeration, dns_srv_query_domain_controllers]
+    on_success: remote-system-discovery
+    on_failure: continue
+    timeout: 30s
+
+  - id: remote-system-discovery
+    name: "Remote System & Share Discovery"
+    description: "Discover remote systems and network shares"
+    technique: T1018
+    tactic: discovery
+    platform: [windows]
+    depends_on: [network-discovery]
+    execute:
+      type: shell
+      commands:
+        - 'net view /domain 2>nul || exit /b 0'
+        - 'net view 2>nul || exit /b 0'
+        - 'nltest /dclist:%USERDNSDOMAIN% 2>nul || exit /b 0'
+        - 'net share'
+        - 'powershell.exe -Command "Get-SmbShare | Format-Table Name,Path,Description"'
+      elevated: false
+    expect:
+      telemetry: [process_create]
+      detections: [remote_system_enumeration, nltest_domain_trust, share_enumeration]
+    on_success: process-discovery
+    on_failure: continue
+    timeout: 30s
+
+  - id: process-discovery
+    name: "Process & Service Discovery"
+    description: "Enumerate running processes, services, and installed software"
+    technique: T1057
+    tactic: discovery
+    platform: [windows]
+    depends_on: [remote-system-discovery]
+    execute:
+      type: shell
+      commands:
+        - 'tasklist /v'
+        - 'powershell.exe -Command "Get-Process | Select-Object Id,ProcessName,CPU,WorkingSet | Format-Table"'
+        - 'sc query type=service state=all'
+        - 'powershell.exe -Command "Get-CimInstance Win32_Product | Select-Object Name,Version | Format-Table"'
+      elevated: false
+    expect:
+      telemetry: [process_create]
+      detections: [process_enumeration, service_enumeration, software_enumeration]
+    on_success: security-software
+    on_failure: continue
+    timeout: 30s
+
+  - id: security-software
+    name: "Security Software Discovery"
+    description: "Identify installed security products — AV, EDR, firewall status"
+    technique: T1518.001
+    tactic: discovery
+    platform: [windows]
+    depends_on: [process-discovery]
+    execute:
+      type: shell
+      commands:
+        - 'powershell.exe -Command "Get-CimInstance -Namespace root/SecurityCenter2 -ClassName AntiVirusProduct | Select-Object displayName, productState"'
+        - 'netsh advfirewall show allprofiles state'
+        - 'powershell.exe -Command "Get-Service | Where-Object {$_.DisplayName -match ''defend|sentinel|crowd|carbon|sophos|symantec|mcafee|trend|kaspersky|eset|malware|virus''} | Select-Object Name, Status, DisplayName"'
+        - 'powershell.exe -Command "Get-Process | Where-Object {$_.ProcessName -match ''MsMpEng|SentinelAgent|CSFalcon|CbDefense|SophosSAU|ccSvcHst|savservice''} | Select-Object ProcessName, Id"'
+      elevated: false
+    expect:
+      telemetry: [process_create]
+      detections: [security_product_enumeration, av_discovery, edr_detection_attempt]
+    on_success: trust-discovery
+    on_failure: continue
+    timeout: 30s
+
+  - id: trust-discovery
+    name: "Domain Trust Discovery"
+    description: "Enumerate Active Directory domain trust relationships"
+    technique: T1482
+    tactic: discovery
+    platform: [windows]
+    depends_on: [security-software]
+    execute:
+      type: shell
+      commands:
+        - 'nltest /domain_trusts /all_trusts 2>nul'
+        - 'nltest /trusted_domains 2>nul'
+        - 'powershell.exe -Command "([System.DirectoryServices.ActiveDirectory.Domain]::GetCurrentDomain()).GetAllTrustRelationships() 2>$null"'
+      elevated: false
+    expect:
+      telemetry: [process_create]
+      detections: [domain_trust_enumeration, nltest_trust_query]
+    on_failure: continue
+    timeout: 15s

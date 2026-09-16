@@ -1,0 +1,126 @@
+ThreatEcho Doctor — Workspace Health Check (threatecho dev (commit: unknown, built: unknown))
+──────────────────────────────────────────────────
+
+🔧 Configuration
+  ℹ No project config (.threatecho.yaml) — using defaults
+
+📁 Campaigns
+  ✓ Found 72 campaigns in <ROOT>/campaigns
+  ✓ agent-api-abuse — valid, lint clean
+  ⚠ agent-capability-probing — 3 lint warning(s)
+  ✓ agent-context-manipulation — valid, lint clean
+  ⚠ agent-credential-harvest — 2 lint warning(s)
+  ⚠ agent-credential-theft — 2 lint warning(s)
+  ⚠ agent-data-exfiltration — 1 lint warning(s)
+  ⚠ agent-delegation-abuse — 1 lint warning(s)
+  ⚠ agent-feedback-loop-attack — 2 lint warning(s)
+  ⚠ agent-function-squatting — 1 lint warning(s)
+  ⚠ agent-guardrail-bypass — 4 lint warning(s)
+  ⚠ agent-identity-spoofing — 22 lint warning(s)
+  ⚠ agent-jailbreak — 3 lint warning(s)
+  ⚠ agent-memory-attack — 2 lint warning(s)
+  ⚠ agent-memory-manipulation — 5 lint warning(s)
+  ✓ agent-model-fingerprint — valid, lint clean
+  ⚠ agent-multi-tenant-escape — 1 lint warning(s)
+  ⚠ agent-orchestrator-takeover — 4 lint warning(s)
+  ✓ agent-output-poisoning — valid, lint clean
+  ✓ agent-plugin-backdoor — valid, lint clean
+  ⚠ agent-privilege-escalation — 2 lint warning(s)
+  ✓ agent-prompt-injection-indirect — valid, lint clean
+  ⚠ agent-session-hijack — 1 lint warning(s)
+  ⚠ agent-state-desync — 3 lint warning(s)
+  ✓ agent-supply-chain — valid, lint clean
+  ✓ agent-tool-abuse — valid, lint clean
+  ⚠ agent-tool-confusion — 3 lint warning(s)
+  ⚠ agent-tool-injection — 3 lint warning(s)
+  ⚠ agent-trust-exploitation — 2 lint warning(s)
+  ⚠ api-key-compromise — 3 lint warning(s)
+  ⚠ apt-lateral-movement — 5 lint warning(s)
+  ✓ apt28-fancy-bear — valid, lint clean
+  ✓ apt29-cozy-bear — valid, lint clean
+  ✓ art-credential-access-linux — valid, lint clean
+  ✓ art-credential-access-windows — valid, lint clean
+  ✓ art-defense-evasion-linux — valid, lint clean
+  ✓ art-defense-evasion-windows — valid, lint clean
+  ✓ art-discovery-linux — valid, lint clean
+  ✓ art-discovery-windows — valid, lint clean
+  ✓ art-execution-linux — valid, lint clean
+  ✓ art-execution-windows — valid, lint clean
+  ✓ art-exfiltration-multi — valid, lint clean
+  ✓ art-lateral-movement-linux — valid, lint clean
+  ✓ art-lateral-movement-windows — valid, lint clean
+  ✓ art-persistence-linux — valid, lint clean
+  ✓ art-persistence-windows — valid, lint clean
+  ⚠ cloud-privilege-escalation — 4 lint warning(s)
+  ⚠ context-window-stuffing — 2 lint warning(s)
+  ⚠ credential-spray — 4 lint warning(s)
+  ⚠ data-staging-exfil — 5 lint warning(s)
+  ✓ fin7-carbanak — valid, lint clean
+  ⚠ function-calling-overflow — 2 lint warning(s)
+  ⚠ insider-threat — 4 lint warning(s)
+  ✓ lazarus-group — valid, lint clean
+  ⚠ living-off-the-land — 5 lint warning(s)
+  ✓ llm-agent-hijack — valid, lint clean
+  ⚠ llm-output-parsing-exploit — 1 lint warning(s)
+  ✓ lockbit-ransomware — valid, lint clean
+  ⚠ mcp-server-attack — 3 lint warning(s)
+  ✓ mcp-server-impersonation — valid, lint clean
+  ⚠ model-extraction — 2 lint warning(s)
+  ⚠ multi-agent-attack — 1 lint warning(s)
+  ⚠ multi-model-arbitrage — 3 lint warning(s)
+  ⚠ prompt-leaking — 20 lint warning(s)
+  ⚠ rag-data-poisoning — 3 lint warning(s)
+  ⚠ rag-index-poisoning — 2 lint warning(s)
+  ✓ rag-poisoning — valid, lint clean
+  ⚠ ransomware-simulation — 4 lint warning(s)
+  ✓ scattered-spider — valid, lint clean
+  ⚠ supply-chain-compromise — 2 lint warning(s)
+  ⚠ tool-call-injection — 25 lint warning(s)
+  ✓ volt-typhoon — valid, lint clean
+  ⚠ zero-day-web-exploit — 1 lint warning(s)
+
+🛡️  Policies
+  ✓ agent-default — valid (10 rules)
+  ✓ agent-strict — valid (17 rules)
+  ✓ api-gateway — valid (10 rules)
+  ✓ autonomous-agent — valid (11 rules)
+  ✓ compliance-hipaa — valid (10 rules)
+  ✓ compliance-pci — valid (10 rules)
+  ✓ data-classification — valid (10 rules)
+  ✓ development-sandbox — valid (10 rules)
+  ✓ incident-response — valid (11 rules)
+  ✓ ml-pipeline — valid (11 rules)
+  ✓ multi-agent-governance — valid (10 rules)
+  ✓ production-lockdown — valid (12 rules)
+  ✓ rag-protection — valid (10 rules)
+  ✓ soc-baseline — valid (14 rules)
+  ✓ tool-calling-strict — valid (10 rules)
+
+📊 Telemetry Registry
+  108 registered types across 16 categories
+  84/108 types used by campaigns (77% registry utilization)
+
+🤖 Agent Inventory
+  ✓ Found 10 agents in agents
+  ✓ billing-agent — valid (tool-calling, elevated trust, 4 tools)
+  ✓ code-assistant — valid (tool-calling, standard trust, 5 tools)
+  ✓ customer-service — valid (tool-calling, standard trust, 5 tools)
+  ✓ data-analyst — valid (tool-calling, standard trust, 4 tools)
+  ✓ deployment-bot — valid (autonomous, elevated trust, 5 tools)
+  ✓ orchestrator — valid (orchestrator, admin trust, 3 tools)
+  ✓ research-agent — valid (tool-calling, standard trust, 5 tools)
+  ✓ security-scanner — valid (autonomous, elevated trust, 5 tools)
+  ✓ support-agent — valid (retrieval, standard trust, 3 tools)
+  ✓ trading-bot — valid (autonomous, elevated trust, 5 tools)
+  ⚠ Trust analysis found 8 risk(s):
+    • [medium] billing-agent: Agent "billing-agent" trusts "orchestrator" which is outside its trust boundary
+    • [medium] code-assistant: Agent "code-assistant" trusts "orchestrator" which is outside its trust boundary
+    • [medium] customer-service: Agent "customer-service" trusts "orchestrator" which is outside its trust boundary
+    • [medium] data-analyst: Agent "data-analyst" trusts "orchestrator" which is outside its trust boundary
+    • [medium] deployment-bot: Agent "deployment-bot" trusts "orchestrator" which is outside its trust boundary
+    • [medium] research-agent: Agent "research-agent" trusts "orchestrator" which is outside its trust boundary
+    • [medium] support-agent: Agent "support-agent" trusts "orchestrator" which is outside its trust boundary
+    • [medium] trading-bot: Agent "trading-bot" trusts "orchestrator" which is outside its trust boundary
+
+──────────────────────────────────────────────────
+⚠ Workspace is functional — 42 warning(s)

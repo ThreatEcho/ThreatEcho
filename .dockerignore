@@ -1,0 +1,12 @@
+.git
+bin/
+dist/
+coverage.*
+*.md
+!README.md
+!CHANGELOG.md
+!LICENSE
+docs/
+.idea/
+.vscode/
+.github/

@@ -1,0 +1,148 @@
+api_version: v1
+kind: Campaign
+
+meta:
+  name: art-defense-evasion-linux
+  adversary: Atomic Red Team
+  description: "Real defense evasion techniques on Linux — timestomping, log clearing, process hiding"
+  objective: "Execute real evasion techniques to validate detection of anti-forensics and indicator removal"
+  mitre_version: "15.1"
+  severity: high
+  tags: [art, atomic-red-team, defense-evasion, linux, live-execution]
+  authors: ["ThreatEcho"]
+  references:
+    - https://github.com/redcanaryco/atomic-red-team
+    - https://attack.mitre.org/tactics/TA0005/
+  created: "2026-09-15"
+  modified: "2026-09-15"
+
+stages:
+  - id: timestomp
+    name: "File Timestomping"
+    description: "Modify file timestamps to blend in with legitimate files"
+    technique: T1070.006
+    tactic: defense-evasion
+    platform: [linux]
+    execute:
+      type: shell
+      commands:
+        - 'echo "ThreatEcho timestomp test" > /tmp/te_timestomp.txt'
+        - 'touch -t 202001010000.00 /tmp/te_timestomp.txt'
+        - 'stat /tmp/te_timestomp.txt'
+      elevated: false
+      cleanup:
+        - 'rm -f /tmp/te_timestomp.txt'
+    expect:
+      telemetry: [file_modify, file_write]
+      detections: [timestomping, file_timestamp_modification]
+    on_success: indicator-removal-bash
+    on_failure: continue
+    timeout: 10s
+
+  - id: indicator-removal-bash
+    name: "Bash History Evasion"
+    description: "Techniques to avoid leaving traces in bash history"
+    technique: T1070.003
+    tactic: defense-evasion
+    platform: [linux]
+    depends_on: [timestomp]
+    execute:
+      type: shell
+      commands:
+        - 'export HISTSIZE=0 && echo "history disabled for this shell"'
+        - 'echo "ThreatEcho history test" && history -c 2>/dev/null || true'
+        - 'unset HISTFILE 2>/dev/null; echo "HISTFILE unset"'
+      elevated: false
+    expect:
+      telemetry: [process_create]
+      detections: [history_evasion, histfile_manipulation, indicator_removal]
+    on_success: hidden-files
+    on_failure: continue
+    timeout: 10s
+
+  - id: hidden-files
+    name: "Hidden File Creation"
+    description: "Create hidden files and directories — common persistence and evasion technique"
+    technique: T1564.001
+    tactic: defense-evasion
+    platform: [linux]
+    depends_on: [indicator-removal-bash]
+    execute:
+      type: shell
+      commands:
+        - 'mkdir -p /tmp/.te_hidden_dir'
+        - 'echo "ThreatEcho hidden file test" > /tmp/.te_hidden_dir/.te_hidden_file'
+        - 'ls -la /tmp/.te_hidden_dir/'
+      elevated: false
+      cleanup:
+        - 'rm -rf /tmp/.te_hidden_dir'
+    expect:
+      telemetry: [file_write, file_create]
+      detections: [hidden_file_creation, hidden_directory, dot_file_creation]
+    on_success: process-masquerade
+    on_failure: continue
+    timeout: 10s
+
+  - id: process-masquerade
+    name: "Process Name Masquerading"
+    description: "Execute with a misleading process name to evade detection"
+    technique: T1036.004
+    tactic: defense-evasion
+    platform: [linux]
+    depends_on: [hidden-files]
+    execute:
+      type: shell
+      commands:
+        - 'cp /bin/ls /tmp/te_kworker && /tmp/te_kworker /tmp && echo "masqueraded as kernel worker"'
+      elevated: false
+      cleanup:
+        - 'rm -f /tmp/te_kworker'
+    expect:
+      telemetry: [process_create, file_write]
+      detections: [process_masquerading, suspicious_process_name, binary_in_tmp]
+    on_success: log-clear-utmp
+    on_failure: continue
+    timeout: 10s
+
+  - id: log-clear-utmp
+    name: "Login Log Discovery"
+    description: "Read login records — precursor to log tampering (read-only check)"
+    technique: T1070.002
+    tactic: defense-evasion
+    platform: [linux]
+    depends_on: [process-masquerade]
+    execute:
+      type: shell
+      commands:
+        - 'last -n 5 2>/dev/null || echo "last not available"'
+        - 'lastlog 2>/dev/null | head -10 || echo "lastlog not available"'
+        - 'ls -la /var/log/wtmp /var/log/btmp /var/log/lastlog 2>/dev/null'
+      elevated: false
+    expect:
+      telemetry: [process_create, file_read]
+      detections: [login_log_access, utmp_read, log_file_discovery]
+    on_success: file-attribute-change
+    on_failure: continue
+    timeout: 10s
+
+  - id: file-attribute-change
+    name: "File Permission Modification"
+    description: "Modify file permissions to enable execution or weaken access controls"
+    technique: T1222.002
+    tactic: defense-evasion
+    platform: [linux]
+    depends_on: [log-clear-utmp]
+    execute:
+      type: shell
+      commands:
+        - 'echo "#!/bin/sh" > /tmp/te_perm_test.sh && echo "echo test" >> /tmp/te_perm_test.sh'
+        - 'chmod 777 /tmp/te_perm_test.sh && ls -la /tmp/te_perm_test.sh'
+        - 'chmod u+s /tmp/te_perm_test.sh 2>/dev/null || echo "suid requires root"'
+      elevated: false
+      cleanup:
+        - 'rm -f /tmp/te_perm_test.sh'
+    expect:
+      telemetry: [file_modify]
+      detections: [permission_modification, chmod_777, suid_modification]
+    on_failure: continue
+    timeout: 10s

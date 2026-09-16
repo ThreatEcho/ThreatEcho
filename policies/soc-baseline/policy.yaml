@@ -1,0 +1,134 @@
+api_version: v1
+kind: Policy
+
+meta:
+  name: soc-baseline
+  description: >
+    Baseline SOC policy for classical adversary simulation gating.
+    Blocks dangerous operations (elevated execution, credential access,
+    privilege escalation) and alerts on lateral movement, exfiltration,
+    and C2 tactics. Allows simulation of initial access, execution,
+    discovery, and collection stages with logging.
+  authors:
+    - ThreatEcho
+  created: "2024-10-01"
+  modified: "2025-08-15"
+
+agent:
+  name: "*"
+  type: soc
+  tools:
+    - shell_exec
+    - http_request
+    - send_email
+    - file_read
+    - file_write
+
+rules:
+  # --- DENY rules ---
+
+  - id: deny-elevated-execution
+    description: Block all stages requiring elevated/root privileges
+    effect: deny
+    priority: 100
+    match:
+      actions: ["execute"]
+    conditions:
+      - field: elevated
+        operator: eq
+        value: "true"
+
+  - id: deny-credential-access
+    description: Block credential access tactics (credential dumping, Kerberoasting, etc.)
+    effect: deny
+    priority: 95
+    match:
+      tactics: ["credential-access"]
+
+  - id: deny-privilege-escalation
+    description: Block privilege escalation tactics
+    effect: deny
+    priority: 95
+    match:
+      tactics: ["privilege-escalation"]
+
+  - id: deny-impact
+    description: Block destructive impact tactics (ransomware, wipers, service stop)
+    effect: deny
+    priority: 95
+    match:
+      tactics: ["impact"]
+
+  - id: deny-persistence
+    description: Block persistence mechanisms in simulation
+    effect: deny
+    priority: 90
+    match:
+      tactics: ["persistence"]
+
+  # --- ALERT rules ---
+
+  - id: alert-lateral-movement
+    description: Alert on lateral movement tactics
+    effect: alert
+    priority: 70
+    match:
+      tactics: ["lateral-movement"]
+
+  - id: alert-exfiltration
+    description: Alert on exfiltration tactics
+    effect: alert
+    priority: 70
+    match:
+      tactics: ["exfiltration"]
+
+  - id: alert-c2
+    description: Alert on command and control tactics
+    effect: alert
+    priority: 70
+    match:
+      tactics: ["command-and-control"]
+
+  - id: alert-defense-evasion
+    description: Alert on defense evasion tactics
+    effect: alert
+    priority: 60
+    match:
+      tactics: ["defense-evasion"]
+
+  - id: alert-discovery
+    description: Alert on discovery/recon activity
+    effect: alert
+    priority: 50
+    match:
+      tactics: ["discovery"]
+
+  - id: alert-email
+    description: Alert on email-related operations
+    effect: alert
+    priority: 50
+    match:
+      tools: ["send_email"]
+
+  # --- ALLOW rules ---
+
+  - id: allow-initial-access
+    description: Allow initial access simulation stages
+    effect: allow
+    priority: 10
+    match:
+      tactics: ["initial-access"]
+
+  - id: allow-execution
+    description: Allow non-elevated execution stages
+    effect: allow
+    priority: 10
+    match:
+      tactics: ["execution"]
+
+  - id: allow-collection
+    description: Allow data collection stages
+    effect: allow
+    priority: 10
+    match:
+      tactics: ["collection"]

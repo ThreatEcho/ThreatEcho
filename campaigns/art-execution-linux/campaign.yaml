@@ -1,0 +1,143 @@
+api_version: v1
+kind: Campaign
+
+meta:
+  name: art-execution-linux
+  adversary: Atomic Red Team
+  description: "Real execution techniques on Linux — shell interpreters, scripting engines, cron, at"
+  objective: "Execute real code execution techniques to validate detection of scripting engines and native execution methods"
+  mitre_version: "15.1"
+  severity: high
+  tags: [art, atomic-red-team, execution, linux, live-execution]
+  authors: ["ThreatEcho"]
+  references:
+    - https://github.com/redcanaryco/atomic-red-team
+    - https://attack.mitre.org/tactics/TA0002/
+  created: "2026-09-15"
+  modified: "2026-09-15"
+
+stages:
+  - id: bash-execution
+    name: "Bash Command Execution"
+    description: "Execute commands via bash — the primary shell on most Linux systems"
+    technique: T1059.004
+    tactic: execution
+    platform: [linux]
+    execute:
+      type: shell
+      commands:
+        - 'bash -c "echo ThreatEcho execution test; whoami; id"'
+        - 'bash -c "echo $(uname -a)"'
+        - '/bin/sh -c "echo ThreatEcho sh test"'
+      elevated: false
+    expect:
+      telemetry: [process_create]
+      detections: [shell_execution, bash_command_execution]
+    on_success: python-execution
+    on_failure: continue
+    timeout: 10s
+
+  - id: python-execution
+    name: "Python Script Execution"
+    description: "Execute code via Python interpreter — common for post-exploitation tooling"
+    technique: T1059.006
+    tactic: execution
+    platform: [linux]
+    depends_on: [bash-execution]
+    execute:
+      type: shell
+      commands:
+        - 'python3 -c "import os; print(''ThreatEcho python test''); print(os.uname())" 2>/dev/null || echo "python3 not available"'
+        - 'python3 -c "import socket; print(socket.gethostname())" 2>/dev/null || true'
+      elevated: false
+    expect:
+      telemetry: [process_create]
+      detections: [python_execution, scripting_engine_execution]
+    on_success: perl-execution
+    on_failure: continue
+    timeout: 10s
+
+  - id: perl-execution
+    name: "Perl Script Execution"
+    description: "Execute code via Perl — present on most enterprise Linux systems"
+    technique: T1059
+    tactic: execution
+    platform: [linux]
+    depends_on: [python-execution]
+    execute:
+      type: shell
+      commands:
+        - 'perl -e "print qq{ThreatEcho perl test\n}; print qq{user: } . `whoami`" 2>/dev/null || echo "perl not available"'
+      elevated: false
+    expect:
+      telemetry: [process_create]
+      detections: [perl_execution, scripting_engine_execution]
+    on_success: at-scheduled
+    on_failure: continue
+    timeout: 10s
+
+  - id: at-scheduled
+    name: "At Job Scheduling"
+    description: "Schedule execution via at command — used for delayed payload execution"
+    technique: T1053.002
+    tactic: execution
+    platform: [linux]
+    depends_on: [perl-execution]
+    execute:
+      type: shell
+      commands:
+        - 'echo "echo ThreatEcho at-test > /tmp/te_at_test.txt" | at now + 1 minute 2>/dev/null || echo "at not available or not permitted"'
+        - 'atq 2>/dev/null || echo "atq not available"'
+      elevated: false
+      cleanup:
+        - 'rm -f /tmp/te_at_test.txt 2>/dev/null'
+    expect:
+      telemetry: [process_create, file_write]
+      detections: [at_job_creation, scheduled_task_execution]
+    on_success: cron-execution
+    on_failure: continue
+    timeout: 10s
+
+  - id: cron-execution
+    name: "Cron Job Discovery"
+    description: "Enumerate and inspect cron jobs — persistence and execution mechanism"
+    technique: T1053.003
+    tactic: execution
+    platform: [linux]
+    depends_on: [at-scheduled]
+    execute:
+      type: shell
+      commands:
+        - 'crontab -l 2>/dev/null || echo "no user crontab"'
+        - 'ls -la /etc/cron.d/ 2>/dev/null || echo "no cron.d"'
+        - 'cat /etc/crontab 2>/dev/null || echo "no crontab"'
+        - 'ls -la /var/spool/cron/crontabs/ 2>/dev/null || echo "crontabs dir not readable"'
+      elevated: false
+    expect:
+      telemetry: [process_create, file_read]
+      detections: [cron_enumeration, scheduled_task_discovery]
+    on_success: tmp-file-exec
+    on_failure: continue
+    timeout: 10s
+
+  - id: tmp-file-exec
+    name: "Temporary File Execution"
+    description: "Write and execute a script from /tmp — common malware staging pattern"
+    technique: T1204.002
+    tactic: execution
+    platform: [linux]
+    depends_on: [cron-execution]
+    execute:
+      type: shell
+      commands:
+        - 'echo "#!/bin/sh" > /tmp/te_exec_test.sh && echo "echo ThreatEcho tmp exec test" >> /tmp/te_exec_test.sh'
+        - 'chmod +x /tmp/te_exec_test.sh'
+        - '/tmp/te_exec_test.sh'
+      elevated: false
+      cleanup:
+        - 'rm -f /tmp/te_exec_test.sh'
+    expect:
+      telemetry: [process_create, file_write, file_modify]
+      detections: [tmp_file_execution, script_from_tmp, executable_in_tmp]
+    on_failure: continue
+    timeout: 10s

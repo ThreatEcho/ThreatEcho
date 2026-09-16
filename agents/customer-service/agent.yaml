@@ -1,0 +1,64 @@
+api_version: v1
+kind: Agent
+
+meta:
+  name: customer-service
+  type: tool-calling
+  description: "Customer-facing support agent handling ticket management, knowledge base searches, email responses, and refund processing. Operates within defined escalation paths and monetary limits."
+  model: claude-3-haiku
+  version: "3.2.0"
+  owner: support-team
+  tags: [external-facing, tier-1, production, pci-scope]
+
+capabilities:
+  tool_calling: true
+  rag: true
+  code_execution: false
+  web_access: false
+  file_access: false
+  message_passing: true
+  memory: true
+  autonomous: false
+
+tools:
+  - name: ticket_read
+    actions: [read, search, list, history]
+    targets: ["https://tickets.internal/api/*"]
+    rate_limit: 200
+  - name: ticket_update
+    actions: [update, comment, assign, close]
+    targets: ["https://tickets.internal/api/*"]
+    rate_limit: 50
+  - name: knowledge_search
+    actions: [search, retrieve]
+    targets: ["https://kb.internal/api/*"]
+    rate_limit: 100
+  - name: email_send
+    actions: [send, draft]
+    targets: ["*@customers.example.com", "*@corp.example.com"]
+    rate_limit: 20
+  - name: refund_process
+    actions: [initiate, query]
+    targets: ["https://refunds.internal/api/*"]
+    rate_limit: 10
+
+trust:
+  level: standard
+  trusts_from: [orchestrator]
+  trusted_by: [billing-agent]
+  boundaries: [customer-data]
+  can_escalate: true
+
+guardrails:
+  - name: pii-filter
+    type: output
+    enforced: true
+  - name: refund-limit-checker
+    type: tool-call
+    enforced: true
+  - name: tone-analyzer
+    type: output
+    enforced: true
+  - name: content-safety
+    type: content-filter
+    enforced: true

@@ -1,0 +1,110 @@
+api_version: v1
+kind: Policy
+
+meta:
+  name: development-sandbox
+  description: >
+    Relaxed security policy for development and testing environments.
+    Allows most tool operations but alerts instead of denying so
+    developers can observe agent behavior. Maintains hard blocks only
+    on truly dangerous operations like production data access and
+    external communications.
+  authors:
+    - ThreatEcho
+  created: "2025-01-20"
+  modified: "2025-09-15"
+
+agent:
+  name: "*"
+  type: llm
+  tools:
+    - shell_exec
+    - code_execute
+    - file_write
+    - file_read
+    - http_request
+    - database_query
+    - send_email
+    - agent_message
+
+rules:
+  - id: deny-production-access
+    description: Block access to production data stores in sandbox
+    effect: deny
+    priority: 100
+    match:
+      tools: ["database_query", "http_request"]
+      targets: ["https://prod.*/*", "https://*.production/*"]
+
+  - id: deny-external-email
+    description: Block sending emails outside the organization
+    effect: deny
+    priority: 95
+    match:
+      tools: ["send_email"]
+      tactics: ["exfiltration"]
+
+  - id: deny-credential-access
+    description: Block credential harvesting even in sandbox
+    effect: deny
+    priority: 95
+    match:
+      tactics: ["credential-access"]
+
+  # --- ALERT rules (most operations alert instead of deny) ---
+
+  - id: alert-shell-exec
+    description: Alert on shell execution for observation
+    effect: alert
+    priority: 60
+    match:
+      tools: ["shell_exec"]
+
+  - id: alert-code-execute
+    description: Alert on code execution for observation
+    effect: alert
+    priority: 55
+    match:
+      tools: ["code_execute"]
+
+  - id: alert-file-modification
+    description: Alert on file writes for tracking
+    effect: alert
+    priority: 50
+    match:
+      tools: ["file_write"]
+
+  - id: alert-network-request
+    description: Alert on outbound network requests
+    effect: alert
+    priority: 45
+    match:
+      tools: ["http_request"]
+
+  - id: alert-agent-communication
+    description: Alert on inter-agent messaging
+    effect: alert
+    priority: 40
+    match:
+      tools: ["agent_message"]
+
+  # --- ALLOW rules ---
+
+  - id: allow-sandbox-tools
+    description: Allow standard development tools when elevated access is not flagged
+    effect: allow
+    priority: 10
+    match:
+      tools: ["file_read", "file_write", "code_execute", "shell_exec"]
+    conditions:
+      - field: elevated
+        operator: eq
+        value: "false"
+
+  - id: allow-test-database
+    description: Allow queries to test/staging databases
+    effect: allow
+    priority: 10
+    match:
+      tools: ["database_query"]
+      targets: ["https://staging.*/*", "https://test.*/*"]

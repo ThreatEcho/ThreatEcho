@@ -1,0 +1,114 @@
+api_version: v1
+kind: Policy
+
+meta:
+  name: data-classification
+  description: >
+    Data handling and classification policy enforcing sensitivity
+    labels on agent operations. Prevents PII exposure in logs,
+    blocks unencrypted storage, limits bulk data access, and
+    enforces data residency rules.
+  authors:
+    - ThreatEcho
+  created: "2025-04-22"
+  modified: "2025-12-08"
+
+agent:
+  name: "*"
+  type: llm
+  tools:
+    - file_write
+    - file_read
+    - database_query
+    - send_email
+    - http_request
+    - log_write
+    - storage_write
+
+rules:
+  - id: deny-pii-in-logs
+    description: Block writing PII or sensitive data to log streams
+    effect: deny
+    priority: 100
+    match:
+      tools: ["log_write"]
+    conditions:
+      - field: technique
+        operator: eq
+        value: "T1530"
+
+  - id: deny-unencrypted-storage
+    description: Block storing data without encryption at rest
+    effect: deny
+    priority: 95
+    match:
+      tools: ["storage_write", "file_write"]
+      actions: ["write", "create"]
+
+  - id: deny-cross-region-transfer
+    description: Block data transfer outside authorized regions
+    effect: deny
+    priority: 95
+    match:
+      tools: ["http_request"]
+      targets: ["https://*.cn/*", "https://*.ru/*"]
+
+  - id: deny-bulk-data-extract
+    description: Block extraction of bulk datasets
+    effect: deny
+    priority: 90
+    match:
+      tools: ["database_query"]
+      actions: ["export", "dump", "backup"]
+
+  - id: deny-pii-exfiltration
+    description: Block sending PII through email or external channels
+    effect: deny
+    priority: 90
+    match:
+      tools: ["send_email"]
+      tactics: ["exfiltration"]
+
+  # --- ALERT rules ---
+
+  - id: alert-bulk-data-access
+    description: Alert on large data retrievals exceeding normal patterns
+    effect: alert
+    priority: 60
+    match:
+      tools: ["database_query"]
+      actions: ["query"]
+
+  - id: alert-sensitive-file-access
+    description: Alert on access to files in sensitive directories
+    effect: alert
+    priority: 55
+    match:
+      tools: ["file_read"]
+      targets: ["*/secrets/*", "*/credentials/*", "*/keys/*"]
+
+  - id: alert-external-sharing
+    description: Alert when data is sent to external endpoints
+    effect: alert
+    priority: 50
+    match:
+      tools: ["http_request"]
+      actions: ["post", "put"]
+
+  # --- ALLOW rules ---
+
+  - id: allow-read-classified
+    description: Allow reading data with proper classification context
+    effect: allow
+    priority: 10
+    match:
+      tools: ["file_read", "database_query"]
+      actions: ["read", "query"]
+
+  - id: allow-internal-logging
+    description: Allow structured logging without sensitive fields
+    effect: allow
+    priority: 10
+    match:
+      tools: ["log_write"]
+      actions: ["info", "debug", "warn"]

@@ -1,0 +1,61 @@
+api_version: v1
+kind: Agent
+
+meta:
+  name: research-agent
+  type: tool-calling
+  description: "Research assistant agent with web search, document analysis, summarization, and citation verification capabilities. Helps with literature reviews, competitive analysis, and technical research."
+  model: claude-3-sonnet
+  version: "1.3.0"
+  owner: research-team
+  tags: [internal, tier-2, production, research-scope]
+
+capabilities:
+  tool_calling: true
+  rag: true
+  code_execution: false
+  web_access: true
+  file_access: true
+  message_passing: false
+  memory: true
+  autonomous: false
+
+tools:
+  - name: web_search
+    actions: [search, fetch]
+    targets: ["https://*"]
+    rate_limit: 30
+  - name: document_read
+    actions: [read, parse, extract]
+    targets: ["*/documents/*", "*/papers/*"]
+    rate_limit: 50
+  - name: summarize
+    actions: [summarize, extract_key_points, compare]
+    targets: ["*"]
+    rate_limit: 40
+  - name: citation_check
+    actions: [verify, cross_reference, lookup]
+    targets: ["https://doi.org/*", "https://scholar.google.com/*", "https://arxiv.org/*"]
+    rate_limit: 20
+  - name: paper_download
+    actions: [download, cache]
+    targets: ["https://arxiv.org/*", "https://doi.org/*", "https://dl.acm.org/*"]
+    rate_limit: 10
+
+trust:
+  level: standard
+  trusts_from: [orchestrator]
+  trusted_by: []
+  boundaries: [research]
+  can_escalate: false
+
+guardrails:
+  - name: content-safety
+    type: content-filter
+    enforced: true
+  - name: source-validator
+    type: tool-call
+    enforced: true
+  - name: copyright-checker
+    type: output
+    enforced: true

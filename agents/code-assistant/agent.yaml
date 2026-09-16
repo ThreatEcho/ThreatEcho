@@ -1,0 +1,60 @@
+api_version: v1
+kind: Agent
+
+meta:
+  name: code-assistant
+  type: tool-calling
+  description: "AI coding assistant with access to file operations, code execution, version control, and web search. Helps developers write, refactor, debug, and review code within sandboxed environments."
+  model: claude-3-sonnet
+  version: "2.4.0"
+  owner: engineering-team
+  tags: [internal, tier-2, production, dev-tools]
+
+capabilities:
+  tool_calling: true
+  rag: true
+  code_execution: true
+  web_access: true
+  file_access: true
+  message_passing: false
+  memory: true
+  autonomous: false
+
+tools:
+  - name: code_execute
+    actions: [run, lint, test, format]
+    targets: ["*/workspace/*", "*/sandbox/*"]
+    rate_limit: 60
+  - name: file_read
+    actions: [read, search, list]
+    targets: ["*/workspace/*", "*/docs/*"]
+  - name: file_write
+    actions: [write, create, delete]
+    targets: ["*/workspace/*"]
+    rate_limit: 30
+  - name: git_commit
+    actions: [commit, push, pull, branch, diff]
+    targets: ["*/repos/*"]
+    rate_limit: 20
+  - name: search_web
+    actions: [search, fetch]
+    targets: ["https://stackoverflow.com/*", "https://docs.*/*", "https://github.com/*"]
+    rate_limit: 15
+
+trust:
+  level: standard
+  trusts_from: [orchestrator]
+  trusted_by: []
+  boundaries: [development]
+  can_escalate: false
+
+guardrails:
+  - name: sandbox-enforcer
+    type: tool-call
+    enforced: true
+  - name: secret-scanner
+    type: output
+    enforced: true
+  - name: code-safety-checker
+    type: tool-call
+    enforced: true

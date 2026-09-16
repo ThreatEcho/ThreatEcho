@@ -1,0 +1,63 @@
+
+╔══════════════════════════════════════════════════════╗
+║            ThreatEcho Project Statistics             ║
+╠══════════════════════════════════════════════════════╣
+
+  Campaigns: 72       Stages: 441      Adversaries: 29
+  Severity:  critical(41) high(27) medium(4)
+  Actors:    AI-Threat-Actor, APT28, APT29, Agent-Chain-Threat-Actor, Atomic Red Team, FIN7, LazarusGroup, LockBit, MCP-Exploit-Actor, Memory-Corruption-Actor, Model-Theft-Actor, Prompt-Adversary, RAG-Poison-Actor, RAG-Threat-Actor, Scattered-Spider, Supply-Chain-Threat-Actor, Tool-Confusion-Actor, Volt Typhoon, ai-red-team, apt1, apt29, apt33, fin7, hafnium, insider, lazarus-group, lockbit, scattered-spider, volt-typhoon
+
+── Technique Analysis ───────────────────────────────
+  Unique techniques: 132
+  Frameworks: ATT&CK(237) ATLAS(178) OWASP(26)
+
+  Top techniques:
+    AML.T0051    LLM Prompt Injection           ██████████  23 campaigns
+    AML.T0043    Craft Adversarial Data         █████░░░░░  20 campaigns
+    AML.T0049    Search for Victim's Publicl... █████░░░░░  25 campaigns
+    AML.T0050    Command and Control via AI ... ██░░░░░░░░  8 campaigns
+    AML.T0053    Data Poisoning                 ██░░░░░░░░  6 campaigns
+    AML.T0056    LLM Meta Prompt Extraction     ██░░░░░░░░  8 campaigns
+    AML.T0042    Verify Attack                  ██░░░░░░░░  9 campaigns
+    AML.T0040    ML Model Inference API Access  ██░░░░░░░░  6 campaigns
+    T1195.002    Compromise Software Supply ... ██░░░░░░░░  4 campaigns
+    LLM06        Excessive Agency               █░░░░░░░░░  6 campaigns
+
+── Tactic Distribution ──────────────────────────────
+    defense-evasion        ████████████████  53 stages
+    initial-access         ██████████████░░  48 stages
+    impact                 █████████████░░░  42 stages
+    credential-access      ████████████░░░░  41 stages
+    discovery              ████████████░░░░  40 stages
+    collection             ██████████░░░░░░  32 stages
+    persistence            █████████░░░░░░░  31 stages
+    execution              █████████░░░░░░░  30 stages
+    reconnaissance         ████████░░░░░░░░  28 stages
+    exfiltration           ████████░░░░░░░░  25 stages
+    lateral-movement       ███████░░░░░░░░░  23 stages
+    privilege-escalation   █████░░░░░░░░░░░  17 stages
+    ml-attack-staging      ████░░░░░░░░░░░░  14 stages
+    ml-model-access        ███░░░░░░░░░░░░░  9 stages
+    command-and-control    ██░░░░░░░░░░░░░░  7 stages
+    resource-development   ░░░░░░░░░░░░░░░░  1 stages
+
+── Execution Profile ────────────────────────────────
+    file: 2   http: 219   powershell: 7   shell: 213
+    Elevated: 42 stages   Cleanup: 66 commands
+
+── Detection Readiness ──────────────────────────────
+    With detections:  414/441 (93.9%)  █████████░
+    With telemetry:   415/441 (94.1%)  █████████░
+    Neither:          26 stages
+
+── Dependency Graph ─────────────────────────────────
+    Total dependencies: 364
+    Max depth: 12
+    Avg depth: 5.6
+
+── Content Metrics ──────────────────────────────────
+    Variables: 171 (103 unique keys)
+    Commands:  607 total
+    Timeouts:  221 stages   Delays: 0 stages
+
+╚══════════════════════════════════════════════════════╝

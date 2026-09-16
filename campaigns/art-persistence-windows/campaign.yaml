@@ -1,0 +1,168 @@
+api_version: v1
+kind: Campaign
+
+meta:
+  name: art-persistence-windows
+  adversary: Atomic Red Team
+  description: "Real persistence techniques using registry keys, scheduled tasks, and services on Windows"
+  objective: "Execute real persistence mechanisms to validate detection of startup modification and scheduled execution"
+  mitre_version: "15.1"
+  severity: high
+  tags: [art, atomic-red-team, persistence, windows, live-execution]
+  authors: ["ThreatEcho"]
+  references:
+    - https://github.com/redcanaryco/atomic-red-team
+    - https://attack.mitre.org/tactics/TA0003/
+  created: "2024-08-15"
+  modified: "2026-09-14"
+
+variables:
+  persist_name: "ThreatEchoTest"
+  persist_payload: "C:\\Windows\\Temp\\threatecho_persist_test.bat"
+
+stages:
+  - id: prep-payload
+    name: "Create Test Payload"
+    description: "Write a harmless test batch file to use as the persistence payload"
+    technique: T1059.003
+    tactic: execution
+    platform: [windows]
+    execute:
+      type: shell
+      commands:
+        - 'echo @echo ThreatEcho persistence test - %DATE% %TIME% > C:\Windows\Temp\threatecho_persist_test.bat'
+      elevated: false
+    expect:
+      telemetry: [file_write]
+    on_success: run-key
+    on_failure: continue
+    timeout: 10s
+
+  - id: run-key
+    name: "Registry Run Key Persistence"
+    description: "Add a Run key to execute payload at user logon — most common persistence mechanism"
+    technique: T1547.001
+    tactic: persistence
+    platform: [windows]
+    depends_on: [prep-payload]
+    execute:
+      type: shell
+      commands:
+        - 'reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Run" /v {{persist_name}} /t REG_SZ /d "{{persist_payload}}" /f'
+      elevated: false
+      cleanup:
+        - 'reg delete "HKCU\Software\Microsoft\Windows\CurrentVersion\Run" /v {{persist_name}} /f 2>nul'
+    expect:
+      telemetry: [registry_write]
+      detections: [run_key_modification, autostart_registry_change]
+    on_success: scheduled-task
+    on_failure: continue
+    timeout: 10s
+
+  - id: scheduled-task
+    name: "Scheduled Task Persistence"
+    description: "Create a scheduled task for persistent execution"
+    technique: T1053.005
+    tactic: persistence
+    platform: [windows]
+    depends_on: [run-key]
+    execute:
+      type: shell
+      commands:
+        - 'schtasks /create /tn "{{persist_name}}" /tr "{{persist_payload}}" /sc daily /st 00:00 /f'
+        - 'schtasks /query /tn "{{persist_name}}" /v /fo list'
+      elevated: false
+      cleanup:
+        - 'schtasks /delete /tn "{{persist_name}}" /f 2>nul'
+    expect:
+      telemetry: [process_create, scheduled_task_create]
+      detections: [suspicious_scheduled_task, persistence_scheduled_task]
+    on_success: service-creation
+    on_failure: continue
+    timeout: 15s
+
+  - id: service-creation
+    name: "Windows Service Persistence"
+    description: "Create a Windows service for SYSTEM-level persistence"
+    technique: T1543.003
+    tactic: persistence
+    platform: [windows]
+    depends_on: [scheduled-task]
+    execute:
+      type: shell
+      commands:
+        - 'sc create {{persist_name}} binPath= "cmd.exe /c {{persist_payload}}" start= auto'
+        - 'sc qc {{persist_name}}'
+      elevated: true
+      cleanup:
+        - 'sc stop {{persist_name}} 2>nul'
+        - 'sc delete {{persist_name}} 2>nul'
+    expect:
+      telemetry: [service_create]
+      detections: [suspicious_service_creation, service_persistence]
+    on_success: startup-folder
+    on_failure: continue
+    timeout: 15s
+
+  - id: startup-folder
+    name: "Startup Folder Persistence"
+    description: "Drop a script in the common Startup folder — executes at user logon"
+    technique: T1547.001
+    tactic: persistence
+    platform: [windows]
+    depends_on: [service-creation]
+    execute:
+      type: powershell
+      commands:
+        - '$startup = [Environment]::GetFolderPath("CommonStartup"); if (-not $startup) { $startup = "C:\ProgramData\Microsoft\Windows\Start Menu\Programs\Startup" }; Copy-Item -Path "{{persist_payload}}" -Destination "$startup\{{persist_name}}.bat" -Force; Write-Host "Dropped to $startup\{{persist_name}}.bat"'
+      elevated: false
+      cleanup:
+        - '$startup = [Environment]::GetFolderPath("CommonStartup"); if (-not $startup) { $startup = "C:\ProgramData\Microsoft\Windows\Start Menu\Programs\Startup" }; Remove-Item "$startup\{{persist_name}}.bat" -Force -ErrorAction SilentlyContinue'
+    expect:
+      telemetry: [file_write]
+      detections: [startup_folder_modification, autostart_file_creation]
+    on_success: wmi-event
+    on_failure: continue
+    timeout: 10s
+
+  - id: wmi-event
+    name: "WMI Event Subscription Persistence"
+    description: "Create a WMI event subscription — stealthy persistence that survives reboots"
+    technique: T1546.003
+    tactic: persistence
+    platform: [windows]
+    depends_on: [startup-folder]
+    execute:
+      type: shell
+      commands:
+        - 'powershell.exe -Command "$Filter = Set-WmiInstance -Namespace root/subscription -Class __EventFilter -Arguments @{Name=''{{persist_name}}''; EventNameSpace=''root/cimv2''; QueryLanguage=''WQL''; Query=''SELECT * FROM __InstanceModificationEvent WITHIN 60 WHERE TargetInstance ISA ''''Win32_PerfFormattedData_PerfOS_System'''' AND TargetInstance.SystemUpTime >= 200''}; $Consumer = Set-WmiInstance -Namespace root/subscription -Class CommandLineEventConsumer -Arguments @{Name=''{{persist_name}}''; CommandLineTemplate=''cmd.exe /c {{persist_payload}}''}; Set-WmiInstance -Namespace root/subscription -Class __FilterToConsumerBinding -Arguments @{Filter=$Filter; Consumer=$Consumer}"'
+      elevated: true
+      cleanup:
+        - 'powershell.exe -Command "Get-WmiObject -Namespace root/subscription -Class __EventFilter -Filter \"Name=''{{persist_name}}''\" | Remove-WmiObject; Get-WmiObject -Namespace root/subscription -Class CommandLineEventConsumer -Filter \"Name=''{{persist_name}}''\" | Remove-WmiObject; Get-WmiObject -Namespace root/subscription -Class __FilterToConsumerBinding | Where-Object {$_.Filter -match ''{{persist_name}}''} | Remove-WmiObject"'
+    expect:
+      telemetry: [wmi_create]
+      detections: [wmi_event_subscription, wmi_persistence]
+    on_success: cleanup
+    on_failure: continue
+    timeout: 30s
+
+  - id: cleanup
+    name: "Cleanup Persistence Artifacts"
+    description: "Remove all test persistence mechanisms"
+    technique: T1070.004
+    tactic: defense-evasion
+    platform: [windows]
+    depends_on: [wmi-event]
+    execute:
+      type: shell
+      commands:
+        - 'reg delete "HKCU\Software\Microsoft\Windows\CurrentVersion\Run" /v {{persist_name}} /f 2>nul'
+        - 'schtasks /delete /tn "{{persist_name}}" /f 2>nul'
+        - 'sc stop {{persist_name}} 2>nul & sc delete {{persist_name}} 2>nul'
+        - 'del /f "%APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup\{{persist_name}}.bat" 2>nul'
+        - 'del /f {{persist_payload}} 2>nul'
+      elevated: true
+    expect:
+      telemetry: [registry_delete, file_delete, service_delete, scheduled_task_delete]
+      detections: [indicator_removal, persistence_cleanup]
+    timeout: 15s

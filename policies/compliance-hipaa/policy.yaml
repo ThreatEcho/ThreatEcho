@@ -1,0 +1,116 @@
+api_version: v1
+kind: Policy
+
+meta:
+  name: compliance-hipaa
+  description: >
+    HIPAA-aligned security controls for AI agents operating in
+    healthcare environments. Enforces Protected Health Information
+    (PHI) access controls, audit logging requirements, minimum
+    necessary access, and breach notification triggers.
+  authors:
+    - ThreatEcho
+  created: "2025-05-10"
+  modified: "2026-01-30"
+
+agent:
+  name: "*"
+  type: llm
+  tools:
+    - patient_records
+    - clinical_notes
+    - billing_system
+    - send_email
+    - http_request
+    - file_write
+    - reporting_api
+    - audit_log
+
+rules:
+  - id: deny-phi-exposure
+    description: Block PHI disclosure to unauthorized endpoints
+    effect: deny
+    priority: 100
+    match:
+      tools: ["send_email", "http_request"]
+      tactics: ["exfiltration"]
+
+  - id: deny-phi-external-transfer
+    description: Block PHI transfer outside the covered entity
+    effect: deny
+    priority: 100
+    match:
+      tools: ["http_request"]
+      actions: ["post", "put"]
+    conditions:
+      - field: elevated
+        operator: eq
+        value: "true"
+
+  - id: deny-bulk-record-access
+    description: Block bulk access to patient records (minimum necessary rule)
+    effect: deny
+    priority: 95
+    match:
+      tools: ["patient_records"]
+      actions: ["export", "dump", "list_all"]
+
+  - id: deny-phi-in-logs
+    description: Block writing PHI to application logs
+    effect: deny
+    priority: 95
+    match:
+      tools: ["file_write"]
+    conditions:
+      - field: technique
+        operator: eq
+        value: "T1530"
+
+  - id: deny-unauthorized-clinical-write
+    description: Block modifications to clinical records without authorization
+    effect: deny
+    priority: 90
+    match:
+      tools: ["clinical_notes"]
+      actions: ["write", "update", "delete"]
+
+  # --- ALERT rules ---
+
+  - id: alert-phi-access
+    description: Audit log all PHI access events (HIPAA required)
+    effect: alert
+    priority: 70
+    match:
+      tools: ["patient_records", "clinical_notes"]
+
+  - id: alert-billing-access
+    description: Audit log billing system access
+    effect: alert
+    priority: 60
+    match:
+      tools: ["billing_system"]
+
+  - id: alert-external-communication
+    description: Alert on any external communication for HIPAA audit
+    effect: alert
+    priority: 55
+    match:
+      tools: ["send_email", "http_request"]
+
+  # --- ALLOW rules ---
+
+  - id: allow-clinical-read
+    description: Allow authorized reading of clinical data
+    effect: allow
+    priority: 10
+    match:
+      tools: ["clinical_notes", "patient_records"]
+      actions: ["read", "search"]
+
+  - id: allow-audit-write
+    description: Allow writing to the HIPAA audit log
+    effect: allow
+    priority: 10
+    match:
+      tools: ["audit_log"]
+      actions: ["write"]

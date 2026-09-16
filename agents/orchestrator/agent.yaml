@@ -1,0 +1,54 @@
+api_version: v1
+kind: Agent
+
+meta:
+  name: orchestrator
+  type: orchestrator
+  description: "Central orchestration agent managing the multi-agent swarm. Routes requests to specialized agents, manages conversation context, handles escalations, and enforces inter-agent communication policies."
+  model: claude-3-opus
+  version: "3.0.0"
+  owner: platform-team
+  tags: [internal, tier-0, production, critical]
+
+capabilities:
+  tool_calling: true
+  rag: false
+  code_execution: false
+  web_access: false
+  file_access: false
+  message_passing: true
+  memory: true
+  autonomous: true
+
+tools:
+  - name: agent_router
+    actions: [route, delegate, escalate]
+    targets: ["*"]
+  - name: context_manager
+    actions: [read, write, merge]
+    targets: ["https://context.internal/api/*"]
+  - name: agent_registry
+    actions: [list, health_check, restart]
+    targets: ["https://registry.internal/api/*"]
+    elevated: true
+
+trust:
+  level: admin
+  trusts_from: []
+  trusted_by: [support-agent, billing-agent]
+  boundaries: [platform]
+  can_escalate: true
+
+guardrails:
+  - name: agent-message-validator
+    type: tool-call
+    enforced: true
+  - name: escalation-policy
+    type: tool-call
+    enforced: true
+  - name: content-safety
+    type: content-filter
+    enforced: true
+  - name: rate-limiter
+    type: tool-call
+    enforced: true

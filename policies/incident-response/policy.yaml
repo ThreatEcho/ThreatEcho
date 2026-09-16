@@ -1,0 +1,116 @@
+api_version: v1
+kind: Policy
+
+meta:
+  name: incident-response
+  description: >
+    Emergency policy activated during active security incidents.
+    Restricts agent operations to incident-relevant tools, blocks
+    all external communication to contain blast radius, enables
+    elevated monitoring, and permits forensic data collection.
+  authors:
+    - ThreatEcho
+  created: "2025-11-03"
+  modified: "2026-06-22"
+
+agent:
+  name: "*"
+  type: llm
+  tools:
+    - http_request
+    - send_email
+    - agent_message
+    - log_analyze
+    - alert_create
+    - file_read
+    - database_query
+    - config_update
+    - forensic_collect
+
+rules:
+  - id: deny-external-comms
+    description: Block all external communications during incident
+    effect: deny
+    priority: 100
+    match:
+      tools: ["send_email", "http_request"]
+    conditions:
+      - field: technique
+        operator: eq
+        value: "T1041"
+
+  - id: deny-config-changes
+    description: Freeze all configuration changes during incident
+    effect: deny
+    priority: 100
+    match:
+      tools: ["config_update"]
+
+  - id: deny-lateral-movement
+    description: Block all lateral movement during containment
+    effect: deny
+    priority: 100
+    match:
+      tactics: ["lateral-movement"]
+
+  - id: deny-persistence
+    description: Block persistence establishment during incident
+    effect: deny
+    priority: 100
+    match:
+      tactics: ["persistence"]
+
+  - id: deny-data-destruction
+    description: Block data destruction during incident response
+    effect: deny
+    priority: 100
+    match:
+      tactics: ["impact"]
+
+  - id: deny-agent-delegation
+    description: Block agent delegation during containment phase
+    effect: deny
+    priority: 95
+    match:
+      tools: ["agent_message"]
+      actions: ["delegate", "escalate"]
+
+  # --- ALERT rules (elevated monitoring) ---
+
+  - id: alert-all-operations
+    description: Full audit trail during incident response
+    effect: alert
+    priority: 80
+    match:
+      tools: ["*"]
+
+  - id: alert-discovery-activity
+    description: Alert on internal discovery during incident
+    effect: alert
+    priority: 75
+    match:
+      tactics: ["discovery"]
+
+  # --- ALLOW rules (incident-relevant only) ---
+
+  - id: allow-log-analysis
+    description: Allow log analysis for investigation
+    effect: allow
+    priority: 10
+    match:
+      tools: ["log_analyze"]
+
+  - id: allow-forensic-collection
+    description: Allow forensic data collection
+    effect: allow
+    priority: 10
+    match:
+      tools: ["forensic_collect"]
+      actions: ["collect", "snapshot", "preserve"]
+
+  - id: allow-alert-creation
+    description: Allow creating security alerts
+    effect: allow
+    priority: 10
+    match:
+      tools: ["alert_create"]

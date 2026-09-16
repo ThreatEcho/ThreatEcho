@@ -1,0 +1,168 @@
+api_version: v1
+kind: Policy
+
+meta:
+  name: agent-strict
+  description: >
+    Zero-trust agent policy for high-security environments. Denies all tool
+    calls by default — only explicitly permitted read-only operations are
+    allowed. Suitable for production agents handling sensitive data where
+    any unauthorized action must be blocked.
+  authors:
+    - ThreatEcho
+  created: "2025-01-15"
+  modified: "2025-07-01"
+
+agent:
+  name: "*"
+  type: llm
+  tools:
+    - shell_exec
+    - http_request
+    - send_email
+    - tool_call
+    - search_knowledge_base
+    - write_knowledge_base
+    - agent_message
+    - query_database
+    - file_write
+    - file_read
+    - create_ticket
+
+rules:
+  # --- DENY rules (highest priority) ---
+
+  - id: deny-shell-exec
+    description: Block all shell command execution
+    effect: deny
+    priority: 100
+    match:
+      tools: ["shell_exec"]
+
+  - id: deny-elevated
+    description: Block any stage requiring elevated privileges
+    effect: deny
+    priority: 100
+    match:
+      actions: ["execute"]
+    conditions:
+      - field: elevated
+        operator: eq
+        value: "true"
+
+  - id: deny-kb-write
+    description: Block all knowledge base writes (RAG poisoning vector)
+    effect: deny
+    priority: 95
+    match:
+      tools: ["write_knowledge_base"]
+
+  - id: deny-agent-messaging
+    description: Block inter-agent communication (propagation vector)
+    effect: deny
+    priority: 95
+    match:
+      tools: ["agent_message"]
+
+  - id: deny-email
+    description: Block all email sending (exfiltration vector)
+    effect: deny
+    priority: 95
+    match:
+      tools: ["send_email"]
+
+  - id: deny-database-write
+    description: Block database mutations
+    effect: deny
+    priority: 95
+    match:
+      tools: ["query_database"]
+    conditions:
+      - field: exec_type
+        operator: ne
+        value: "http"
+
+  - id: deny-file-write
+    description: Block all file write operations
+    effect: deny
+    priority: 90
+    match:
+      tools: ["file_write"]
+
+  - id: deny-ticket-create
+    description: Block ticket creation (social engineering vector)
+    effect: deny
+    priority: 90
+    match:
+      tools: ["create_ticket"]
+
+  - id: deny-c2-patterns
+    description: Block requests to known C2 infrastructure patterns
+    effect: deny
+    priority: 95
+    match:
+      targets: ["https://*.evil.com/*", "https://*.c2.*/*", "http://*:4444/*", "https://*.onion/*"]
+
+  - id: deny-exfiltration-tactics
+    description: Block all exfiltration-tactic stages
+    effect: deny
+    priority: 85
+    match:
+      tactics: ["exfiltration"]
+
+  - id: deny-impact-tactics
+    description: Block all impact-tactic stages
+    effect: deny
+    priority: 85
+    match:
+      tactics: ["impact"]
+
+  - id: deny-credential-access
+    description: Block credential access tactics
+    effect: deny
+    priority: 85
+    match:
+      tactics: ["credential-access"]
+
+  - id: deny-lateral-movement
+    description: Block lateral movement tactics
+    effect: deny
+    priority: 85
+    match:
+      tactics: ["lateral-movement"]
+
+  # --- ALERT rules ---
+
+  - id: alert-network-connections
+    description: Alert on all outbound network connections
+    effect: alert
+    priority: 50
+    match:
+      tools: ["http_request"]
+
+  - id: alert-file-read
+    description: Alert on file read operations
+    effect: alert
+    priority: 50
+    match:
+      tools: ["file_read"]
+
+  # --- ALLOW rules (lowest priority, explicit permits only) ---
+
+  - id: allow-kb-search
+    description: Allow knowledge base searches (read-only)
+    effect: allow
+    priority: 10
+    match:
+      tools: ["search_knowledge_base"]
+
+  - id: allow-http-get
+    description: Allow HTTP GET requests to non-blocked targets
+    effect: allow
+    priority: 10
+    match:
+      tools: ["http_request"]
+    conditions:
+      - field: exec_type
+        operator: eq
+        value: "http"

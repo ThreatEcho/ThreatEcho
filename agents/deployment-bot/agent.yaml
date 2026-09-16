@@ -1,0 +1,66 @@
+api_version: v1
+kind: Agent
+
+meta:
+  name: deployment-bot
+  type: autonomous
+  description: "CI/CD deployment agent managing container deployments, configuration rollouts, health monitoring, and automated rollbacks. Operates in production with strict change-management controls."
+  model: gpt-4
+  version: "2.0.0"
+  owner: platform-team
+  tags: [internal, tier-0, production, infra-scope, critical]
+
+capabilities:
+  tool_calling: true
+  rag: false
+  code_execution: false
+  web_access: false
+  file_access: true
+  message_passing: true
+  memory: false
+  autonomous: true
+
+tools:
+  - name: container_deploy
+    actions: [deploy, scale, stop]
+    targets: ["https://k8s.internal/api/*"]
+    rate_limit: 5
+    elevated: true
+  - name: config_update
+    actions: [read, update, rollback]
+    targets: ["https://config.internal/api/*"]
+    rate_limit: 10
+  - name: rollback
+    actions: [trigger, verify]
+    targets: ["https://k8s.internal/api/*"]
+    rate_limit: 5
+  - name: health_check
+    actions: [check, monitor, report]
+    targets: ["https://*.internal/*"]
+    rate_limit: 120
+  - name: dns_update
+    actions: [create, update, delete]
+    targets: ["https://dns.internal/api/*"]
+    rate_limit: 5
+    elevated: true
+
+trust:
+  level: elevated
+  trusts_from: [orchestrator]
+  trusted_by: []
+  boundaries: [infrastructure]
+  can_escalate: true
+
+guardrails:
+  - name: deployment-approval
+    type: tool-call
+    enforced: true
+  - name: canary-checker
+    type: tool-call
+    enforced: true
+  - name: blast-radius-limiter
+    type: tool-call
+    enforced: true
+  - name: rollback-safety
+    type: tool-call
+    enforced: true

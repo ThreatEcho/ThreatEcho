@@ -1,0 +1,1049 @@
+{
+  "name": "AI Agent Deployment Threat Model",
+  "generated_at": "<TIMESTAMP>",
+  "threats": [
+    {
+      "id": "THR-001",
+      "category": "spoofing",
+      "title": "Inter-agent identity claim spoofing",
+      "description": "Agent \"billing-agent\" exchanges messages with other agents; identity claims in those messages can be forged absent mutual authentication.",
+      "affected_agent": "billing-agent",
+      "severity": "medium",
+      "likelihood": "possible",
+      "risk_score": 2,
+      "mitigations": [
+        "pci-compliance-check",
+        "amount-limit-validator",
+        "pii-filter"
+      ],
+      "recommendations": [
+        "Authenticate inter-agent messages with signed tokens",
+        "Validate sender identity against the trust graph before acting on a message"
+      ],
+      "mitigation_status": "partial"
+    },
+    {
+      "id": "THR-002",
+      "category": "information_disclosure",
+      "title": "Sensitive file data disclosure",
+      "description": "Agent \"billing-agent\" has file access, risking disclosure of sensitive files to unauthorized parties.",
+      "affected_agent": "billing-agent",
+      "severity": "high",
+      "likelihood": "likely",
+      "risk_score": 5.6,
+      "mitigations": [
+        "pci-compliance-check",
+        "amount-limit-validator",
+        "pii-filter"
+      ],
+      "recommendations": [
+        "Scope file access to a minimal, allow-listed directory set",
+        "Apply data-loss-prevention scanning to file reads before they reach the model context"
+      ],
+      "mitigation_status": "mitigated"
+    },
+    {
+      "id": "THR-003",
+      "category": "denial_of_service",
+      "title": "Unbounded tool rate limit",
+      "description": "Tool \"invoice_system\" used by agent \"billing-agent\" has no configured rate limit, allowing resource exhaustion through unbounded calls.",
+      "affected_agent": "billing-agent",
+      "affected_tool": "invoice_system",
+      "severity": "medium",
+      "likelihood": "possible",
+      "risk_score": 2,
+      "mitigations": [
+        "pci-compliance-check",
+        "amount-limit-validator",
+        "pii-filter"
+      ],
+      "recommendations": [
+        "Set a conservative rate_limit on \"invoice_system\" sized to expected legitimate usage",
+        "Add a circuit breaker that suspends the tool after sustained abnormal call volume"
+      ],
+      "mitigation_status": "mitigated"
+    },
+    {
+      "id": "THR-004",
+      "category": "denial_of_service",
+      "title": "Unbounded tool rate limit",
+      "description": "Tool \"reporting_db\" used by agent \"billing-agent\" has no configured rate limit, allowing resource exhaustion through unbounded calls.",
+      "affected_agent": "billing-agent",
+      "affected_tool": "reporting_db",
+      "severity": "medium",
+      "likelihood": "possible",
+      "risk_score": 2,
+      "mitigations": [
+        "pci-compliance-check",
+        "amount-limit-validator",
+        "pii-filter"
+      ],
+      "recommendations": [
+        "Set a conservative rate_limit on \"reporting_db\" sized to expected legitimate usage",
+        "Add a circuit breaker that suspends the tool after sustained abnormal call volume"
+      ],
+      "mitigation_status": "mitigated"
+    },
+    {
+      "id": "THR-005",
+      "category": "tampering",
+      "title": "Unauthorized write access",
+      "description": "Tool \"file_write\" available to agent \"code-assistant\" permits write actions, allowing tampering with downstream data or systems.",
+      "affected_agent": "code-assistant",
+      "affected_tool": "file_write",
+      "severity": "high",
+      "likelihood": "likely",
+      "risk_score": 5.6,
+      "mitigations": [
+        "sandbox-enforcer",
+        "secret-scanner",
+        "code-safety-checker"
+      ],
+      "recommendations": [
+        "Restrict \"file_write\" to read-only actions unless write is strictly required",
+        "Add integrity checks (hash/signature) on writes performed by this tool"
+      ],
+      "mitigation_status": "mitigated"
+    },
+    {
+      "id": "THR-006",
+      "category": "tampering",
+      "title": "Arbitrary code execution tampering",
+      "description": "Agent \"code-assistant\" can execute code, enabling tampering with its own runtime, memory, or host environment.",
+      "affected_agent": "code-assistant",
+      "severity": "critical",
+      "likelihood": "likely",
+      "risk_score": 8,
+      "mitigations": [
+        "sandbox-enforcer",
+        "secret-scanner",
+        "code-safety-checker"
+      ],
+      "recommendations": [
+        "Sandbox code execution in an isolated, ephemeral environment",
+        "Whitelist allowed interpreters/commands rather than allowing arbitrary code"
+      ],
+      "mitigation_status": "mitigated"
+    },
+    {
+      "id": "THR-007",
+      "category": "information_disclosure",
+      "title": "Sensitive file data disclosure",
+      "description": "Agent \"code-assistant\" has file access, risking disclosure of sensitive files to unauthorized parties.",
+      "affected_agent": "code-assistant",
+      "severity": "high",
+      "likelihood": "likely",
+      "risk_score": 5.6,
+      "mitigations": [
+        "sandbox-enforcer",
+        "secret-scanner",
+        "code-safety-checker"
+      ],
+      "recommendations": [
+        "Scope file access to a minimal, allow-listed directory set",
+        "Apply data-loss-prevention scanning to file reads before they reach the model context"
+      ],
+      "mitigation_status": "mitigated"
+    },
+    {
+      "id": "THR-008",
+      "category": "information_disclosure",
+      "title": "RAG index content disclosure",
+      "description": "Agent \"code-assistant\" retrieves from a knowledge base; sensitive indexed content may be surfaced to unauthorized requesters or exfiltrated via prompt injection.",
+      "affected_agent": "code-assistant",
+      "severity": "high",
+      "likelihood": "likely",
+      "risk_score": 5.6,
+      "mitigations": [
+        "sandbox-enforcer",
+        "secret-scanner",
+        "code-safety-checker"
+      ],
+      "recommendations": [
+        "Apply document-level access control on the retrieval index",
+        "Filter retrieved content for sensitive data before it reaches the model context"
+      ],
+      "mitigation_status": "mitigated"
+    },
+    {
+      "id": "THR-009",
+      "category": "denial_of_service",
+      "title": "Unbounded tool rate limit",
+      "description": "Tool \"file_read\" used by agent \"code-assistant\" has no configured rate limit, allowing resource exhaustion through unbounded calls.",
+      "affected_agent": "code-assistant",
+      "affected_tool": "file_read",
+      "severity": "medium",
+      "likelihood": "possible",
+      "risk_score": 2,
+      "mitigations": [
+        "sandbox-enforcer",
+        "secret-scanner",
+        "code-safety-checker"
+      ],
+      "recommendations": [
+        "Set a conservative rate_limit on \"file_read\" sized to expected legitimate usage",
+        "Add a circuit breaker that suspends the tool after sustained abnormal call volume"
+      ],
+      "mitigation_status": "mitigated"
+    },
+    {
+      "id": "THR-010",
+      "category": "spoofing",
+      "title": "Inter-agent identity claim spoofing",
+      "description": "Agent \"customer-service\" exchanges messages with other agents; identity claims in those messages can be forged absent mutual authentication.",
+      "affected_agent": "customer-service",
+      "severity": "medium",
+      "likelihood": "possible",
+      "risk_score": 2,
+      "mitigations": [
+        "pii-filter",
+        "refund-limit-checker",
+        "tone-analyzer",
+        "content-safety"
+      ],
+      "recommendations": [
+        "Authenticate inter-agent messages with signed tokens",
+        "Validate sender identity against the trust graph before acting on a message"
+      ],
+      "mitigation_status": "partial"
+    },
+    {
+      "id": "THR-011",
+      "category": "information_disclosure",
+      "title": "RAG index content disclosure",
+      "description": "Agent \"customer-service\" retrieves from a knowledge base; sensitive indexed content may be surfaced to unauthorized requesters or exfiltrated via prompt injection.",
+      "affected_agent": "customer-service",
+      "severity": "high",
+      "likelihood": "likely",
+      "risk_score": 5.6,
+      "mitigations": [
+        "pii-filter",
+        "refund-limit-checker",
+        "tone-analyzer",
+        "content-safety"
+      ],
+      "recommendations": [
+        "Apply document-level access control on the retrieval index",
+        "Filter retrieved content for sensitive data before it reaches the model context"
+      ],
+      "mitigation_status": "mitigated"
+    },
+    {
+      "id": "THR-012",
+      "category": "elevation_of_privilege",
+      "title": "Trust escalation path enabled",
+      "description": "Agent \"customer-service\" is configured with can_escalate, allowing it to obtain higher trust than initially granted.",
+      "affected_agent": "customer-service",
+      "severity": "critical",
+      "likelihood": "likely",
+      "risk_score": 8,
+      "mitigations": [
+        "pii-filter",
+        "refund-limit-checker",
+        "tone-analyzer",
+        "content-safety"
+      ],
+      "recommendations": [
+        "Disable can_escalate unless there is an explicit, reviewed business need",
+        "Gate any escalation behind a human approval or a signed policy exception"
+      ],
+      "mitigation_status": "mitigated"
+    },
+    {
+      "id": "THR-013",
+      "category": "spoofing",
+      "title": "Inter-agent identity claim spoofing",
+      "description": "Agent \"data-analyst\" exchanges messages with other agents; identity claims in those messages can be forged absent mutual authentication.",
+      "affected_agent": "data-analyst",
+      "severity": "medium",
+      "likelihood": "possible",
+      "risk_score": 2,
+      "mitigations": [
+        "pii-filter",
+        "query-size-limit",
+        "data-classification-check"
+      ],
+      "recommendations": [
+        "Authenticate inter-agent messages with signed tokens",
+        "Validate sender identity against the trust graph before acting on a message"
+      ],
+      "mitigation_status": "partial"
+    },
+    {
+      "id": "THR-014",
+      "category": "information_disclosure",
+      "title": "Sensitive file data disclosure",
+      "description": "Agent \"data-analyst\" has file access, risking disclosure of sensitive files to unauthorized parties.",
+      "affected_agent": "data-analyst",
+      "severity": "high",
+      "likelihood": "likely",
+      "risk_score": 5.6,
+      "mitigations": [
+        "pii-filter",
+        "query-size-limit",
+        "data-classification-check"
+      ],
+      "recommendations": [
+        "Scope file access to a minimal, allow-listed directory set",
+        "Apply data-loss-prevention scanning to file reads before they reach the model context"
+      ],
+      "mitigation_status": "mitigated"
+    },
+    {
+      "id": "THR-015",
+      "category": "spoofing",
+      "title": "Inter-agent identity claim spoofing",
+      "description": "Agent \"deployment-bot\" exchanges messages with other agents; identity claims in those messages can be forged absent mutual authentication.",
+      "affected_agent": "deployment-bot",
+      "severity": "medium",
+      "likelihood": "possible",
+      "risk_score": 2,
+      "mitigations": [
+        "deployment-approval",
+        "canary-checker",
+        "blast-radius-limiter",
+        "rollback-safety"
+      ],
+      "recommendations": [
+        "Authenticate inter-agent messages with signed tokens",
+        "Validate sender identity against the trust graph before acting on a message"
+      ],
+      "mitigation_status": "partial"
+    },
+    {
+      "id": "THR-016",
+      "category": "tampering",
+      "title": "Configuration tampering",
+      "description": "Tool \"config_update\" used by agent \"deployment-bot\" can modify configuration, risking silent policy or behavior changes.",
+      "affected_agent": "deployment-bot",
+      "affected_tool": "config_update",
+      "severity": "critical",
+      "likelihood": "possible",
+      "risk_score": 5,
+      "mitigations": [
+        "deployment-approval",
+        "canary-checker",
+        "blast-radius-limiter",
+        "rollback-safety"
+      ],
+      "recommendations": [
+        "Version and checksum configuration before and after each write",
+        "Require a second approval step (human or policy) for configuration changes"
+      ],
+      "mitigation_status": "mitigated"
+    },
+    {
+      "id": "THR-017",
+      "category": "information_disclosure",
+      "title": "Sensitive file data disclosure",
+      "description": "Agent \"deployment-bot\" has file access, risking disclosure of sensitive files to unauthorized parties.",
+      "affected_agent": "deployment-bot",
+      "severity": "high",
+      "likelihood": "likely",
+      "risk_score": 5.6,
+      "mitigations": [
+        "deployment-approval",
+        "canary-checker",
+        "blast-radius-limiter",
+        "rollback-safety"
+      ],
+      "recommendations": [
+        "Scope file access to a minimal, allow-listed directory set",
+        "Apply data-loss-prevention scanning to file reads before they reach the model context"
+      ],
+      "mitigation_status": "mitigated"
+    },
+    {
+      "id": "THR-018",
+      "category": "denial_of_service",
+      "title": "Autonomous execution resource exhaustion",
+      "description": "Agent \"deployment-bot\" operates autonomously and may loop or over-execute without human checkpoints, exhausting compute or downstream capacity.",
+      "affected_agent": "deployment-bot",
+      "severity": "medium",
+      "likelihood": "possible",
+      "risk_score": 2,
+      "mitigations": [
+        "deployment-approval",
+        "canary-checker",
+        "blast-radius-limiter",
+        "rollback-safety"
+      ],
+      "recommendations": [
+        "Cap the number of autonomous steps or wall-clock time per run",
+        "Require a human checkpoint after N consecutive autonomous actions"
+      ],
+      "mitigation_status": "mitigated"
+    },
+    {
+      "id": "THR-019",
+      "category": "elevation_of_privilege",
+      "title": "Trust escalation path enabled",
+      "description": "Agent \"deployment-bot\" is configured with can_escalate, allowing it to obtain higher trust than initially granted.",
+      "affected_agent": "deployment-bot",
+      "severity": "critical",
+      "likelihood": "likely",
+      "risk_score": 8,
+      "mitigations": [
+        "deployment-approval",
+        "canary-checker",
+        "blast-radius-limiter",
+        "rollback-safety"
+      ],
+      "recommendations": [
+        "Disable can_escalate unless there is an explicit, reviewed business need",
+        "Gate any escalation behind a human approval or a signed policy exception"
+      ],
+      "mitigation_status": "mitigated"
+    },
+    {
+      "id": "THR-020",
+      "category": "elevation_of_privilege",
+      "title": "Elevated tool access",
+      "description": "Tool-calling agent \"deployment-bot\" (trust level \"elevated\") can invoke elevated tool \"container_deploy\", risking privilege escalation if the agent is manipulated.",
+      "affected_agent": "deployment-bot",
+      "affected_tool": "container_deploy",
+      "severity": "high",
+      "likelihood": "likely",
+      "risk_score": 5.6,
+      "mitigations": [
+        "deployment-approval",
+        "canary-checker",
+        "blast-radius-limiter",
+        "rollback-safety"
+      ],
+      "recommendations": [
+        "Require elevated trust before granting \"container_deploy\", or remove the elevated flag",
+        "Add a policy deny rule for this tool outside its intended trust boundary"
+      ],
+      "mitigation_status": "mitigated"
+    },
+    {
+      "id": "THR-021",
+      "category": "elevation_of_privilege",
+      "title": "Elevated tool access",
+      "description": "Tool-calling agent \"deployment-bot\" (trust level \"elevated\") can invoke elevated tool \"dns_update\", risking privilege escalation if the agent is manipulated.",
+      "affected_agent": "deployment-bot",
+      "affected_tool": "dns_update",
+      "severity": "high",
+      "likelihood": "likely",
+      "risk_score": 5.6,
+      "mitigations": [
+        "deployment-approval",
+        "canary-checker",
+        "blast-radius-limiter",
+        "rollback-safety"
+      ],
+      "recommendations": [
+        "Require elevated trust before granting \"dns_update\", or remove the elevated flag",
+        "Add a policy deny rule for this tool outside its intended trust boundary"
+      ],
+      "mitigation_status": "mitigated"
+    },
+    {
+      "id": "THR-022",
+      "category": "spoofing",
+      "title": "Delegating agent impersonation",
+      "description": "Orchestrator agent \"orchestrator\" delegates work to sub-agents; a spoofed delegate could inject forged results back into the chain.",
+      "affected_agent": "orchestrator",
+      "severity": "high",
+      "likelihood": "possible",
+      "risk_score": 3.5,
+      "mitigations": [
+        "agent-message-validator",
+        "escalation-policy",
+        "content-safety",
+        "rate-limiter"
+      ],
+      "recommendations": [
+        "Require signed responses from delegated agents",
+        "Bind delegate identity to a verified attestation before accepting its output"
+      ],
+      "mitigation_status": "partial"
+    },
+    {
+      "id": "THR-023",
+      "category": "spoofing",
+      "title": "Inter-agent identity claim spoofing",
+      "description": "Agent \"orchestrator\" exchanges messages with other agents; identity claims in those messages can be forged absent mutual authentication.",
+      "affected_agent": "orchestrator",
+      "severity": "medium",
+      "likelihood": "possible",
+      "risk_score": 2,
+      "mitigations": [
+        "agent-message-validator",
+        "escalation-policy",
+        "content-safety",
+        "rate-limiter"
+      ],
+      "recommendations": [
+        "Authenticate inter-agent messages with signed tokens",
+        "Validate sender identity against the trust graph before acting on a message"
+      ],
+      "mitigation_status": "partial"
+    },
+    {
+      "id": "THR-024",
+      "category": "tampering",
+      "title": "Unauthorized write access",
+      "description": "Tool \"context_manager\" available to agent \"orchestrator\" permits write actions, allowing tampering with downstream data or systems.",
+      "affected_agent": "orchestrator",
+      "affected_tool": "context_manager",
+      "severity": "high",
+      "likelihood": "likely",
+      "risk_score": 5.6,
+      "mitigations": [
+        "agent-message-validator",
+        "escalation-policy",
+        "content-safety",
+        "rate-limiter"
+      ],
+      "recommendations": [
+        "Restrict \"context_manager\" to read-only actions unless write is strictly required",
+        "Add integrity checks (hash/signature) on writes performed by this tool"
+      ],
+      "mitigation_status": "mitigated"
+    },
+    {
+      "id": "THR-025",
+      "category": "denial_of_service",
+      "title": "Unbounded tool rate limit",
+      "description": "Tool \"agent_router\" used by agent \"orchestrator\" has no configured rate limit, allowing resource exhaustion through unbounded calls.",
+      "affected_agent": "orchestrator",
+      "affected_tool": "agent_router",
+      "severity": "medium",
+      "likelihood": "possible",
+      "risk_score": 2,
+      "mitigations": [
+        "agent-message-validator",
+        "escalation-policy",
+        "content-safety",
+        "rate-limiter"
+      ],
+      "recommendations": [
+        "Set a conservative rate_limit on \"agent_router\" sized to expected legitimate usage",
+        "Add a circuit breaker that suspends the tool after sustained abnormal call volume"
+      ],
+      "mitigation_status": "mitigated"
+    },
+    {
+      "id": "THR-026",
+      "category": "denial_of_service",
+      "title": "Unbounded tool rate limit",
+      "description": "Tool \"context_manager\" used by agent \"orchestrator\" has no configured rate limit, allowing resource exhaustion through unbounded calls.",
+      "affected_agent": "orchestrator",
+      "affected_tool": "context_manager",
+      "severity": "medium",
+      "likelihood": "possible",
+      "risk_score": 2,
+      "mitigations": [
+        "agent-message-validator",
+        "escalation-policy",
+        "content-safety",
+        "rate-limiter"
+      ],
+      "recommendations": [
+        "Set a conservative rate_limit on \"context_manager\" sized to expected legitimate usage",
+        "Add a circuit breaker that suspends the tool after sustained abnormal call volume"
+      ],
+      "mitigation_status": "mitigated"
+    },
+    {
+      "id": "THR-027",
+      "category": "denial_of_service",
+      "title": "Unbounded tool rate limit",
+      "description": "Tool \"agent_registry\" used by agent \"orchestrator\" has no configured rate limit, allowing resource exhaustion through unbounded calls.",
+      "affected_agent": "orchestrator",
+      "affected_tool": "agent_registry",
+      "severity": "medium",
+      "likelihood": "possible",
+      "risk_score": 2,
+      "mitigations": [
+        "agent-message-validator",
+        "escalation-policy",
+        "content-safety",
+        "rate-limiter"
+      ],
+      "recommendations": [
+        "Set a conservative rate_limit on \"agent_registry\" sized to expected legitimate usage",
+        "Add a circuit breaker that suspends the tool after sustained abnormal call volume"
+      ],
+      "mitigation_status": "mitigated"
+    },
+    {
+      "id": "THR-028",
+      "category": "denial_of_service",
+      "title": "Autonomous execution resource exhaustion",
+      "description": "Agent \"orchestrator\" operates autonomously and may loop or over-execute without human checkpoints, exhausting compute or downstream capacity.",
+      "affected_agent": "orchestrator",
+      "severity": "medium",
+      "likelihood": "possible",
+      "risk_score": 2,
+      "mitigations": [
+        "agent-message-validator",
+        "escalation-policy",
+        "content-safety",
+        "rate-limiter"
+      ],
+      "recommendations": [
+        "Cap the number of autonomous steps or wall-clock time per run",
+        "Require a human checkpoint after N consecutive autonomous actions"
+      ],
+      "mitigation_status": "mitigated"
+    },
+    {
+      "id": "THR-029",
+      "category": "denial_of_service",
+      "title": "Recursive delegation loop",
+      "description": "Orchestrator agent \"orchestrator\" delegates to agents that are also trusted by it, creating the potential for a recursive delegation loop that exhausts resources.",
+      "affected_agent": "orchestrator",
+      "severity": "high",
+      "likelihood": "possible",
+      "risk_score": 3.5,
+      "mitigations": [
+        "agent-message-validator",
+        "escalation-policy",
+        "content-safety",
+        "rate-limiter"
+      ],
+      "recommendations": [
+        "Enforce a maximum delegation depth across the agent chain",
+        "Detect and break cycles in the delegation/trust graph before execution"
+      ],
+      "mitigation_status": "mitigated"
+    },
+    {
+      "id": "THR-030",
+      "category": "elevation_of_privilege",
+      "title": "Trust escalation path enabled",
+      "description": "Agent \"orchestrator\" is configured with can_escalate, allowing it to obtain higher trust than initially granted.",
+      "affected_agent": "orchestrator",
+      "severity": "critical",
+      "likelihood": "likely",
+      "risk_score": 8,
+      "mitigations": [
+        "agent-message-validator",
+        "escalation-policy",
+        "content-safety",
+        "rate-limiter"
+      ],
+      "recommendations": [
+        "Disable can_escalate unless there is an explicit, reviewed business need",
+        "Gate any escalation behind a human approval or a signed policy exception"
+      ],
+      "mitigation_status": "mitigated"
+    },
+    {
+      "id": "THR-031",
+      "category": "elevation_of_privilege",
+      "title": "Elevated tool access",
+      "description": "Tool-calling agent \"orchestrator\" (trust level \"admin\") can invoke elevated tool \"agent_registry\", risking privilege escalation if the agent is manipulated.",
+      "affected_agent": "orchestrator",
+      "affected_tool": "agent_registry",
+      "severity": "high",
+      "likelihood": "likely",
+      "risk_score": 5.6,
+      "mitigations": [
+        "agent-message-validator",
+        "escalation-policy",
+        "content-safety",
+        "rate-limiter"
+      ],
+      "recommendations": [
+        "Require elevated trust before granting \"agent_registry\", or remove the elevated flag",
+        "Add a policy deny rule for this tool outside its intended trust boundary"
+      ],
+      "mitigation_status": "mitigated"
+    },
+    {
+      "id": "THR-032",
+      "category": "information_disclosure",
+      "title": "Sensitive file data disclosure",
+      "description": "Agent \"research-agent\" has file access, risking disclosure of sensitive files to unauthorized parties.",
+      "affected_agent": "research-agent",
+      "severity": "high",
+      "likelihood": "likely",
+      "risk_score": 5.6,
+      "mitigations": [
+        "content-safety",
+        "source-validator",
+        "copyright-checker"
+      ],
+      "recommendations": [
+        "Scope file access to a minimal, allow-listed directory set",
+        "Apply data-loss-prevention scanning to file reads before they reach the model context"
+      ],
+      "mitigation_status": "mitigated"
+    },
+    {
+      "id": "THR-033",
+      "category": "information_disclosure",
+      "title": "RAG index content disclosure",
+      "description": "Agent \"research-agent\" retrieves from a knowledge base; sensitive indexed content may be surfaced to unauthorized requesters or exfiltrated via prompt injection.",
+      "affected_agent": "research-agent",
+      "severity": "high",
+      "likelihood": "likely",
+      "risk_score": 5.6,
+      "mitigations": [
+        "content-safety",
+        "source-validator",
+        "copyright-checker"
+      ],
+      "recommendations": [
+        "Apply document-level access control on the retrieval index",
+        "Filter retrieved content for sensitive data before it reaches the model context"
+      ],
+      "mitigation_status": "mitigated"
+    },
+    {
+      "id": "THR-034",
+      "category": "spoofing",
+      "title": "Inter-agent identity claim spoofing",
+      "description": "Agent \"security-scanner\" exchanges messages with other agents; identity claims in those messages can be forged absent mutual authentication.",
+      "affected_agent": "security-scanner",
+      "severity": "medium",
+      "likelihood": "possible",
+      "risk_score": 2,
+      "mitigations": [
+        "scan-scope-limiter",
+        "finding-classifier",
+        "rate-limiter"
+      ],
+      "recommendations": [
+        "Authenticate inter-agent messages with signed tokens",
+        "Validate sender identity against the trust graph before acting on a message"
+      ],
+      "mitigation_status": "partial"
+    },
+    {
+      "id": "THR-035",
+      "category": "tampering",
+      "title": "Configuration tampering",
+      "description": "Tool \"config_audit\" used by agent \"security-scanner\" can modify configuration, risking silent policy or behavior changes.",
+      "affected_agent": "security-scanner",
+      "affected_tool": "config_audit",
+      "severity": "critical",
+      "likelihood": "possible",
+      "risk_score": 5,
+      "mitigations": [
+        "scan-scope-limiter",
+        "finding-classifier",
+        "rate-limiter"
+      ],
+      "recommendations": [
+        "Version and checksum configuration before and after each write",
+        "Require a second approval step (human or policy) for configuration changes"
+      ],
+      "mitigation_status": "mitigated"
+    },
+    {
+      "id": "THR-036",
+      "category": "tampering",
+      "title": "Arbitrary code execution tampering",
+      "description": "Agent \"security-scanner\" can execute code, enabling tampering with its own runtime, memory, or host environment.",
+      "affected_agent": "security-scanner",
+      "severity": "critical",
+      "likelihood": "likely",
+      "risk_score": 8,
+      "mitigations": [
+        "scan-scope-limiter",
+        "finding-classifier",
+        "rate-limiter"
+      ],
+      "recommendations": [
+        "Sandbox code execution in an isolated, ephemeral environment",
+        "Whitelist allowed interpreters/commands rather than allowing arbitrary code"
+      ],
+      "mitigation_status": "mitigated"
+    },
+    {
+      "id": "THR-037",
+      "category": "information_disclosure",
+      "title": "Sensitive file data disclosure",
+      "description": "Agent \"security-scanner\" has file access, risking disclosure of sensitive files to unauthorized parties.",
+      "affected_agent": "security-scanner",
+      "severity": "high",
+      "likelihood": "likely",
+      "risk_score": 5.6,
+      "mitigations": [
+        "scan-scope-limiter",
+        "finding-classifier",
+        "rate-limiter"
+      ],
+      "recommendations": [
+        "Scope file access to a minimal, allow-listed directory set",
+        "Apply data-loss-prevention scanning to file reads before they reach the model context"
+      ],
+      "mitigation_status": "mitigated"
+    },
+    {
+      "id": "THR-038",
+      "category": "denial_of_service",
+      "title": "Autonomous execution resource exhaustion",
+      "description": "Agent \"security-scanner\" operates autonomously and may loop or over-execute without human checkpoints, exhausting compute or downstream capacity.",
+      "affected_agent": "security-scanner",
+      "severity": "medium",
+      "likelihood": "possible",
+      "risk_score": 2,
+      "mitigations": [
+        "scan-scope-limiter",
+        "finding-classifier",
+        "rate-limiter"
+      ],
+      "recommendations": [
+        "Cap the number of autonomous steps or wall-clock time per run",
+        "Require a human checkpoint after N consecutive autonomous actions"
+      ],
+      "mitigation_status": "mitigated"
+    },
+    {
+      "id": "THR-039",
+      "category": "elevation_of_privilege",
+      "title": "Trust escalation path enabled",
+      "description": "Agent \"security-scanner\" is configured with can_escalate, allowing it to obtain higher trust than initially granted.",
+      "affected_agent": "security-scanner",
+      "severity": "critical",
+      "likelihood": "likely",
+      "risk_score": 8,
+      "mitigations": [
+        "scan-scope-limiter",
+        "finding-classifier",
+        "rate-limiter"
+      ],
+      "recommendations": [
+        "Disable can_escalate unless there is an explicit, reviewed business need",
+        "Gate any escalation behind a human approval or a signed policy exception"
+      ],
+      "mitigation_status": "mitigated"
+    },
+    {
+      "id": "THR-040",
+      "category": "elevation_of_privilege",
+      "title": "Elevated tool access",
+      "description": "Tool-calling agent \"security-scanner\" (trust level \"elevated\") can invoke elevated tool \"port_scan\", risking privilege escalation if the agent is manipulated.",
+      "affected_agent": "security-scanner",
+      "affected_tool": "port_scan",
+      "severity": "high",
+      "likelihood": "likely",
+      "risk_score": 5.6,
+      "mitigations": [
+        "scan-scope-limiter",
+        "finding-classifier",
+        "rate-limiter"
+      ],
+      "recommendations": [
+        "Require elevated trust before granting \"port_scan\", or remove the elevated flag",
+        "Add a policy deny rule for this tool outside its intended trust boundary"
+      ],
+      "mitigation_status": "mitigated"
+    },
+    {
+      "id": "THR-041",
+      "category": "spoofing",
+      "title": "Inter-agent identity claim spoofing",
+      "description": "Agent \"support-agent\" exchanges messages with other agents; identity claims in those messages can be forged absent mutual authentication.",
+      "affected_agent": "support-agent",
+      "severity": "medium",
+      "likelihood": "possible",
+      "risk_score": 2,
+      "mitigations": [
+        "prompt-injection-detector",
+        "pii-filter",
+        "content-safety"
+      ],
+      "recommendations": [
+        "Authenticate inter-agent messages with signed tokens",
+        "Validate sender identity against the trust graph before acting on a message"
+      ],
+      "mitigation_status": "partial"
+    },
+    {
+      "id": "THR-042",
+      "category": "information_disclosure",
+      "title": "RAG index content disclosure",
+      "description": "Agent \"support-agent\" retrieves from a knowledge base; sensitive indexed content may be surfaced to unauthorized requesters or exfiltrated via prompt injection.",
+      "affected_agent": "support-agent",
+      "severity": "high",
+      "likelihood": "likely",
+      "risk_score": 5.6,
+      "mitigations": [
+        "prompt-injection-detector",
+        "pii-filter",
+        "content-safety"
+      ],
+      "recommendations": [
+        "Apply document-level access control on the retrieval index",
+        "Filter retrieved content for sensitive data before it reaches the model context"
+      ],
+      "mitigation_status": "mitigated"
+    },
+    {
+      "id": "THR-043",
+      "category": "denial_of_service",
+      "title": "Unbounded tool rate limit",
+      "description": "Tool \"search_knowledge_base\" used by agent \"support-agent\" has no configured rate limit, allowing resource exhaustion through unbounded calls.",
+      "affected_agent": "support-agent",
+      "affected_tool": "search_knowledge_base",
+      "severity": "medium",
+      "likelihood": "possible",
+      "risk_score": 2,
+      "mitigations": [
+        "prompt-injection-detector",
+        "pii-filter",
+        "content-safety"
+      ],
+      "recommendations": [
+        "Set a conservative rate_limit on \"search_knowledge_base\" sized to expected legitimate usage",
+        "Add a circuit breaker that suspends the tool after sustained abnormal call volume"
+      ],
+      "mitigation_status": "mitigated"
+    },
+    {
+      "id": "THR-044",
+      "category": "denial_of_service",
+      "title": "Unbounded tool rate limit",
+      "description": "Tool \"create_ticket\" used by agent \"support-agent\" has no configured rate limit, allowing resource exhaustion through unbounded calls.",
+      "affected_agent": "support-agent",
+      "affected_tool": "create_ticket",
+      "severity": "medium",
+      "likelihood": "possible",
+      "risk_score": 2,
+      "mitigations": [
+        "prompt-injection-detector",
+        "pii-filter",
+        "content-safety"
+      ],
+      "recommendations": [
+        "Set a conservative rate_limit on \"create_ticket\" sized to expected legitimate usage",
+        "Add a circuit breaker that suspends the tool after sustained abnormal call volume"
+      ],
+      "mitigation_status": "mitigated"
+    },
+    {
+      "id": "THR-045",
+      "category": "spoofing",
+      "title": "Inter-agent identity claim spoofing",
+      "description": "Agent \"trading-bot\" exchanges messages with other agents; identity claims in those messages can be forged absent mutual authentication.",
+      "affected_agent": "trading-bot",
+      "severity": "medium",
+      "likelihood": "possible",
+      "risk_score": 2,
+      "mitigations": [
+        "position-limit-checker",
+        "order-size-validator",
+        "risk-threshold-monitor",
+        "market-hours-enforcer",
+        "compliance-pre-trade"
+      ],
+      "recommendations": [
+        "Authenticate inter-agent messages with signed tokens",
+        "Validate sender identity against the trust graph before acting on a message"
+      ],
+      "mitigation_status": "partial"
+    },
+    {
+      "id": "THR-046",
+      "category": "information_disclosure",
+      "title": "Cross-boundary information disclosure",
+      "description": "Agent \"trading-bot\" operates across 2 trust boundaries (financial, trading), risking data leaking from one boundary into another.",
+      "affected_agent": "trading-bot",
+      "severity": "high",
+      "likelihood": "possible",
+      "risk_score": 3.5,
+      "mitigations": [
+        "position-limit-checker",
+        "order-size-validator",
+        "risk-threshold-monitor",
+        "market-hours-enforcer",
+        "compliance-pre-trade"
+      ],
+      "recommendations": [
+        "Enforce per-boundary data classification and tagging",
+        "Require explicit policy allow rules for any cross-boundary data flow"
+      ],
+      "mitigation_status": "mitigated"
+    },
+    {
+      "id": "THR-047",
+      "category": "denial_of_service",
+      "title": "Autonomous execution resource exhaustion",
+      "description": "Agent \"trading-bot\" operates autonomously and may loop or over-execute without human checkpoints, exhausting compute or downstream capacity.",
+      "affected_agent": "trading-bot",
+      "severity": "medium",
+      "likelihood": "possible",
+      "risk_score": 2,
+      "mitigations": [
+        "position-limit-checker",
+        "order-size-validator",
+        "risk-threshold-monitor",
+        "market-hours-enforcer",
+        "compliance-pre-trade"
+      ],
+      "recommendations": [
+        "Cap the number of autonomous steps or wall-clock time per run",
+        "Require a human checkpoint after N consecutive autonomous actions"
+      ],
+      "mitigation_status": "mitigated"
+    },
+    {
+      "id": "THR-048",
+      "category": "elevation_of_privilege",
+      "title": "Trust escalation path enabled",
+      "description": "Agent \"trading-bot\" is configured with can_escalate, allowing it to obtain higher trust than initially granted.",
+      "affected_agent": "trading-bot",
+      "severity": "critical",
+      "likelihood": "likely",
+      "risk_score": 8,
+      "mitigations": [
+        "position-limit-checker",
+        "order-size-validator",
+        "risk-threshold-monitor",
+        "market-hours-enforcer",
+        "compliance-pre-trade"
+      ],
+      "recommendations": [
+        "Disable can_escalate unless there is an explicit, reviewed business need",
+        "Gate any escalation behind a human approval or a signed policy exception"
+      ],
+      "mitigation_status": "mitigated"
+    },
+    {
+      "id": "THR-049",
+      "category": "elevation_of_privilege",
+      "title": "Elevated tool access",
+      "description": "Tool-calling agent \"trading-bot\" (trust level \"elevated\") can invoke elevated tool \"order_place\", risking privilege escalation if the agent is manipulated.",
+      "affected_agent": "trading-bot",
+      "affected_tool": "order_place",
+      "severity": "high",
+      "likelihood": "likely",
+      "risk_score": 5.6,
+      "mitigations": [
+        "position-limit-checker",
+        "order-size-validator",
+        "risk-threshold-monitor",
+        "market-hours-enforcer",
+        "compliance-pre-trade"
+      ],
+      "recommendations": [
+        "Require elevated trust before granting \"order_place\", or remove the elevated flag",
+        "Add a policy deny rule for this tool outside its intended trust boundary"
+      ],
+      "mitigation_status": "mitigated"
+    }
+  ],
+  "threat_count": 49,
+  "critical_count": 9,
+  "high_count": 20,
+  "medium_count": 20,
+  "low_count": 0,
+  "mitigated_count": 40,
+  "partial_count": 9,
+  "unmitigated_count": 0,
+  "overall_risk": 4.3,
+  "category_breakdown": {
+    "denial_of_service": 13,
+    "elevation_of_privilege": 10,
+    "information_disclosure": 11,
+    "spoofing": 9,
+    "tampering": 6
+  }
+}

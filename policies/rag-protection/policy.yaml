@@ -1,0 +1,119 @@
+api_version: v1
+kind: Policy
+
+meta:
+  name: rag-protection
+  description: >
+    Security policy for retrieval-augmented generation pipelines.
+    Prevents RAG poisoning, cross-tenant data leakage, and
+    unauthorized knowledge base modifications. Enforces read-only
+    access patterns and limits retrieval scope to authorized namespaces.
+  authors:
+    - ThreatEcho
+  created: "2025-03-10"
+  modified: "2025-11-22"
+
+agent:
+  name: "*"
+  type: llm
+  tools:
+    - search_knowledge_base
+    - write_knowledge_base
+    - query_database
+    - http_request
+    - file_read
+    - file_write
+    - embedding_store
+
+rules:
+  # --- DENY rules ---
+
+  - id: deny-kb-write
+    description: Block all knowledge base writes to prevent RAG poisoning
+    effect: deny
+    priority: 100
+    match:
+      tools: ["write_knowledge_base"]
+
+  - id: deny-embedding-overwrite
+    description: Block direct embedding store modifications
+    effect: deny
+    priority: 100
+    match:
+      tools: ["embedding_store"]
+      actions: ["write", "delete", "update"]
+
+  - id: deny-cross-tenant-query
+    description: Block queries targeting other tenant namespaces
+    effect: deny
+    priority: 95
+    match:
+      tools: ["query_database", "search_knowledge_base"]
+      targets: ["*/tenant-*/*"]
+    conditions:
+      - field: elevated
+        operator: eq
+        value: "true"
+
+  - id: deny-raw-db-access
+    description: Block direct database access bypassing the retrieval layer
+    effect: deny
+    priority: 90
+    match:
+      tools: ["query_database"]
+      actions: ["execute", "write", "delete"]
+
+  - id: deny-bulk-export
+    description: Block bulk data export from knowledge stores
+    effect: deny
+    priority: 90
+    match:
+      tools: ["search_knowledge_base"]
+    conditions:
+      - field: technique
+        operator: eq
+        value: "T1530"
+
+  # --- ALERT rules ---
+
+  - id: alert-large-retrieval
+    description: Alert when retrieval returns unusually large result sets
+    effect: alert
+    priority: 60
+    match:
+      tools: ["search_knowledge_base"]
+      actions: ["search", "retrieve"]
+
+  - id: alert-metadata-access
+    description: Alert on access to document metadata (provenance info leak)
+    effect: alert
+    priority: 50
+    match:
+      tools: ["search_knowledge_base"]
+      actions: ["metadata"]
+
+  - id: alert-external-source
+    description: Alert when RAG retrieval fetches from external sources
+    effect: alert
+    priority: 55
+    match:
+      tools: ["http_request"]
+      tactics: ["collection"]
+
+  # --- ALLOW rules ---
+
+  - id: allow-kb-search
+    description: Allow standard knowledge base search queries
+    effect: allow
+    priority: 10
+    match:
+      tools: ["search_knowledge_base"]
+      actions: ["search"]
+
+  - id: allow-read-only-db
+    description: Allow read-only database queries through the retrieval layer
+    effect: allow
+    priority: 10
+    match:
+      tools: ["query_database"]
+      actions: ["query", "read"]

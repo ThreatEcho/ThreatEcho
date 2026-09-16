@@ -1,0 +1,144 @@
+api_version: v1
+kind: Campaign
+
+meta:
+  name: art-lateral-movement-linux
+  adversary: Atomic Red Team
+  description: "Real lateral movement techniques on Linux — SSH, rsync, scp, remote command execution"
+  objective: "Execute real lateral movement reconnaissance to validate detection of SSH-based pivoting and remote access patterns"
+  mitre_version: "15.1"
+  severity: high
+  tags: [art, atomic-red-team, lateral-movement, linux, live-execution]
+  authors: ["ThreatEcho"]
+  references:
+    - https://github.com/redcanaryco/atomic-red-team
+    - https://attack.mitre.org/tactics/TA0008/
+  created: "2026-09-15"
+  modified: "2026-09-15"
+
+stages:
+  - id: ssh-config-recon
+    name: "SSH Configuration Discovery"
+    description: "Enumerate SSH client and server configuration — pre-lateral-movement recon"
+    technique: T1021.004
+    tactic: lateral-movement
+    platform: [linux]
+    execute:
+      type: shell
+      commands:
+        - 'cat /etc/ssh/ssh_config 2>/dev/null | grep -v "^#" | grep -v "^$" || echo "ssh_config not readable"'
+        - 'cat /etc/ssh/sshd_config 2>/dev/null | grep -E "(PermitRootLogin|PasswordAuthentication|PubkeyAuthentication|AuthorizedKeysFile)" || echo "sshd_config not readable"'
+        - 'ls -la ~/.ssh/ 2>/dev/null || echo "no .ssh directory"'
+      elevated: false
+    expect:
+      telemetry: [file_read]
+      detections: [ssh_config_access, sshd_config_read, lateral_movement_recon]
+    on_success: ssh-key-enum
+    on_failure: continue
+    timeout: 10s
+
+  - id: ssh-key-enum
+    name: "SSH Key Enumeration"
+    description: "Find SSH keys that could be used for lateral movement"
+    technique: T1552.004
+    tactic: credential-access
+    platform: [linux]
+    depends_on: [ssh-config-recon]
+    execute:
+      type: shell
+      commands:
+        - 'find /home -maxdepth 3 -name "authorized_keys" -o -name "id_rsa" -o -name "id_ed25519" -o -name "id_ecdsa" 2>/dev/null'
+        - 'find /root -maxdepth 2 -name "id_rsa" -o -name "id_ed25519" 2>/dev/null || true'
+        - 'cat ~/.ssh/known_hosts 2>/dev/null | head -10 || echo "no known_hosts"'
+      elevated: false
+    expect:
+      telemetry: [process_create, file_read]
+      detections: [ssh_key_discovery, credential_file_access, known_hosts_read]
+    on_success: remote-host-discovery
+    on_failure: continue
+    timeout: 15s
+
+  - id: remote-host-discovery
+    name: "Remote Host Discovery"
+    description: "Identify hosts reachable from this system — ARP cache, known_hosts, DNS"
+    technique: T1018
+    tactic: discovery
+    platform: [linux]
+    depends_on: [ssh-key-enum]
+    execute:
+      type: shell
+      commands:
+        - 'arp -a 2>/dev/null || ip neigh show'
+        - 'cat ~/.ssh/known_hosts 2>/dev/null | cut -d" " -f1 | head -20 || echo "no known_hosts"'
+        - 'cat /etc/hosts | grep -v "^#" | grep -v "^$"'
+        - 'getent hosts $(hostname) 2>/dev/null || true'
+      elevated: false
+    expect:
+      telemetry: [process_create, file_read]
+      detections: [remote_system_discovery, arp_scan, network_enumeration]
+    on_success: network-share-enum
+    on_failure: continue
+    timeout: 10s
+
+  - id: network-share-enum
+    name: "Network Share Discovery"
+    description: "Enumerate NFS and SMB mounts available on the network"
+    technique: T1135
+    tactic: discovery
+    platform: [linux]
+    depends_on: [remote-host-discovery]
+    execute:
+      type: shell
+      commands:
+        - 'showmount -e 127.0.0.1 2>/dev/null || echo "showmount not available or no NFS exports"'
+        - 'mount | grep -E "(nfs|cifs|smb)" || echo "no network mounts"'
+        - 'cat /etc/fstab | grep -E "(nfs|cifs|smb)" || echo "no network entries in fstab"'
+        - 'smbclient -L 127.0.0.1 -N 2>/dev/null || echo "smbclient not available or no shares"'
+      elevated: false
+    expect:
+      telemetry: [process_create, file_read]
+      detections: [network_share_discovery, nfs_enumeration, smb_enumeration]
+    on_success: ssh-agent-check
+    on_failure: continue
+    timeout: 15s
+
+  - id: ssh-agent-check
+    name: "SSH Agent Hijacking Recon"
+    description: "Check for SSH agent forwarding sockets — used to hijack authenticated sessions"
+    technique: T1563.001
+    tactic: lateral-movement
+    platform: [linux]
+    depends_on: [network-share-enum]
+    execute:
+      type: shell
+      commands:
+        - 'echo $SSH_AUTH_SOCK'
+        - 'find /tmp -maxdepth 2 -name "agent.*" -type s 2>/dev/null || echo "no agent sockets found"'
+        - 'ssh-add -l 2>/dev/null || echo "no keys in agent or agent not running"'
+      elevated: false
+    expect:
+      telemetry: [process_create]
+      detections: [ssh_agent_discovery, agent_socket_enumeration, session_hijack_recon]
+    on_success: lateral-tool-recon
+    on_failure: continue
+    timeout: 10s
+
+  - id: lateral-tool-recon
+    name: "Lateral Movement Tool Check"
+    description: "Check availability of tools commonly used for lateral movement"
+    technique: T1570
+    tactic: lateral-movement
+    platform: [linux]
+    depends_on: [ssh-agent-check]
+    execute:
+      type: shell
+      commands:
+        - 'which ssh scp rsync curl wget nc ncat socat 2>/dev/null || echo "tool check complete"'
+        - 'ssh -V 2>&1'
+        - 'rsync --version 2>/dev/null | head -1 || echo "rsync not available"'
+      elevated: false
+    expect:
+      telemetry: [process_create]
+      detections: [tool_discovery, lateral_movement_tool_check]
+    on_failure: continue
+    timeout: 10s

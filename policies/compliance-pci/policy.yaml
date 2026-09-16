@@ -1,0 +1,112 @@
+api_version: v1
+kind: Policy
+
+meta:
+  name: compliance-pci
+  description: >
+    PCI DSS v4.0 aligned controls for AI agents handling payment
+    card data. Blocks cardholder data logging, prevents CVV storage,
+    restricts access to cardholder data environments, and enforces
+    encryption requirements for data in transit and at rest.
+  authors:
+    - ThreatEcho
+  created: "2025-04-01"
+  modified: "2026-01-15"
+
+agent:
+  name: "*"
+  type: llm
+  tools:
+    - payment_gateway
+    - database_query
+    - file_write
+    - log_write
+    - http_request
+    - send_email
+    - reporting_api
+
+rules:
+  - id: deny-cvv-storage
+    description: Block storage of CVV/CVC security codes (PCI DSS 3.4)
+    effect: deny
+    priority: 100
+    match:
+      tools: ["file_write", "database_query"]
+      actions: ["write", "create", "store"]
+
+  - id: deny-card-data-in-logs
+    description: Block logging of primary account numbers or card data
+    effect: deny
+    priority: 100
+    match:
+      tools: ["log_write"]
+
+  - id: deny-unencrypted-transmission
+    description: Block unencrypted transmission of cardholder data
+    effect: deny
+    priority: 100
+    match:
+      tools: ["http_request"]
+      targets: ["http://*"]
+
+  - id: deny-pan-exfiltration
+    description: Block exfiltration of primary account numbers
+    effect: deny
+    priority: 95
+    match:
+      tools: ["send_email", "http_request"]
+      tactics: ["exfiltration"]
+
+  - id: deny-cde-unauthorized-access
+    description: Block unauthorized access to cardholder data environment
+    effect: deny
+    priority: 95
+    match:
+      tools: ["database_query"]
+      targets: ["*/cardholder-data/*"]
+    conditions:
+      - field: elevated
+        operator: eq
+        value: "true"
+
+  - id: deny-bulk-payment-export
+    description: Block bulk export of payment records
+    effect: deny
+    priority: 90
+    match:
+      tools: ["database_query", "reporting_api"]
+      actions: ["export", "dump"]
+
+  # --- ALERT rules ---
+
+  - id: alert-payment-transaction
+    description: Audit log all payment transactions (PCI DSS 10.2)
+    effect: alert
+    priority: 70
+    match:
+      tools: ["payment_gateway"]
+
+  - id: alert-cde-access
+    description: Log all access to cardholder data environment
+    effect: alert
+    priority: 65
+    match:
+      tools: ["database_query"]
+
+  # --- ALLOW rules ---
+
+  - id: allow-tokenized-payment
+    description: Allow payment processing using tokenized card data
+    effect: allow
+    priority: 10
+    match:
+      tools: ["payment_gateway"]
+      actions: ["charge", "refund", "query"]
+
+  - id: allow-encrypted-reporting
+    description: Allow encrypted reporting API access
+    effect: allow
+    priority: 10
+    match:
+      tools: ["reporting_api"]
+      actions: ["read", "query"]

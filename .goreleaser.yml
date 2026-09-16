@@ -1,0 +1,156 @@
+# GoReleaser configuration for ThreatEcho
+# https://goreleaser.com
+#
+# Release: goreleaser release --clean
+# Snapshot: goreleaser build --snapshot --clean
+
+version: 2
+
+project_name: threatecho
+
+before:
+  hooks:
+    - go mod tidy
+
+builds:
+  - id: threatecho
+    main: ./cmd/threatecho
+    binary: threatecho
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - darwin
+      - windows
+    goarch:
+      - amd64
+      - arm64
+    ldflags:
+      - -s -w
+      - -X github.com/ThreatEcho/threatecho/pkg/version.Version={{.Version}}
+      - -X github.com/ThreatEcho/threatecho/pkg/version.Commit={{.Commit}}
+      - -X github.com/ThreatEcho/threatecho/pkg/version.BuildTime={{.Date}}
+
+  - id: threatecho-agent
+    main: ./cmd/threatecho-agent
+    binary: threatecho-agent
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - darwin
+      - windows
+    goarch:
+      - amd64
+      - arm64
+    ldflags:
+      - -s -w
+      - -X github.com/ThreatEcho/threatecho/pkg/version.Version={{.Version}}
+      - -X github.com/ThreatEcho/threatecho/pkg/version.Commit={{.Commit}}
+      - -X github.com/ThreatEcho/threatecho/pkg/version.BuildTime={{.Date}}
+
+archives:
+  - id: default
+    format: tar.gz
+    name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+    format_overrides:
+      - goos: windows
+        format: zip
+    files:
+      - LICENSE
+      - README.md
+      - CHANGELOG.md
+      - campaigns/**/*
+      - policies/**/*
+      - agents/**/*
+
+checksum:
+  name_template: "checksums.txt"
+  algorithm: sha256
+
+snapshot:
+  version_template: "{{ incpatch .Version }}-next"
+
+changelog:
+  use: github
+  sort: asc
+  filters:
+    exclude:
+      - "^docs:"
+      - "^test:"
+      - "^ci:"
+      - "^chore:"
+      - "^style:"
+      - Merge pull request
+      - Merge branch
+
+release:
+  github:
+    owner: ThreatEcho
+    name: threatecho
+  draft: true
+  prerelease: auto
+  name_template: "v{{.Version}}"
+
+brews:
+  - repository:
+      owner: ThreatEcho
+      name: homebrew-tap
+    name: threatecho
+    homepage: "https://threatecho.com"
+    description: "Detection Engineering for AI Agents"
+    license: "AGPL-3.0-only"
+    install: |
+      bin.install "threatecho"
+      bin.install "threatecho-agent"
+    test: |
+      system "#{bin}/threatecho", "version"
+
+dockers:
+  - image_templates:
+      - "ghcr.io/threatecho/threatecho:{{ .Version }}-amd64"
+    use: buildx
+    build_flag_templates:
+      - "--platform=linux/amd64"
+      - "--build-arg=VERSION={{.Version}}"
+      - "--build-arg=COMMIT={{.Commit}}"
+      - "--build-arg=BUILD_DATE={{.Date}}"
+      - "--label=org.opencontainers.image.title={{ .ProjectName }}"
+      - "--label=org.opencontainers.image.version={{ .Version }}"
+      - "--label=org.opencontainers.image.source=https://github.com/ThreatEcho/threatecho"
+    dockerfile: Dockerfile
+    extra_files:
+      - campaigns
+      - policies
+      - agents
+
+  - image_templates:
+      - "ghcr.io/threatecho/threatecho:{{ .Version }}-arm64"
+    use: buildx
+    build_flag_templates:
+      - "--platform=linux/arm64"
+      - "--build-arg=VERSION={{.Version}}"
+      - "--build-arg=COMMIT={{.Commit}}"
+      - "--build-arg=BUILD_DATE={{.Date}}"
+      - "--label=org.opencontainers.image.title={{ .ProjectName }}"
+      - "--label=org.opencontainers.image.version={{ .Version }}"
+      - "--label=org.opencontainers.image.source=https://github.com/ThreatEcho/threatecho"
+    goarch: arm64
+    dockerfile: Dockerfile
+    extra_files:
+      - campaigns
+      - policies
+      - agents
+
+docker_manifests:
+  - name_template: "ghcr.io/threatecho/threatecho:{{ .Version }}"
+    image_templates:
+      - "ghcr.io/threatecho/threatecho:{{ .Version }}-amd64"
+      - "ghcr.io/threatecho/threatecho:{{ .Version }}-arm64"
+  - name_template: "ghcr.io/threatecho/threatecho:latest"
+    image_templates:
+      - "ghcr.io/threatecho/threatecho:{{ .Version }}-amd64"
+      - "ghcr.io/threatecho/threatecho:{{ .Version }}-arm64"
+
+sboms:
+  - artifacts: archive

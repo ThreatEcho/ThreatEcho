@@ -1,0 +1,138 @@
+# Copyright (c) 2024-2026 ThreatEcho. All rights reserved.
+# SPDX-License-Identifier: AGPL-3.0-only
+
+name: Bug Report
+description: Report a bug in ThreatEcho
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for reporting this issue. Please fill out the sections below to help us reproduce and fix the problem.
+
+  - type: input
+    id: version
+    attributes:
+      label: ThreatEcho version
+      description: Output of `threatecho version`
+      placeholder: "0.2.0 (abc1234, 2026-09-14T12:00:00Z)"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: os
+    attributes:
+      label: Operating system
+      options:
+        - Linux (amd64)
+        - Linux (arm64)
+        - macOS (amd64)
+        - macOS (arm64)
+        - Windows (amd64)
+        - Windows (arm64)
+        - Docker
+    validations:
+      required: true
+
+  - type: dropdown
+    id: command
+    attributes:
+      label: Command
+      description: Which CLI command is affected?
+      options:
+        - validate
+        - lint
+        - simulate
+        - run
+        - gap
+        - compare
+        - policy eval
+        - policy validate
+        - policy test
+        - policy lint
+        - policy drift
+        - policy impact
+        - policy coverage / coveragemap
+        - policy remediate
+        - policy compile / merge / generate
+        - policy export / guardrail / history
+        - policy simulate / benchmark / compliance
+        - export sigma
+        - export navigator
+        - deploy
+        - deploy-baseline
+        - agent (list / show / validate / test)
+        - agent (chain / dependency / trust / graph)
+        - agent (attest / profile / guardrail / export)
+        - threat-model
+        - risk-posture
+        - compliance
+        - dashboard
+        - scenario (run / validate / list)
+        - trace (replay / correlate)
+        - summary
+        - matrix
+        - coverage
+        - search
+        - stats
+        - score
+        - enrich
+        - profile
+        - timeline
+        - diff
+        - merge
+        - convert
+        - fmt
+        - hash
+        - telemetry (list / check / stats)
+        - template (list / create)
+        - completion
+        - watch
+        - config
+        - doctor
+        - init
+        - import
+        - version
+        - other
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: What happened, and what did you expect to happen?
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce
+      description: Minimal steps to reproduce the issue.
+      placeholder: |
+        1. Create a campaign with ...
+        2. Run `threatecho gap ...`
+        3. See error ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: campaign
+    attributes:
+      label: Campaign YAML (if applicable)
+      description: Paste the minimal campaign YAML that triggers the issue.
+      render: yaml
+
+  - type: textarea
+    id: output
+    attributes:
+      label: Actual output
+      description: Paste the CLI output including any error messages.
+      render: text
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
+      description: Anything else that might be relevant (deploy target, policy file, output format, etc.).

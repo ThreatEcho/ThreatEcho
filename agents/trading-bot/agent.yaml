@@ -1,0 +1,68 @@
+api_version: v1
+kind: Agent
+
+meta:
+  name: trading-bot
+  type: autonomous
+  description: "Algorithmic trading agent with market data access, order placement, portfolio monitoring, risk calculation, and alerting. Operates within strict position limits and risk parameters with human oversight on large trades."
+  model: gpt-4
+  version: "1.0.2"
+  owner: quant-team
+  tags: [internal, tier-0, production, financial-scope, critical, pci-scope]
+
+capabilities:
+  tool_calling: true
+  rag: false
+  code_execution: false
+  web_access: true
+  file_access: false
+  message_passing: true
+  memory: true
+  autonomous: true
+
+tools:
+  - name: market_query
+    actions: [quote, history, depth, volume]
+    targets: ["https://market-data.internal/api/*"]
+    rate_limit: 500
+  - name: order_place
+    actions: [buy, sell, cancel, modify]
+    targets: ["https://oms.internal/api/*"]
+    rate_limit: 50
+    elevated: true
+  - name: portfolio_read
+    actions: [positions, balance, history, pnl]
+    targets: ["https://portfolio.internal/api/*"]
+    rate_limit: 100
+  - name: risk_calculate
+    actions: [var, stress_test, exposure, margin]
+    targets: ["https://risk.internal/api/*"]
+    rate_limit: 30
+  - name: alert_set
+    actions: [create, update, delete, trigger]
+    targets: ["https://alerts.internal/api/*"]
+    rate_limit: 20
+
+trust:
+  level: elevated
+  trusts_from: [orchestrator]
+  trusted_by: []
+  boundaries: [financial, trading]
+  can_escalate: true
+
+guardrails:
+  - name: position-limit-checker
+    type: tool-call
+    enforced: true
+  - name: order-size-validator
+    type: tool-call
+    enforced: true
+  - name: risk-threshold-monitor
+    type: tool-call
+    enforced: true
+  - name: market-hours-enforcer
+    type: tool-call
+    enforced: true
+  - name: compliance-pre-trade
+    type: tool-call
+    enforced: true

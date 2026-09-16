@@ -1,0 +1,162 @@
+api_version: v1
+kind: Campaign
+
+meta:
+  name: art-discovery-linux
+  adversary: Atomic Red Team
+  description: "Real discovery and reconnaissance techniques on Linux using native commands"
+  objective: "Execute real enumeration commands to validate detection of Linux reconnaissance patterns"
+  mitre_version: "15.1"
+  severity: medium
+  tags: [art, atomic-red-team, discovery, linux, live-execution]
+  authors: ["ThreatEcho"]
+  references:
+    - https://github.com/redcanaryco/atomic-red-team
+    - https://attack.mitre.org/tactics/TA0007/
+  created: "2024-08-15"
+  modified: "2026-09-15"
+
+stages:
+  - id: system-info
+    name: "System Information Discovery"
+    description: "Gather system information using standard Linux commands"
+    technique: T1082
+    tactic: discovery
+    platform: [linux]
+    execute:
+      type: shell
+      commands:
+        - 'uname -a'
+        - 'cat /etc/os-release'
+        - 'hostnamectl 2>/dev/null || hostname'
+        - 'uptime'
+        - 'lscpu 2>/dev/null || cat /proc/cpuinfo | head -20'
+        - 'free -h'
+        - 'df -h'
+      elevated: false
+    expect:
+      telemetry: [process_create, file_read]
+      detections: [system_info_enumeration, linux_reconnaissance]
+    on_success: user-discovery
+    on_failure: continue
+    timeout: 15s
+
+  - id: user-discovery
+    name: "User & Group Discovery"
+    description: "Enumerate local users, groups, and privilege information"
+    technique: T1087.001
+    tactic: discovery
+    platform: [linux]
+    depends_on: [system-info]
+    execute:
+      type: shell
+      commands:
+        - 'whoami'
+        - 'id'
+        - 'cat /etc/passwd'
+        - 'cat /etc/group'
+        - 'getent passwd'
+        - 'last -n 10 2>/dev/null || echo "last not available"'
+        - 'w 2>/dev/null || who'
+      elevated: false
+    expect:
+      telemetry: [process_create, file_read]
+      detections: [account_enumeration, passwd_file_read, user_discovery]
+    on_success: network-discovery
+    on_failure: continue
+    timeout: 15s
+
+  - id: network-discovery
+    name: "Network Configuration Discovery"
+    description: "Enumerate network interfaces, connections, routes, and DNS"
+    technique: T1016
+    tactic: discovery
+    platform: [linux]
+    depends_on: [user-discovery]
+    execute:
+      type: shell
+      commands:
+        - 'ip addr show'
+        - 'ip route show'
+        - 'ss -tlnp'
+        - 'ss -anp'
+        - 'cat /etc/resolv.conf'
+        - 'iptables -L -n 2>/dev/null || echo "iptables requires root"'
+        - 'arp -a 2>/dev/null || ip neigh show'
+      elevated: false
+    expect:
+      telemetry: [process_create, file_read]
+      detections: [network_enumeration, connection_discovery, firewall_enumeration]
+    on_success: process-discovery
+    on_failure: continue
+    timeout: 15s
+
+  - id: process-discovery
+    name: "Process & Service Discovery"
+    description: "Enumerate running processes, services, and listening ports"
+    technique: T1057
+    tactic: discovery
+    platform: [linux]
+    depends_on: [network-discovery]
+    execute:
+      type: shell
+      commands:
+        - 'ps auxww'
+        - 'systemctl list-units --type=service --state=running 2>/dev/null || echo "systemctl not available"'
+        - 'ls -la /etc/systemd/system/*.service 2>/dev/null || echo "no systemd services"'
+        - 'cat /etc/crontab 2>/dev/null || echo "no crontab"'
+        - 'ls -la /etc/cron.d/ 2>/dev/null || echo "no cron.d"'
+        - 'crontab -l 2>/dev/null || echo "no user crontab"'
+      elevated: false
+    expect:
+      telemetry: [process_create, file_read]
+      detections: [process_enumeration, service_enumeration, cron_discovery]
+    on_success: priv-esc-recon
+    on_failure: continue
+    timeout: 15s
+
+  - id: priv-esc-recon
+    name: "Privilege Escalation Reconnaissance"
+    description: "Identify SUID binaries, sudo rights, and writable directories — GTFOBins recon"
+    technique: T1083
+    tactic: discovery
+    platform: [linux]
+    depends_on: [process-discovery]
+    execute:
+      type: shell
+      commands:
+        - 'find / -perm -4000 -type f 2>/dev/null | head -30'
+        - 'sudo -l 2>/dev/null || echo "sudo -l requires password or NOPASSWD"'
+        - 'cat /etc/sudoers 2>/dev/null || echo "sudoers requires root"'
+        - 'find / -writable -type d 2>/dev/null | head -20 || true'
+        - 'ls -la /etc/shadow 2>/dev/null || echo "shadow not readable"'
+        - 'getcap -r / 2>/dev/null | head -20 || echo "getcap not available"'
+      elevated: false
+    expect:
+      telemetry: [process_create, file_read]
+      detections: [suid_discovery, sudo_enumeration, privilege_escalation_recon, capabilities_enumeration]
+    on_success: ssh-key-discovery
+    on_failure: continue
+    timeout: 30s
+
+  - id: ssh-key-discovery
+    name: "SSH Key & Config Discovery"
+    description: "Locate SSH keys, known_hosts, and config files for lateral movement"
+    technique: T1552.004
+    tactic: credential-access
+    platform: [linux]
+    depends_on: [priv-esc-recon]
+    execute:
+      type: shell
+      commands:
+        - 'find /home -name "id_rsa" -o -name "id_ed25519" -o -name "id_ecdsa" 2>/dev/null || true'
+        - 'find /root -name "id_rsa" -o -name "id_ed25519" 2>/dev/null || true'
+        - 'cat /home/*/.ssh/known_hosts 2>/dev/null | head -20 || echo "no known_hosts found"'
+        - 'cat /home/*/.ssh/config 2>/dev/null || echo "no ssh configs found"'
+        - 'cat /etc/ssh/sshd_config 2>/dev/null | grep -v "^#" | grep -v "^$" || echo "sshd_config not readable"'
+      elevated: false
+    expect:
+      telemetry: [file_read]
+      detections: [ssh_key_discovery, credential_file_access, lateral_movement_recon]
+    on_failure: continue
+    timeout: 15s

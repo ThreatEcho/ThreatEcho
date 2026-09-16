@@ -135,7 +135,7 @@ jobs:
         run: ./${{ env.BINARY }} gap -format sarif -dir campaigns/ > results.sarif
 
       - name: Upload SARIF to Code Scanning
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@v4
         continue-on-error: true   # Code Scanning may not be enabled on all repos
         with:
           sarif_file: results.sarif
@@ -194,7 +194,7 @@ jobs:
         run: ./${{ env.BINARY }} policy eval -policy policies/agent-default/ -format sarif -dir campaigns/ > policy.sarif || true
 
       - name: Upload SARIF to Code Scanning
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@v4
         continue-on-error: true   # Code Scanning may not be enabled on all repos
         with:
           sarif_file: policy.sarif
